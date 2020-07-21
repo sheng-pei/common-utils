@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ppl.common.utils</groupId>
-    <artifactId>Utils</artifactId>
+    <artifactId>common-utils</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
