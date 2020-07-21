@@ -2,6 +2,7 @@ package ppl.common.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ppl.common.utils.exception.StreamException;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -30,13 +31,15 @@ public class IOUtils {
 
     public static void copy(InputStream is, OutputStream os, int bufferSize) {
         if (bufferSize < 1) {
-            throw new IllegalArgumentException("Buffer size must be greater than 0, but actual size is " + bufferSize);
+            throw new IllegalArgumentException("Required positive size, but: " + bufferSize);
         }
+
         try {
             org.apache.commons.io.IOUtils.copy(is, os, bufferSize);
         } catch (IOException e) {
-            throw new ReadWriteException("Copy error", e);
+            throw new StreamException("Error to copy", e);
         }
+
     }
 
 }

@@ -1,4 +1,4 @@
-package ppl.common.utils;
+package ppl.common.utils.exception;
 
 public class ResourceException extends RuntimeException {
     public ResourceException() {

@@ -4,6 +4,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
+
 public class StringUtilsTest {
 
     private static final String[] EMPTY_ARRAY = new String[0];
@@ -11,78 +16,78 @@ public class StringUtilsTest {
 
     @Test
     public void testSplitNullByEmptyRegexSeparator() {
-        String[] actual = StringUtils.splitByRegexSeparator(null, "");
+        String[] actual = StringUtils.split(null, "");
         Assert.assertArrayEquals(EMPTY_ARRAY, actual);
     }
 
     @Test
     public void testSplitEmptyStringByEmptyRegexSeparator() {
-        String[] actual = StringUtils.splitByRegexSeparator("", "");
+        String[] actual = StringUtils.split("", "");
         Assert.assertArrayEquals(EMPTY_ARRAY, actual);
     }
 
     @Test
     public void testSplitByEmptyRegexSeparator() {
-        String[] actual = StringUtils.splitByRegexSeparator("abndc", "");
+        String[] actual = StringUtils.split("abndc", "");
         String[] expected = {"a", "b", "n", "d", "c"};
         Assert.assertArrayEquals(expected, actual);
     }
 
     @Test
     public void testSplitNullByRegexSeparator() {
-        String[] actual = StringUtils.splitByRegexSeparator(null, ",*");
+        String[] actual = StringUtils.split(null, ",*");
         Assert.assertArrayEquals(EMPTY_ARRAY, actual);
     }
 
     @Test
     public void testSplitEmptyStringByRegexSeparator() {
-        String[] actual = StringUtils.splitByRegexSeparator("", ",*");
+        String[] actual = StringUtils.split("", ",*");
         Assert.assertArrayEquals(EMPTY_ARRAY, actual);
     }
 
     @Test
     public void testSplitWholeMatchingByRegexSeparator() {
-        String[] actual = StringUtils.splitByRegexSeparator(",", ",*");
+        String[] actual = StringUtils.split(",", ",*");
         String[] expected = {""};
         Assert.assertArrayEquals(expected, actual);
     }
 
     @Test
     public void testSplitHeadPositiveWidthMatchingByRegexSeparator() {
-        String[] actual = StringUtils.splitByRegexSeparator(",a", ",*");
+        String[] actual = StringUtils.split(",a", ",*");
         String[] expected = {"", "a"};
         Assert.assertArrayEquals(expected, actual);
     }
 
     @Test
     public void testSplitHeadZeroWidthMatchingByRegexSeparator() {
-        String[] actual = StringUtils.splitByRegexSeparator("a", ",*");
+        String[] actual = StringUtils.split("a", ",*");
         String[] expected = {"a"};
         Assert.assertArrayEquals(expected, actual);
     }
 
     @Test
     public void testSplitIgnoreTrailingEmptyStringByRegexSeparator() {
-        String[] actual = StringUtils.splitByRegexSeparator("a,", ",*");
+        String[] actual = StringUtils.split("a,", ",*");
         String[] expected = {"a"};
         Assert.assertArrayEquals(expected, actual);
     }
 
     @Test
     public void testSplitByRegexSeparator() {
-        String[] actual = StringUtils.splitByRegexSeparator("a,bfd,,,,,d,,,,,", ",*");
+        String[] actual = StringUtils.split("a,bfd,,,,,d,,,,,", ",*");
         String[] expected = {"a", "b", "f", "d", "d"};
         Assert.assertArrayEquals(expected, actual);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSplitByNullSeparator() {
-        StringUtils.splitByRegexSeparator("", null);
+        StringUtils.split("", null);
     }
 
     @Test
     public void testUniqueOfNull() {
-        String[] actual = StringUtils.unique(null);
+        String[] actual = StringUtils.removeDuplicate(null);
         Assert.assertArrayEquals(EMPTY_ARRAY, actual);
     }
 
@@ -91,7 +96,7 @@ public class StringUtilsTest {
         String[] input = {"a", "b", "a"};
         String[] expected = {"a", "b"};
 
-        String[] actual = StringUtils.unique(input);
+        String[] actual = StringUtils.removeDuplicate(input);
 
         Assert.assertArrayEquals(expected, actual);
     }
@@ -171,21 +176,21 @@ public class StringUtilsTest {
     @Test
     public void testToSnakeAndLowerCaseMM() {
         String MM = "MM";
-        String mm = StringUtils.toSnakeAndLowerCase(MM);
+        String mm = StringUtils.toSnakeCase(MM);
         Assert.assertEquals("mm", mm);
     }
 
     @Test
     public void testToSnakeAndLowerCasemM() {
         String mM = "mM";
-        String m_m = StringUtils.toSnakeAndLowerCase(mM);
+        String m_m = StringUtils.toSnakeCase(mM);
         Assert.assertEquals("m_m", m_m);
     }
 
     @Test
     public void testToSnakeAndLowerCasem_M() {
         String m_M = "m_M";
-        String m_m = StringUtils.toSnakeAndLowerCase(m_M);
+        String m_m = StringUtils.toSnakeCase(m_M);
         Assert.assertEquals("m_m", m_m);
     }
 

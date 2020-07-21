@@ -1,59 +1,63 @@
 package ppl.common.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringUtils {
 
-	public static String[] splitByRegexSeparator(String string, String separator) {
-		if (separator == null) {
-			throw new IllegalArgumentException("The specified separator is null");
-		}
+	public static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+	public static String[] split(String string, String regex) {
+		Objects.requireNonNull(regex, "The specified regex is null");
 
 		if (string == null) {
-			return ArrayUtils.EMPTY_STRING_ARRAY;
+			return EMPTY_STRING_ARRAY;
 		}
 
-		List<String> list = new ArrayList<>();
-		Pattern pattern = Pattern.compile(separator);
-		Matcher matcher = pattern.matcher(string);
-		int start = 0;
-		int matchStart = 0;
-		while(matchStart < string.length() && matcher.find(matchStart)) {
-			int startMatch = matcher.start();
-			int endMatch = matcher.end();
-
-			String pre = string.substring(start, startMatch);
-			if (endMatch - startMatch != 0 || !pre.isEmpty()) {
-				list.add(pre);
-				start = endMatch;
-			}
-
-			if (endMatch - startMatch != 0) {
-				matchStart = endMatch;
+		List<String> accumulator = new ArrayList<>();
+		Matcher matcher = Pattern.compile(regex).matcher(string);
+		int eatenLength = 0;
+		int next = 0;
+		while(next < string.length() && matcher.find(next)) {
+			if (isZeroLength(matcher)) {
+				if (!isZeroLengthPrefixBeforeMatcher(matcher, string, eatenLength)) {
+					accumulator.add(prefixBeforeMatcher(matcher, string, eatenLength));
+					eatenLength = matcher.start();
+				}
+				next = eatenLength + 1;
 			} else {
-				matchStart++;
+				accumulator.add(prefixBeforeMatcher(matcher, string, eatenLength));
+				eatenLength = next = matcher.end();
 			}
 		}
-		String endSub = string.substring(start);
-		if (StringUtils.isNotEmpty(endSub)) {
-			list.add(endSub);
+
+		if (eatenLength < string.length()) {
+			accumulator.add(string.substring(eatenLength));
 		}
-		return list.toArray(ArrayUtils.EMPTY_STRING_ARRAY);
+		return accumulator.toArray(EMPTY_STRING_ARRAY);
 	}
 
-	public static String[] unique(String[] strings) {
+	private static boolean isZeroLengthPrefixBeforeMatcher(Matcher matcher, String string, int start) {
+		return matcher.start() == start;
+	}
+
+	private static String prefixBeforeMatcher(Matcher matcher, String string, int start) {
+		return string.substring(start, matcher.start());
+	}
+
+	private static boolean isZeroLength(Matcher matcher) {
+		return matcher.end() == matcher.start();
+	}
+
+	public static String[] removeDuplicate(String[] strings) {
 		return Optional.ofNullable(strings)
 				.map(Arrays::stream)
 				.map(stream -> stream
 						.distinct()
 						.toArray(String[]::new)
 				)
-				.orElse(ArrayUtils.EMPTY_STRING_ARRAY);
+				.orElse(EMPTY_STRING_ARRAY);
 	}
 
 	public static boolean isEmpty(String string) {
@@ -99,62 +103,58 @@ public class StringUtils {
 		return true;
 	}
 
-	public static String toSnakeAndLowerCase(String attrName) {
-		if (isEmpty(attrName)) {
-			return attrName;
+	public static String toSnakeCase(String string) {
+		if (isEmpty(string)) {
+			return string;
 		}
 
-		char firstChar = attrName.subSequence(0, 1).charAt(0);
-		boolean prevCharIsUpperCaseOrUnderscore = Character.isUpperCase(firstChar) || firstChar == '_';
-		StringBuilder resultBuilder = new StringBuilder(attrName.length()).append(Character.toLowerCase(firstChar));
-		for (char attrChar : attrName.substring(1).toCharArray()) {
-			boolean charIsUpperCase = Character.isUpperCase(attrChar);
-			if (!prevCharIsUpperCaseOrUnderscore && charIsUpperCase) {
+		StringBuilder resultBuilder = new StringBuilder(string.length());
+		Character previousCharacter = null;
+		for (char currentCharacter : string.toCharArray()) {
+			if (needUnderscore(previousCharacter, currentCharacter)) {
 				resultBuilder.append("_");
 			}
-			resultBuilder.append(Character.toLowerCase(attrChar));
-			prevCharIsUpperCaseOrUnderscore = charIsUpperCase || attrChar == '_';
+			resultBuilder.append(Character.toLowerCase(currentCharacter));
+			previousCharacter = currentCharacter;
 		}
 		return resultBuilder.toString();
 	}
 
+	private static boolean needUnderscore(Character previous, Character current) {
+		return previous != null && Character.isLowerCase(previous) && Character.isUpperCase(current);
+	}
+
+	private static final char[] REFERENCE = "{}".toCharArray();
+
 	public static String format(String formatString, Object... parameters) {
+		Objects.requireNonNull(formatString, "The specified formatString is null");
 
-		if (formatString == null) {
-			throw new IllegalArgumentException("The specified formatString must not be null");
-		}
+		char[] formatCharacters = formatString.toCharArray();
 
+		ReferenceMatcher matcher = new ReferenceMatcher(formatCharacters);
 		StringBuilder result = new StringBuilder();
 		int paramPos = 0;
-		int nextStart = 0;
-		while (nextStart < formatString.length()) {
-			int position = indexOfReference(formatString, nextStart);
-			if (position >= 0) {
-				int backSlashPos = successionBackslashPos(formatString, position);
-				if (backSlashPos == -1) {
-					result.append(formatString, nextStart, position);
-					result.append(replaceWithParameter(paramPos, parameters));
-					paramPos++;
-				} else {
-					result.append(formatString, nextStart, backSlashPos);
-					result.append(formatString, backSlashPos, backSlashPos + (position - backSlashPos) / 2);
-					if (((position - backSlashPos) & 0x1) != 0) {
-						result.append("{}");
-					} else {
-						result.append(replaceWithParameter(paramPos, parameters));
-						paramPos++;
-					}
-				}
-				nextStart = position + 2;
+		int start = 0;
+		while (matcher.find(start, REFERENCE)) {
+			result.append(formatString, start, matcher.start());
+			result.append(formatCharacters, matcher.start(), escapeCharacterLength(matcher) >> 1);
+			if (((escapeCharacterLength(matcher)) & 0x1) != 0) {
+				result.append("{}");
 			} else {
-				result.append(formatString, nextStart, formatString.length());
-				break;
+				result.append(getTarget(paramPos++, parameters));
 			}
+			start = matcher.end();
 		}
+
+		result.append(formatString, start, formatString.length());
 		return result.toString();
 	}
 
-	private static String replaceWithParameter(int paramPos, Object... parameters) {
+	private static int escapeCharacterLength(ReferenceMatcher matcher) {
+		return matcher.end() - matcher.start() - REFERENCE.length;
+	}
+
+	private static String getTarget(int paramPos, Object... parameters) {
 		if (paramPos < parameters.length) {
 			return parameters[paramPos].toString();
 		} else {
@@ -162,63 +162,74 @@ public class StringUtils {
 		}
 	}
 
-	private static int successionBackslashPos(String formatString, int pos) {
-		if (pos < 1 || pos >= formatString.length()) {
-			return -1;
+	private static class ReferenceMatcher {
+		private static final char ESCAPE_CHARACTER = '\\';
+
+		private final char[] chars;
+
+		private int start;
+		private int end;
+
+		public ReferenceMatcher(char[] chars) {
+			this.chars = chars;
 		}
-		int i = pos - 1;
-		if (formatString.charAt(i) != '\\') {
-			return -1;
+
+		public int start() {
+			return start;
 		}
-		i--;
-		while (i >= 0) {
-			if (formatString.charAt(i) == '\\') {
-				i--;
-			} else {
-				return i + 1;
+
+		public int end() {
+			return end;
+		}
+
+		public boolean find(int pos, char[] reference) {
+			int start = pos;
+			int end = pos;
+			while (end <= this.chars.length - reference.length) {
+
+				if (this.chars[end] == ESCAPE_CHARACTER) {
+					end++;
+					continue;
+				}
+
+				if (isMatch(end, reference)) {
+					this.start = start;
+					this.end = end + reference.length;
+					return true;
+				} else {
+					if (end + reference.length >= this.chars.length) {
+						break;
+					}
+					end = start = moveTo(end, reference);
+				}
+
 			}
+			return false;
 		}
-		return 0;
-	}
 
-	private static int indexOfReference(String formatString, int pos) {//sunday算法
-		char[] reference = new char[] {'{', '}'};
-
-		char[] chars = formatString.toCharArray();
-		int i = pos;
-		while (i <= chars.length - reference.length) {
-			int j;
-			for (j = 0; j < reference.length; j++) {
-				if (reference[j] != chars[i + j]) {
-					if (i + reference.length >= chars.length) {
-						return -1;
-					}
-
-					int lastIndex = lastIndexOf(reference, chars[i + reference.length]);
-					if (lastIndex == -1) {
-						i = i + reference.length + 1;
-					} else {
-						i = i + reference.length - lastIndex;
-					}
-					break;
+		private boolean isMatch(int pos, char[] reference) {
+			for (int j = 0; j < reference.length; j++) {
+				if (reference[j] != chars[pos + j]) {
+					return false;
 				}
 			}
-
-			if (j == reference.length) {
-				return i;
-			}
-
+			return true;
 		}
-		return -1;
-	}
 
-	private static int lastIndexOf(char[] reference, char c) {
-		for (int i = reference.length - 1; i >= 0; i--) {
-			if (reference[i] == c) {
-				return i;
-			}
+		private int moveTo(int pos, char[] reference) {
+			int lastIndex = lastIndexOf(reference, chars[pos + reference.length]);
+			return pos + reference.length + (lastIndex == -1 ? 1 : -lastIndex);
 		}
-		return -1;
+
+		private int lastIndexOf(char[] reference, char c) {
+			for (int i = reference.length - 1; i >= 0; i--) {
+				if (reference[i] == c) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
 	}
 
 }

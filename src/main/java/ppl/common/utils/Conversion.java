@@ -1,5 +1,7 @@
 package ppl.common.utils;
 
+import ppl.common.utils.exception.ConversionException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;

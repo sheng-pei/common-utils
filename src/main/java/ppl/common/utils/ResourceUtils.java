@@ -1,5 +1,7 @@
 package ppl.common.utils;
 
+import ppl.common.utils.exception.ResourceException;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
