@@ -24,7 +24,7 @@ public class Conversion {
 
     private static <T> T cast(Object object, Function<Object, T> converter) {
         return Optional.ofNullable(object)
-                .map(converter::apply)
+                .map(converter)
                 .orElse(null);
     }
 
@@ -121,7 +121,7 @@ public class Conversion {
             if (nonNull instanceof Map) {
                 return (Map<?, ?>) nonNull;
             }
-            throw new ConversionException("Incompatible with List");
+            throw new ConversionException("Incompatible with Map");
         });
     }
 
