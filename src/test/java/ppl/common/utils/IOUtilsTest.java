@@ -1,17 +1,15 @@
 package ppl.common.utils;
 
-import org.apache.commons.lang3.EnumUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.*;
 import java.util.Date;
 
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class IOUtilsTest {
 
     @Mock
@@ -20,12 +18,12 @@ public class IOUtilsTest {
     @Test
     public void testCloseInvoked() throws Exception {
         IOUtils.closeQuietly(closeable);
-        verify(closeable).close();
+        Mockito.verify(closeable).close();
     }
 
     @Test
     public void testCloseThrowException() throws Exception {
-        doThrow(new IOException()).when(closeable).close();
+        Mockito.doThrow(new IOException()).when(closeable).close();
         IOUtils.closeQuietly(closeable);
     }
 

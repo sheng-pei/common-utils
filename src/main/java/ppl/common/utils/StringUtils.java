@@ -124,6 +124,32 @@ public class StringUtils {
 		return previous != null && Character.isLowerCase(previous) && Character.isUpperCase(current);
 	}
 
+	public static int indexOfNot(char c, char[] chars, int pos, int end) {
+		for (int idx = pos; idx < end; idx++) {
+			if (chars[idx] != c) {
+				return idx;
+			}
+		}
+		return -1;
+	}
+
+	public static int indexOfNot(char c, String string, int pos, int end) {
+		return indexOfNot(c, string.toCharArray(), pos, end);
+	}
+
+	public static int indexOfNot(char c, String string) {
+		return indexOfNot(c, string, 0, string.length());
+	}
+
+	public static int indexOf(char c, char[] chars, int pos, int end) {
+		for (int idx = pos; idx < end; idx++) {
+			if (chars[idx] == c) {
+				return idx;
+			}
+		}
+		return -1;
+	}
+
 	private static final char[] REFERENCE = "{}".toCharArray();
 
 	public static String format(String formatString, Object... parameters) {
