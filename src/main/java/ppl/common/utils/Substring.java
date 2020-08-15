@@ -20,14 +20,14 @@ public final class Substring {
 
     public Substring(String source, int start, int end) {
         Objects.requireNonNull(source, "Source is null");
-        this.checkOutOfBounds(start, end);
+        this.checkOutOfBounds(start, end, source.length());
         this.source = source;
         this.start = start;
         this.end = end;
     }
 
-    private void checkOutOfBounds(int start, int end) {
-        if (start < 0 || end > this.source.length() || end < start) {
+    private void checkOutOfBounds(int start, int end, int len) {
+        if (start < 0 || end > len || end < start) {
             throw new StringIndexOutOfBoundsException(StringUtils.format("out of bound: ({}, {})", start, end));
         }
     }

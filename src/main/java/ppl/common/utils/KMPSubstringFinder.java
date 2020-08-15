@@ -51,9 +51,19 @@ public class KMPSubstringFinder implements SubstringFinder {
 
     @Override
     public Substring find(String input) {
-        int start = this.match(input.toCharArray(), 0, input.length());
-        if (start != -1) {
-            return new Substring(input, start, start + this.pattern.length);
+        return this.find(input, 0, input.length());
+    }
+
+    @Override
+    public Substring find(String input, int start) {
+        return this.find(input, start, input.length());
+    }
+
+    @Override
+    public Substring find(String input, int start, int end) {
+        int matchedIdx = this.match(input.toCharArray(), start, end);
+        if (matchedIdx != -1) {
+            return new Substring(input, matchedIdx, matchedIdx + this.pattern.length);
         }
         return null;
     }
