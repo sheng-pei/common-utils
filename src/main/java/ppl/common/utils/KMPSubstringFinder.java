@@ -1,9 +1,12 @@
 package ppl.common.utils;
 
+import java.util.Arrays;
+
 public class KMPSubstringFinder implements SubstringFinder {
 
     private final char[] pattern;
     private final int[] next;
+    private int count = 0;
 
     public KMPSubstringFinder(String pattern) {
         if (StringUtils.isEmpty(pattern)) {
@@ -20,6 +23,19 @@ public class KMPSubstringFinder implements SubstringFinder {
         for (int i = 1; i < pattern.length - 1; i++) {
             next[i + 1] = calcNext(i, 1);
         }
+    }
+
+    public static void main(String[] args) {
+        KMPSubstringFinder finder = new KMPSubstringFinder("AACAAB");
+        System.out.println(Arrays.toString(finder.next));
+        System.out.println(finder.find("UADCAACAACAABJUN"));
+//        finder.count = 0;
+//        Arrays.fill(finder.next, 0);
+//        for (int i = 1; i < 11; i ++) {
+//            finder.next[i] = i - 1;
+//        }
+//        finder.calcNext(10, 1);
+//        System.out.println(finder.count);
     }
 
     private int calcNext(int idx, int level) {
@@ -40,6 +56,7 @@ public class KMPSubstringFinder implements SubstringFinder {
                 return 0;
             }
             nxt = next[nxt];
+            count ++;
         }
         return nxt;
     }

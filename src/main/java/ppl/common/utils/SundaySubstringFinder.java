@@ -37,28 +37,6 @@ public class SundaySubstringFinder implements SubstringFinder {
         return null;
     }
 
-//    private int escapableFind(char[] input) {
-//        char escape = '\\';
-//        int firstEscape = 0;
-//        while (firstEscape != -1) {
-//            int firstUnescape = StringUtils.indexOfNot(escape, input, firstEscape, input.length);
-//            if (firstUnescape == -1) {
-//                return -1;
-//            } else {
-//                int nextFirstEscape = StringUtils.indexOf(escape, input, firstUnescape, input.length);
-//                int matched = match(input, firstUnescape, nextFirstEscape == -1 ? input.length : nextFirstEscape);
-//                if (matched == -1) {
-//                    firstEscape = nextFirstEscape;
-//                } else if (matched == firstUnescape) {
-//                    return firstEscape;
-//                } else {
-//                    return matched;
-//                }
-//            }
-//        }
-//        return -1;
-//    }
-
     private int match(char[] input, int start, int end) {
         int patternStart = start;
         int patternEnd = patternStart + this.pattern.length;
