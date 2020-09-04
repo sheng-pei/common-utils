@@ -63,10 +63,14 @@ public class SundaySubstringFinder implements SubstringFinder {
         int patternStart = start;
         int patternEnd = patternStart + this.pattern.length;
 
-        while (patternEnd < end) {
+        while (patternEnd <= end) {
 
-            if (this.isPrefixOf(input, patternStart)) {
+            if (this.isPatternAtTheStartOf(input, patternStart)) {
                 return patternStart;
+            }
+
+            if (patternEnd == end) {
+                return -1;
             }
 
             int distance = distance(input[patternEnd]);
@@ -75,10 +79,10 @@ public class SundaySubstringFinder implements SubstringFinder {
             patternEnd += distance;
         }
 
-        return patternEnd == end && this.isPrefixOf(input, patternStart) ? patternStart : -1;
+        return -1;
     }
 
-    private boolean isPrefixOf(char[] input, int start) {
+    private boolean isPatternAtTheStartOf(char[] input, int start) {
         for (int j = 0; j < pattern.length; j++) {
             if (this.pattern[j] != input[start + j]) {
                 return false;

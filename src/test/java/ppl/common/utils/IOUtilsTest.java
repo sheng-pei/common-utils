@@ -29,13 +29,17 @@ public class IOUtilsTest {
 
     @Test
     public void testCopy() throws Exception {
-        File inFile = new File("/Users/shengpei/Desktop/osg-uc0009.tgz");
-        File outFile = new File("/Users/shengpei/Desktop/oo00oo.tgz");
-        InputStream is = new FileInputStream(inFile);
-        OutputStream os = new FileOutputStream(outFile);
-        Date start = new Date();
-        IOUtils.copy(is, os, 10240);
-        System.out.println("Elapsed time: " + (System.currentTimeMillis() - start.getTime()));
+        try {
+            File inFile = new File("/Users/shengpei/Desktop/osg-uc0009.tgz");
+            File outFile = new File("/Users/shengpei/Desktop/oo00oo.tgz");
+            InputStream is = new FileInputStream(inFile);
+            OutputStream os = new FileOutputStream(outFile);
+            Date start = new Date();
+            IOUtils.copy(is, os, 10240);
+            System.out.println("Elapsed time: " + (System.currentTimeMillis() - start.getTime()));
+        } catch (FileNotFoundException e) {
+            System.out.println("no source file ignored");
+        }
     }
 
 }
