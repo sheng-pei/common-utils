@@ -1,5 +1,7 @@
 package ppl.common.utils;
 
+import java.util.Arrays;
+
 public class KMPSubstringFinder implements SubstringFinder {
 
     private final char[] pattern;
@@ -12,36 +14,40 @@ public class KMPSubstringFinder implements SubstringFinder {
 
         this.pattern = pattern.toCharArray();
         this.next = new int[this.pattern.length];
-        fillNext();
         this.next[0] = -1;
+        fillNext();
+    }
+
+    public static void main(String[] args) {
+        String pattern = "ppppapppp";
+        KMPSubstringFinder finder = new KMPSubstringFinder(pattern);
     }
 
     private void fillNext() {
-        for (int i = 1; i < pattern.length - 1; i++) {
-            next[i + 1] = calcNext(i, 1);
-        }
-    }
+        int[] len = new int[this.pattern.length];
 
-    private int calcNext(int idx, int level) {
-        int tmp = fn(idx, level);
-        if (pattern[tmp] == pattern[idx]) {
-            return tmp + 1;
-        } else if (tmp == 0) {
-            return 0;
-        } else {
-            return calcNext(idx, level + 1);
-        }
-    }
-
-    private int fn(int len, int level) {
-        int nxt = len;
-        for (int i = 0; i < level; i ++) {
-            if (nxt == 0) {
-                return 0;
+        for (int pos = 1; pos < this.pattern.length; pos++) {
+            calc(len, pos);
+            if (this.pattern[pos] == this.pattern[len[pos]]) {
+                this.next[pos] = this.next[len[pos]];
+            } else {
+                this.next[pos] = len[pos];
             }
-            nxt = next[nxt];
         }
-        return nxt;
+
+        System.out.println(Arrays.toString(this.next));
+
+    }
+
+    private void calc(int[] l, int len) {
+        int p = len - 1;
+        while (p != 0) {
+            p = l[p];
+            if (this.pattern[len - 1] == this.pattern[p]) {
+                l[len] = p + 1;
+                return;
+            }
+        }
     }
 
     @Override

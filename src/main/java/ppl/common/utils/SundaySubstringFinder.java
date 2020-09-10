@@ -2,20 +2,57 @@ package ppl.common.utils;
 
 public class SundaySubstringFinder implements SubstringFinder {
 
-    private final char[] pattern;
+    private static class Pattern {
 
-    public SundaySubstringFinder(String pattern) {
+        private final char[] pattern;
 
-        if (StringUtils.isEmpty(pattern)) {
-            throw new IllegalArgumentException(StringUtils.format("Pattern string is empty or null"));
+        public Pattern(String pattern) {
+            if (StringUtils.isEmpty(pattern)) {
+                throw new IllegalArgumentException(StringUtils.format("Pattern string is empty or null"));
+            }
+
+            this.pattern = pattern.toCharArray();
         }
 
-        this.pattern = pattern.toCharArray();
+        public boolean isAtTheStartOf(char[] input, int start) {
+            for (int j = 0; j < this.length(); j++) {
+                if (this.pattern[j] != input[start + j]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public int lastIndexOf(char c) {
+            int lastIdx = this.length() - 1;
+            for (int i = lastIdx; i >= 0; i--) {
+                if (this.pattern[i] == c) {
+                    return this.length() - i;
+                }
+            }
+            return this.length();
+        }
+
+        public int length() {
+            return this.pattern.length;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(this.pattern);
+        }
+
+    }
+
+    private Pattern pattern;
+
+    public SundaySubstringFinder(String pattern) {
+        this.pattern = new Pattern(pattern);
     }
 
     @Override
     public String getPattern() {
-        return String.valueOf(pattern);
+        return this.pattern.toString();
     }
 
     @Override
@@ -32,7 +69,7 @@ public class SundaySubstringFinder implements SubstringFinder {
     public Substring find(String input, int start, int end) {
         int matchedIdx = this.match(input.toCharArray(), start, end);
         if (matchedIdx != -1) {
-            return new Substring(input, matchedIdx, matchedIdx + this.pattern.length);
+            return new Substring(input, matchedIdx, matchedIdx + this.pattern.length());
         }
         return null;
     }
@@ -60,45 +97,28 @@ public class SundaySubstringFinder implements SubstringFinder {
 //    }
 
     private int match(char[] input, int start, int end) {
-        int patternStart = start;
-        int patternEnd = patternStart + this.pattern.length;
+        int prospectiveMatchStart = start;
+        int prospectiveMatchEnd = prospectiveMatchStart + this.pattern.length();
 
-        while (patternEnd <= end) {
+        while (prospectiveMatchEnd <= end) {
 
-            if (this.isPatternAtTheStartOf(input, patternStart)) {
-                return patternStart;
+            if (this.pattern.isAtTheStartOf(input, prospectiveMatchStart)) {
+                return prospectiveMatchStart;
             }
 
-            if (patternEnd == end) {
+            if (prospectiveMatchEnd == end) {
                 return -1;
             }
 
-            int distance = distance(input[patternEnd]);
+            int distanceToBeMove = this.pattern.lastIndexOf(input[prospectiveMatchEnd]);
 
-            patternStart += distance;
-            patternEnd += distance;
+            prospectiveMatchStart += distanceToBeMove;
+            prospectiveMatchEnd += distanceToBeMove;
         }
 
         return -1;
     }
 
-    private boolean isPatternAtTheStartOf(char[] input, int start) {
-        for (int j = 0; j < pattern.length; j++) {
-            if (this.pattern[j] != input[start + j]) {
-                return false;
-            }
-        }
-        return true;
-    }
 
-    private int distance(char c) {
-        int lastIdx = this.pattern.length - 1;
-        for (int i = lastIdx; i >= 0; i--) {
-            if (this.pattern[i] == c) {
-                return this.pattern.length - i;
-            }
-        }
-        return this.pattern.length;
-    }
 
 }
