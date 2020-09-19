@@ -13,41 +13,29 @@ public class KMPSubstringFinder implements SubstringFinder {
         }
 
         this.pattern = pattern.toCharArray();
-        this.next = new int[this.pattern.length];
+        this.next = new int[this.pattern.length + 1];
         this.next[0] = -1;
         fillNext();
     }
 
-    public static void main(String[] args) {
-        String pattern = "ppppapppp";
-        KMPSubstringFinder finder = new KMPSubstringFinder(pattern);
-    }
-
     private void fillNext() {
-        int[] len = new int[this.pattern.length];
-
-        for (int pos = 1; pos < this.pattern.length; pos++) {
-            calc(len, pos);
-            if (this.pattern[pos] == this.pattern[len[pos]]) {
-                this.next[pos] = this.next[len[pos]];
+        int pos = 1;
+        int cnd = 0;
+        while (pos < this.pattern.length) {
+            if (this.pattern[pos] == this.pattern[cnd]) {
+                this.next[pos] = this.next[cnd];
             } else {
-                this.next[pos] = len[pos];
+                this.next[pos] = cnd;
+                cnd = this.next[cnd];
+                while (cnd >= 0 && this.pattern[pos] != this.pattern[cnd]) {
+                    cnd = this.next[cnd];
+                }
             }
+            pos = pos + 1;
+            cnd = cnd + 1;
         }
-
+        this.next[pos] = cnd;
         System.out.println(Arrays.toString(this.next));
-
-    }
-
-    private void calc(int[] l, int len) {
-        int p = len - 1;
-        while (p != 0) {
-            p = l[p];
-            if (this.pattern[len - 1] == this.pattern[p]) {
-                l[len] = p + 1;
-                return;
-            }
-        }
     }
 
     @Override
@@ -80,26 +68,27 @@ public class KMPSubstringFinder implements SubstringFinder {
             return -1;
         }
 
-        int patternPos = start;
+        int next = 0;
         int consumed = start;
         while (consumed < end) {
-            int prefixLen = consumed - patternPos;
 
-            if (prefixLen == pattern.length) {
-                return patternPos;
-            } else if (pattern[prefixLen] != input[consumed]) {
-                patternPos = consumed - next[prefixLen];
+            if (next == pattern.length) {
+                return consumed - pattern.length;
             }
 
-            if (pattern[prefixLen] == input[consumed] || prefixLen == 0) {
+            if (pattern[next] != input[consumed]) {
+                next = this.next[next];
+                if (next == -1) {
+                    consumed++;
+                    next++;
+                }
+            } else {
                 consumed++;
+                next++;
             }
         }
 
-        if (patternPos + pattern.length == end) {
-            return patternPos;
-        }
-        return -1;
+        return next == pattern.length ? consumed - pattern.length : -1;
     }
 
 }
