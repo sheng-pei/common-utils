@@ -192,9 +192,6 @@ public class StringUtilsTest {
         String singleReference = "{}";
         String replaced = StringUtils.format(singleReference, "ab");
         Assertions.assertEquals("ab", replaced);
-
-        System.out.println(StringUtils.format("abc{}", "ab"));
-        System.out.println(StringUtils.format("a\\\\\\\\{}aaa", "ab"));
     }
 
     @Test
@@ -208,7 +205,7 @@ public class StringUtilsTest {
     public void testFormatSpecialBackslash() {
         String specialBackslash = "abc\\\\\\{}";
         String replaced = StringUtils.format(specialBackslash, "ab");
-        Assertions.assertEquals("abc\\{}", replaced);
+        Assertions.assertEquals("abc\\\\{}", replaced);
     }
 
     @Test
@@ -222,7 +219,7 @@ public class StringUtilsTest {
     public void testFormat() {
         String formatString = "{}abc{}\\\\\\{}aaaa{}";
         String replaced = StringUtils.format(formatString, "ab", "cd", "ef");
-        Assertions.assertEquals("ababccd\\{}aaaaef", replaced);
+        Assertions.assertEquals("ababccd\\\\{}aaaaef", replaced);
     }
 
 }

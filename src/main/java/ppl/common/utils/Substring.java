@@ -66,7 +66,7 @@ public final class Substring {
     public String toString() {
         String res = this._substring;
         if (res == null) {
-            res = String.valueOf(this.source, this.start, this.end);
+            res = String.valueOf(this.source, this.start, this.end - this.start);
             this._substring = res;
         }
         return res;

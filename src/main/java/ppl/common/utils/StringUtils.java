@@ -154,18 +154,30 @@ public class StringUtils {
 
 	public static String format(String formatString, Object... parameters) {
 		Objects.requireNonNull(formatString, "The specified formatString is null");
+		StringBuilder res = new StringBuilder();
 
 		char[] formatCharacters = formatString.toCharArray();
 
 		EscapableSubstringFinder finder = new EscapableSubstringFinder(REFERENCE);
-		Substring substring = finder.find(formatCharacters, 0, formatCharacters.length);
+
+		int paramIdx = 0;
+		int nxt = 0;
+		Substring substring = finder.find(formatCharacters, nxt, formatCharacters.length);
 		while (!substring.isEmpty()) {
+			res.append(formatCharacters, nxt, substring.getStart() - nxt);
 			int escapeLen = substring.length() - REFERENCE.length();
 			if (escapeLen % 2 == 0) {
-
+				res.append(formatCharacters, substring.getStart(), escapeLen >> 1);
+				res.append(getTarget(paramIdx++, parameters));
+			} else {
+				res.append(formatCharacters, substring.getStart(), (escapeLen >> 1) + 1);
+				res.append(REFERENCE);
 			}
+			nxt = substring.getEnd();
+			substring = finder.find(formatCharacters, nxt, formatCharacters.length);
 		}
-		return result.toString();
+		res.append(formatCharacters, nxt, formatCharacters.length - nxt);
+		return res.toString();
 	}
 
 	private static String getTarget(int paramPos, Object... parameters) {
