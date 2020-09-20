@@ -36,7 +36,6 @@ public class KMPSubstringFinder implements SubstringFinder {
             cnd = cnd + 1;
         }
         this.next[pos] = cnd;
-        System.out.println(Arrays.toString(this.next));
     }
 
     @Override

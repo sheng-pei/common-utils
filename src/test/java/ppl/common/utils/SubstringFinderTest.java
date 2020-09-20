@@ -35,7 +35,7 @@ class SubstringFinderTest {
     @MethodSource({"subclassAndPatternProvider"})
     public void testFindInputSmallerThanPattern(Class<?> finderClazz, String pattern) throws Throwable {
         SubstringFinder finder = newInstance(finderClazz, pattern);
-        Assertions.assertNull(finder.find(""));
+        Assertions.assertTrue(finder.find("").isEmpty());
     }
 
     @ParameterizedTest
@@ -92,7 +92,7 @@ class SubstringFinderTest {
         SubstringFinder finder = newInstance(finderClazz, pattern);
 
         String input = pattern.substring(0, 2) + pattern.substring(0, pattern.length() - 1) + pattern.substring(3);
-        Assertions.assertNull(finder.find(input, 1, pattern.length() + 3));
+        Assertions.assertTrue(finder.find(input, 1, pattern.length() + 3).isEmpty());
 
     }
 
@@ -111,7 +111,7 @@ class SubstringFinderTest {
     private void assertSubstring(Substring expected, Substring actual) {
         Assertions.assertEquals(expected.getStart(), actual.getStart());
         Assertions.assertEquals(expected.getEnd(), actual.getEnd());
-        Assertions.assertEquals(expected.getSource(), actual.getSource());
+        Assertions.assertArrayEquals(expected.getSource(), actual.getSource());
         Assertions.assertEquals(expected, actual);
     }
 
