@@ -4,11 +4,17 @@ import java.util.Objects;
 
 public final class Substring {
 
+    public static final Substring EMPTY_SUBSTRING = new Substring();
+
     private final String source;
     private final int start;
     private final int end;
 
     private String _substring;
+
+    private Substring() {
+        this("");
+    }
 
     public Substring(String source) {
         this(source, 0, source.length());
@@ -27,7 +33,7 @@ public final class Substring {
     }
 
     private void checkOutOfBounds(int start, int end, int len) {
-        if (start < 0 || end > len || end < start) {
+        if (start < 0 || end > len) {
             throw new StringIndexOutOfBoundsException(StringUtils.format("out of bound: ({}, {})", start, end));
         }
     }
@@ -42,6 +48,10 @@ public final class Substring {
 
     public int getEnd() {
         return end;
+    }
+
+    public boolean isEmpty() {
+        return end <= start;
     }
 
     @Override

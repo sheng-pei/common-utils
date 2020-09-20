@@ -59,7 +59,7 @@ public class KMPSubstringFinder implements SubstringFinder {
         if (matchedIdx != -1) {
             return new Substring(input, matchedIdx, matchedIdx + this.pattern.length);
         }
-        return null;
+        return Substring.EMPTY_SUBSTRING;
     }
 
     private int match(char[] input, int start, int end) {
