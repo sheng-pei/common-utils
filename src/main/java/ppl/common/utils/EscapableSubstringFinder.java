@@ -1,5 +1,9 @@
 package ppl.common.utils;
 
+import ppl.common.utils.exception.StringProcessException;
+
+import java.util.Objects;
+
 public class EscapableSubstringFinder implements SubstringFinder {
 
     private static final char DEFAULT_ESCAPE = '\\';
@@ -64,14 +68,23 @@ public class EscapableSubstringFinder implements SubstringFinder {
 
     @Override
     public Substring find(String input, int start, int end) {
-        char[] charInput = input.toCharArray();
+        return this.find(input != null ? input.toCharArray() : null, start, end);
+    }
+
+    @Override
+    public Substring find(char[] input, int start, int end) {
+        Objects.requireNonNull(input, "The string to be checked could not be null");
+        if (start < 0 || start > end || end > input.length) {
+            throw new IndexOutOfBoundsException("Start: " + start + " and end: " + end + " must be in [0, " + input.length + ")");
+        }
+
         int firstEscape = start;
         while (firstEscape != -1) {
-            int firstUnescape = StringUtils.indexOfNot(this.escape, charInput, firstEscape, end);
+            int firstUnescape = StringUtils.indexOfNot(this.escape, input, firstEscape, end);
             if (firstUnescape == -1) {
                 return Substring.EMPTY_SUBSTRING;
             } else {
-                int nextFirstEscape = StringUtils.indexOf(this.escape, charInput, firstUnescape, end);
+                int nextFirstEscape = StringUtils.indexOf(this.escape, input, firstUnescape, end);
                 Substring substring = this.finder.find(input, firstUnescape, nextFirstEscape == -1 ? end : nextFirstEscape);
                 if (substring.isEmpty()) {
                     firstEscape = nextFirstEscape;

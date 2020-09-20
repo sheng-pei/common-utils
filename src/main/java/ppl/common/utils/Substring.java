@@ -6,7 +6,7 @@ public final class Substring {
 
     public static final Substring EMPTY_SUBSTRING = new Substring();
 
-    private final String source;
+    private final char[] source;
     private final int start;
     private final int end;
 
@@ -25,8 +25,12 @@ public final class Substring {
     }
 
     public Substring(String source, int start, int end) {
+        this(source != null ? source.toCharArray() : null, start, end);
+    }
+
+    public Substring(char[] source, int start, int end) {
         Objects.requireNonNull(source, "Source is null");
-        this.checkOutOfBounds(start, end, source.length());
+        this.checkOutOfBounds(start, end, source.length);
         this.source = source;
         this.start = start;
         this.end = end;
@@ -38,7 +42,7 @@ public final class Substring {
         }
     }
 
-    public String getSource() {
+    public char[] getSource() {
         return source;
     }
 
@@ -50,6 +54,10 @@ public final class Substring {
         return end;
     }
 
+    public int length() {
+        return end - start;
+    }
+
     public boolean isEmpty() {
         return end <= start;
     }
@@ -58,7 +66,7 @@ public final class Substring {
     public String toString() {
         String res = this._substring;
         if (res == null) {
-            res = this.source.substring(this.start, this.end);
+            res = String.valueOf(this.source, this.start, this.end);
             this._substring = res;
         }
         return res;

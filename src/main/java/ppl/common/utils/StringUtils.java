@@ -150,34 +150,22 @@ public class StringUtils {
 		return -1;
 	}
 
-	private static final char[] REFERENCE = "{}".toCharArray();
+	private static final String REFERENCE = "{}";
 
 	public static String format(String formatString, Object... parameters) {
 		Objects.requireNonNull(formatString, "The specified formatString is null");
 
 		char[] formatCharacters = formatString.toCharArray();
 
-		ReferenceMatcher matcher = new ReferenceMatcher(formatCharacters);
-		StringBuilder result = new StringBuilder();
-		int paramPos = 0;
-		int start = 0;
-		while (matcher.find(start, REFERENCE)) {
-			result.append(formatString, start, matcher.start());
-			result.append(formatCharacters, matcher.start(), escapeCharacterLength(matcher) >> 1);
-			if (((escapeCharacterLength(matcher)) & 0x1) != 0) {
-				result.append("{}");
-			} else {
-				result.append(getTarget(paramPos++, parameters));
+		EscapableSubstringFinder finder = new EscapableSubstringFinder(REFERENCE);
+		Substring substring = finder.find(formatCharacters, 0, formatCharacters.length);
+		while (!substring.isEmpty()) {
+			int escapeLen = substring.length() - REFERENCE.length();
+			if (escapeLen % 2 == 0) {
+
 			}
-			start = matcher.end();
 		}
-
-		result.append(formatString, start, formatString.length());
 		return result.toString();
-	}
-
-	private static int escapeCharacterLength(ReferenceMatcher matcher) {
-		return matcher.end() - matcher.start() - REFERENCE.length;
 	}
 
 	private static String getTarget(int paramPos, Object... parameters) {
@@ -186,76 +174,6 @@ public class StringUtils {
 		} else {
 			throw new IllegalArgumentException("Not enough parameters");
 		}
-	}
-
-	private static class ReferenceMatcher {
-		private static final char ESCAPE_CHARACTER = '\\';
-
-		private final char[] chars;
-
-		private int start;
-		private int end;
-
-		public ReferenceMatcher(char[] chars) {
-			this.chars = chars;
-		}
-
-		public int start() {
-			return start;
-		}
-
-		public int end() {
-			return end;
-		}
-
-		public boolean find(int pos, char[] reference) {
-			int start = pos;
-			int end = pos;
-			while (end <= this.chars.length - reference.length) {
-
-				if (this.chars[end] == ESCAPE_CHARACTER) {
-					end++;
-					continue;
-				}
-
-				if (isMatch(end, reference)) {
-					this.start = start;
-					this.end = end + reference.length;
-					return true;
-				} else {
-					if (end + reference.length >= this.chars.length) {
-						break;
-					}
-					end = start = moveTo(end, reference);
-				}
-
-			}
-			return false;
-		}
-
-		private boolean isMatch(int pos, char[] reference) {
-			for (int j = 0; j < reference.length; j++) {
-				if (reference[j] != chars[pos + j]) {
-					return false;
-				}
-			}
-			return true;
-		}
-
-		private int moveTo(int pos, char[] reference) {
-			int lastIndex = lastIndexOf(reference, chars[pos + reference.length]);
-			return pos + reference.length + (lastIndex == -1 ? 1 : -lastIndex);
-		}
-
-		private int lastIndexOf(char[] reference, char c) {
-			for (int i = reference.length - 1; i >= 0; i--) {
-				if (reference[i] == c) {
-					return i;
-				}
-			}
-			return -1;
-		}
-
 	}
 
 }

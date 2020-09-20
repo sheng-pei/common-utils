@@ -1,6 +1,7 @@
 package ppl.common.utils;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class KMPSubstringFinder implements SubstringFinder {
 
@@ -55,7 +56,17 @@ public class KMPSubstringFinder implements SubstringFinder {
 
     @Override
     public Substring find(String input, int start, int end) {
-        int matchedIdx = this.match(input.toCharArray(), start, end);
+        return this.find(input != null ? input.toCharArray() : null, start, end);
+    }
+
+    @Override
+    public Substring find(char[] input, int start, int end) {
+        Objects.requireNonNull(input, "The string to be checked could not be null");
+        if (start < 0 || start > end || end > input.length) {
+            throw new IndexOutOfBoundsException("Start: " + start + " and end: " + end + " must be in [0, " + input.length + ")");
+        }
+
+        int matchedIdx = this.match(input, start, end);
         if (matchedIdx != -1) {
             return new Substring(input, matchedIdx, matchedIdx + this.pattern.length);
         }
