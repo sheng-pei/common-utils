@@ -1,7 +1,5 @@
 package ppl.common.utils;
 
-import ppl.common.utils.exception.StringProcessException;
-
 import java.util.Objects;
 
 public class EscapableSubstringFinder implements SubstringFinder {
@@ -11,8 +9,11 @@ public class EscapableSubstringFinder implements SubstringFinder {
     private final SubstringFinder finder;
 
     public EscapableSubstringFinder(char escape, SubstringFinder finder) {
-        if (!check(finder.getPattern().toCharArray()))
-            throw new StringProcessException("This pattern may be ambiguity.");
+        if (finder.getPattern().indexOf(escape) != -1) {
+            throw new IllegalArgumentException("Pattern: " + finder.getPattern() + " mustn't contain escape: " + escape);
+        }
+        if (maybeOverlap(finder.getPattern().toCharArray()))
+            throw new IllegalArgumentException("This pattern: " + finder.getPattern() + " may be ambiguity.");
         this.escape = escape;
         this.finder = finder;
     }
@@ -29,7 +30,7 @@ public class EscapableSubstringFinder implements SubstringFinder {
         this(DEFAULT_ESCAPE, new SundaySubstringFinder(pattern));
     }
 
-    private boolean check(char[] pattern) {
+    private boolean maybeOverlap(char[] pattern) {
         int[] lens = new int[pattern.length + 1];
         for (int i = 2; i < pattern.length + 1; i++) {
             int len = lens[i - 1];
@@ -44,7 +45,7 @@ public class EscapableSubstringFinder implements SubstringFinder {
                 lens[i] = pattern[i - 1] == pattern[len] ? 1 : 0;
             }
         }
-        return lens[pattern.length] == 0;
+        return lens[pattern.length] != 0;
     }
 
     public char getEscape() {

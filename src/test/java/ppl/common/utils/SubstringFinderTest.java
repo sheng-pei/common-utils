@@ -1,6 +1,7 @@
 package ppl.common.utils;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -120,6 +121,34 @@ class SubstringFinderTest {
                 Arguments.of(SundaySubstringFinder.class, "abccda"),
                 Arguments.of(KMPSubstringFinder.class, "GCGCGT")
         );
+    }
+
+    @Test
+    public void testEscapableSubstringFinderWithPatternContainingEscape() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new EscapableSubstringFinder("\\"));
+    }
+
+    @Test
+    public void testEscapableSubstringFinderWithOverlappedPattern() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new EscapableSubstringFinder("pap"));
+    }
+
+    @Test
+    public void testEscapableSubstringFinderFindEscapePrefix() {
+        EscapableSubstringFinder finder = new EscapableSubstringFinder("{}");
+
+        String input = "aa\\\\{}bb";
+        Substring actual = finder.find(input);
+        assertSubstring(new Substring(input, 2, 6), actual);
+    }
+
+    @Test
+    public void testEscapableSubstringFinderNoEscapePrefix() {
+        EscapableSubstringFinder finder = new EscapableSubstringFinder("{}");
+
+        String input = "{}";
+        Substring actual = finder.find(input);
+        assertSubstring(new Substring(input, 0, 2), actual);
     }
 
 }
