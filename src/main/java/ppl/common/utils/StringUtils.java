@@ -188,11 +188,11 @@ public class StringUtils {
 		}
 	}
 
-	public static boolean equalsFocusedOnContent(final String s1, final String s2) {
+	public static boolean equalsOnContent(final String s1, final String s2) {
 		return StringUtils.equals(s1 == null ? "" : s1.trim(), s2 == null ? "" : s2.trim());
 	}
 
-	public static boolean equalsFocusedOnCharacter(final CharSequence cs1, final CharSequence cs2) {
+	public static boolean equalsOnCharacter(final CharSequence cs1, final CharSequence cs2) {
 		return StringUtils.equals(cs1 == null ? "" : cs1, cs2 == null ? "" : cs2);
 	}
 

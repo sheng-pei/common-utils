@@ -203,38 +203,38 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void testEqualsFocusedOnCharacterNullEmpty() {
-        Assertions.assertTrue(StringUtils.equalsFocusedOnCharacter(null, ""));
+    public void testEqualsOnCharacterNullEmpty() {
+        Assertions.assertTrue(StringUtils.equalsOnCharacter(null, ""));
     }
 
     @Test
-    public void testEqualsFocusedOnCharacterNullNull() {
-        Assertions.assertTrue(StringUtils.equalsFocusedOnCharacter(null, null));
+    public void testEqualsOnCharacterNullNull() {
+        Assertions.assertTrue(StringUtils.equalsOnCharacter(null, null));
     }
 
     @Test
-    public void testEqualsFocusedOnCharacter() {
-        Assertions.assertTrue(StringUtils.equalsFocusedOnCharacter("akj", "akj"));
+    public void testEqualsOnCharacter() {
+        Assertions.assertTrue(StringUtils.equalsOnCharacter("akj", "akj"));
     }
 
     @Test
-    public void testEqualsFocusedOnContentNullEmpty() {
-        Assertions.assertTrue(StringUtils.equalsFocusedOnContent(null, ""));
+    public void testEqualsOnContentNullEmpty() {
+        Assertions.assertTrue(StringUtils.equalsOnContent(null, ""));
     }
 
     @Test
-    public void testEqualsFocusedOnContentNullNull() {
-        Assertions.assertTrue(StringUtils.equalsFocusedOnContent(null, null));
+    public void testEqualsOnContentNullNull() {
+        Assertions.assertTrue(StringUtils.equalsOnContent(null, null));
     }
 
     @Test
-    public void testEqualsFocusedOnContentBlankNull() {
-        Assertions.assertTrue(StringUtils.equalsFocusedOnContent(" \t\n", ""));
+    public void testEqualsOnContentBlankNull() {
+        Assertions.assertTrue(StringUtils.equalsOnContent(" \t\n", ""));
     }
 
     @Test
-    public void testEqualsFocusedOnContent() {
-        Assertions.assertTrue(StringUtils.equalsFocusedOnContent("akj", "akj"));
+    public void testEqualsOnContent() {
+        Assertions.assertTrue(StringUtils.equalsOnContent("akj", "akj"));
     }
 
     @Test
