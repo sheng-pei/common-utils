@@ -147,26 +147,6 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void testEqualsNullNull() {
-        Assertions.assertTrue(StringUtils.equals(null, null));
-    }
-
-    @Test
-    public void testEqualsNullNonnull() {
-        Assertions.assertFalse(StringUtils.equals(null, ""));
-    }
-
-    @Test
-    public void testEqualsNonnullNull() {
-        Assertions.assertFalse(StringUtils.equals("", null));
-    }
-
-    @Test
-    public void testEquals() {
-        Assertions.assertTrue(StringUtils.equals("aavgf", "aavgf"));
-    }
-
-    @Test
     public void testToSnakeAndLowerCaseMM() {
         String MM = "MM";
         String mm = StringUtils.toSnakeCase(MM);
@@ -220,6 +200,61 @@ public class StringUtilsTest {
         String formatString = "{}abc{}\\\\\\{}aaaa{}";
         String replaced = StringUtils.format(formatString, "ab", "cd", "ef");
         Assertions.assertEquals("ababccd\\\\{}aaaaef", replaced);
+    }
+
+    @Test
+    public void testEqualsFocusedOnCharacterNullEmpty() {
+        Assertions.assertTrue(StringUtils.equalsFocusedOnCharacter(null, ""));
+    }
+
+    @Test
+    public void testEqualsFocusedOnCharacterNullNull() {
+        Assertions.assertTrue(StringUtils.equalsFocusedOnCharacter(null, null));
+    }
+
+    @Test
+    public void testEqualsFocusedOnCharacter() {
+        Assertions.assertTrue(StringUtils.equalsFocusedOnCharacter("akj", "akj"));
+    }
+
+    @Test
+    public void testEqualsFocusedOnContentNullEmpty() {
+        Assertions.assertTrue(StringUtils.equalsFocusedOnContent(null, ""));
+    }
+
+    @Test
+    public void testEqualsFocusedOnContentNullNull() {
+        Assertions.assertTrue(StringUtils.equalsFocusedOnContent(null, null));
+    }
+
+    @Test
+    public void testEqualsFocusedOnContentBlankNull() {
+        Assertions.assertTrue(StringUtils.equalsFocusedOnContent(" \t\n", ""));
+    }
+
+    @Test
+    public void testEqualsFocusedOnContent() {
+        Assertions.assertTrue(StringUtils.equalsFocusedOnContent("akj", "akj"));
+    }
+
+    @Test
+    public void testEqualsNullNull() {
+        Assertions.assertTrue(StringUtils.equals(null, null));
+    }
+
+    @Test
+    public void testEqualsNullNonnull() {
+        Assertions.assertFalse(StringUtils.equals(null, ""));
+    }
+
+    @Test
+    public void testEqualsNonnullNull() {
+        Assertions.assertFalse(StringUtils.equals("", null));
+    }
+
+    @Test
+    public void testEquals() {
+        Assertions.assertTrue(StringUtils.equals("aavgf", "aavgf"));
     }
 
 }
