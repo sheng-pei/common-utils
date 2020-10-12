@@ -31,7 +31,7 @@ public class CustomSerializeConfig extends SerializeConfig {
                 throw new JSONException(StringUtils.format("Required enum, but: " + object.getClass().getCanonicalName()));
             }
 
-            if (EnumUtils.supportEncoderProtocol((Class<? extends Enum>)object.getClass())) {
+            if (EnumUtils.isEncodeSupport((Class<? extends Enum>)object.getClass())) {
                 Object key = EnumUtils.encode((Enum) object);
 
                 if (key instanceof String) {

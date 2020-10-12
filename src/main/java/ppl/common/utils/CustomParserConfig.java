@@ -18,7 +18,7 @@ public class CustomParserConfig extends ParserConfig {
         }
 
         Class<? extends Enum> enumClass = (Class<? extends Enum>) clazz;
-        if (EnumUtils.supportEncoderProtocol(enumClass)) {
+        if (EnumUtils.isEncodeSupport(enumClass)) {
             return new CustomEnumDeserializer(enumClass);
         } else {
             return super.getEnumDeserializer(clazz);

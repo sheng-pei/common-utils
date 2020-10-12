@@ -11,7 +11,7 @@ public abstract class EnumConverter<A extends Enum<A>, D> implements AttributeCo
     private Class<A> enumClazz;
 
     public EnumConverter(Class<A> enumClazz, Class<D> keyClazz) {
-        if (!EnumUtils.supportEncoderProtocol(enumClazz)) {
+        if (!EnumUtils.isEncodeSupport(enumClazz)) {
             throw new IllegalArgumentException(
                     StringUtils.format(
                             "The encode protocol is not implemented in the enum({}), so it does not support converter({})",
