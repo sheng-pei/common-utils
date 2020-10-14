@@ -9,6 +9,7 @@ import javax.persistence.AttributeConverter;
 public abstract class EnumConverter<A extends Enum<A>, D> implements AttributeConverter<A, D> {
 
     private Class<A> enumClazz;
+    private Class<D> keyClazz;
 
     public EnumConverter(Class<A> enumClazz, Class<D> keyClazz) {
         if (!EnumUtils.isEncodeSupport(enumClazz)) {
@@ -30,17 +31,17 @@ public abstract class EnumConverter<A extends Enum<A>, D> implements AttributeCo
             );
         }
         this.enumClazz = enumClazz;
-
+        this.keyClazz = keyClazz;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public D convertToDatabaseColumn(A attribute) {
-        return (D) EnumUtils.encode(attribute);
+    public final D convertToDatabaseColumn(A attribute) {
+        return EnumUtils.encode(attribute, keyClazz);
     }
 
     @Override
-    public A convertToEntityAttribute(D dbData) {
+    public final A convertToEntityAttribute(D dbData) {
         return EnumUtils.enumOf(enumClazz, dbData);
     }
 
