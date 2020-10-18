@@ -1,6 +1,7 @@
 package ppl.common.utils;
 
 import ppl.common.utils.exception.EnumEncoderNotSupportedException;
+import ppl.common.utils.exception.UnknownEnumException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,14 +25,18 @@ public class EnumUtils {
         Objects.requireNonNull(key, "Key is null");
         checkEncodeSupport(enumClass);
 
-        return (E) keyToEnumCache.get(enumClass).get(key);
+        E e = (E) keyToEnumCache.get(enumClass).get(key);
+        if (e == null) {
+            throw new UnknownEnumException(enumClass, key);
+        }
+        return e;
 
     }
 
     @SuppressWarnings("unchecked")
     public static <K> K encode(Enum e, Class<K> keyClazz) {
         Objects.requireNonNull(e, "Enum is null");
-        Objects.requireNonNull(e, "keyClazz is null");
+        Objects.requireNonNull(keyClazz, "keyClazz is null");
         checkEncodeSupport(e.getClass());
 
         Object key = enumToKeyCache.get(e);
@@ -126,6 +131,9 @@ public class EnumUtils {
         for (Enum<?> e : enums) {
             try {
                 Object key = encoder.invoke(e);
+                if (key == null) {
+                    return ERROR.NULL_KEY;
+                }
                 if (keyToEnum.containsKey(key)) {
                     return ERROR.DUPLICATE_ENUM_KEYS;
                 }

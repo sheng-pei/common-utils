@@ -40,7 +40,8 @@ public @interface EnumEncoder {
         ILLEGAL_ACCESS("The encoder of the enum({}) is not accessible"),
         INVOCATION_ERROR("Failed to apply the encoder to some element of enum({})"),
         DUPLICATE_ENUM_KEYS("There are same keys in the enum({})"),
-        NO_ENUM_ENCODER("The enum({}) not support encoder protocol");
+        NO_ENUM_ENCODER("The enum({}) not support encoder protocol"),
+        NULL_KEY("The key of enum({}) must not be null");
 
         ERROR(String cause) {
             this.cause = cause;
