@@ -5,7 +5,6 @@ import ppl.common.utils.exception.ConvertException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 public class Converter<C> {
@@ -108,12 +107,20 @@ public class Converter<C> {
     private Function<Object, C> convertFunc;
 
     private Converter(Function<Object, C> convertFunc) {
-        Objects.requireNonNull(convertFunc, "Converter function is required");
         this.convertFunc = convertFunc;
     }
 
     public C convert(Object obj) {
         return this.convertFunc.apply(obj);
+    }
+
+    public C convertNullIfConvertExcept(Object obj) {
+        try {
+            return this.convertFunc.apply(obj);
+        } catch (ConvertException e) {
+            //Ignore, not error
+        }
+        return null;
     }
 
 }

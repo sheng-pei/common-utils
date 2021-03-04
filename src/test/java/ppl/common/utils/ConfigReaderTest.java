@@ -19,7 +19,7 @@ public class ConfigReaderTest {
 
     @Test
     public void testReadInteger() {
-        ConfigReader reader = new ConfigReaderImpl(configs);
+        ConfigReader reader = ConfigReaderImpl.createFromMap(configs);
         Integer i = reader.getInteger("int");
         Assertions.assertEquals(1, i);
     }
