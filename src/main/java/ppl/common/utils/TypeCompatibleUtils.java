@@ -9,6 +9,8 @@ public class TypeCompatibleUtils {
     private static final Map<Class<?>, Class<?>> primitiveToWrapper;
     private static final Map<Class<?>, Class<?>> wrapperToPrimitive;
 
+    private TypeCompatibleUtils() {}
+
     static {
         Map<Class<?>, Class<?>> pToW = new HashMap<>();
         pToW.put(byte.class, Byte.class);

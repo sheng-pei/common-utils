@@ -72,7 +72,7 @@ public class EnumUtils {
         return true;
     }
 
-    private static void checkEncodeSupport(Class<? extends Enum> enumClass) {
+    public static void checkEncodeSupport(Class<? extends Enum> enumClass) {
         loadEnums(enumClass);
 
         Object encoder = encoderCache.get(enumClass);
