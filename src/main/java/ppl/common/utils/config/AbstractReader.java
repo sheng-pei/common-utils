@@ -114,6 +114,11 @@ abstract class AbstractReader implements Reader {
     }
 
     @Override
+    public <E extends Enum<E>> E getEnum(Object key, Class<E> enumClass, E def) {
+        return getOrDefault(key, enumClass, def);
+    }
+
+    @Override
     public <M> M getOrDefault(Object key, Class<M> targetClass, M def) {
         M v = get(key, targetClass);
         return v == null ? def : v;

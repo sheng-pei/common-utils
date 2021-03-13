@@ -20,6 +20,8 @@ public interface Getter {
 
     <E extends Enum<E>> E getEnum(Object key, Class<E> enumClass);
 
+    <E extends Enum<E>> E getEnum(Object key, Class<E> enumClass, E def);
+
     <M> M getOrDefault(Object key, Class<M> targetClass, M def);
 
     <M> M get(Object key, Class<M> targetClass);
