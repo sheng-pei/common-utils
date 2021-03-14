@@ -10,8 +10,6 @@ public interface Reader extends Key, Value, Getter {
 
     String absolutePath();
 
-    boolean isNull();
-
     Reader getParent();
 
     Reader getChild(Object key);

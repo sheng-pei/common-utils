@@ -33,11 +33,6 @@ abstract class AbstractReader implements Reader {
         return this.absolutePath(this.parent == null);
     }
 
-    @Override
-    public boolean isNull() {
-        return false;
-    }
-
     private String absolutePath(boolean isRoot) {
         if (this.parent == null) {
             return isRoot ? Reader.ROOT_PATH : "";
