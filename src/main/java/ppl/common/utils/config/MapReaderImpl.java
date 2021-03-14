@@ -21,7 +21,8 @@ final class MapReaderImpl extends AbstractReader {
 
     @Override
     protected String path(Object key) {
-        return key.toString();
+        String keyStr = key.toString();
+        return keyStr.contains(PATH_SEPARATOR) ? "{" + keyStr + "}" : keyStr;
     }
 
     @Override

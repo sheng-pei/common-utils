@@ -6,6 +6,8 @@ public interface Reader extends Key, Value, Getter {
 
     String ROOT_PATH = ".";
 
+    String PATH_SEPARATOR = ".";
+
     String absolutePath();
 
     boolean isNull();
