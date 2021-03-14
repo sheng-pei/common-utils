@@ -28,11 +28,6 @@ final class NullReaderImpl extends AbstractReader {
     }
 
     @Override
-    public boolean isNull() {
-        return true;
-    }
-
-    @Override
     public Iterator<Reader> iterator() {
         return new Iterator<Reader>() {
             @Override
