@@ -80,6 +80,10 @@ public class StringUtils {
 		return true;
 	}
 
+	public static boolean isNotBlank(String string) {
+		return !isBlank(string);
+	}
+
 	public static boolean equals(final CharSequence cs1, final CharSequence cs2) {
 		if (cs1 == cs2) {
 			return true;
