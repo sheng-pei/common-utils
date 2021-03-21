@@ -133,7 +133,7 @@ public class Converter<C> {
             try {
                 EnumUtils.checkEncodeSupport(enumClass);
             } catch (EnumEncoderNotSupportedException e) {
-                throw new IllegalArgumentException("TargetClass not support enum encoder.", e);
+                throw new IllegalArgumentException("TargetClass is not support enum encoder.", e);
             }
         }
 
@@ -162,7 +162,7 @@ public class Converter<C> {
         return this.convertFunc.apply(obj);
     }
 
-    public C convertNullIfConvertExcept(Object obj) {
+    public C convertNullIfException(Object obj) {
         try {
             return this.convertFunc.apply(obj);
         } catch (ConvertException e) {

@@ -1,5 +1,7 @@
 package ppl.common.utils.config;
 
+import ppl.common.utils.exception.ReaderException;
+
 import java.util.Iterator;
 
 final class ScalarReaderImpl extends AbstractReader {

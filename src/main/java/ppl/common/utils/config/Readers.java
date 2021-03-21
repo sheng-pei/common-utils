@@ -1,6 +1,7 @@
 package ppl.common.utils.config;
 
 import ppl.common.utils.StringUtils;
+import ppl.common.utils.exception.ReaderException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -25,15 +26,6 @@ public class Readers {
     }
 
     static Reader newer(Class<?> readerClass, LinkedHashMap<Class<?>, Object> params) {
-        if (readerClass == null) {
-            throw new IllegalArgumentException("The specified class of reader must not be null");
-        }
-
-        if (!Reader.class.isAssignableFrom(readerClass)) {
-            throw new IllegalArgumentException(
-                    StringUtils.format("The specified class is not a reader class: {}",
-                            readerClass.getCanonicalName()));
-        }
 
         List<Class<?>> paramClasses = new ArrayList<>(params.size());
         List<Object> paramValues = new ArrayList<>(params.size());

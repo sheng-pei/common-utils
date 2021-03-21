@@ -3,6 +3,7 @@ package ppl.common.utils.config;
 import ppl.common.utils.config.convert.ConvertException;
 import ppl.common.utils.config.convert.Converter;
 import ppl.common.utils.StringUtils;
+import ppl.common.utils.exception.ReaderException;
 
 import java.util.LinkedHashMap;
 import java.util.Objects;
@@ -18,8 +19,6 @@ abstract class AbstractReader implements Reader {
     }
 
     protected AbstractReader(Reader parent, Object key) {
-        Objects.requireNonNull(parent, "Parent couldn't be null in child");
-        Objects.requireNonNull(key, "The key of reader couldn't be null except root");
         this.parent = parent;
         this.key = key;
     }
@@ -140,6 +139,11 @@ abstract class AbstractReader implements Reader {
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * no exception
+     * @param key key of child
+     * @return value of child corresponding key
+     */
     protected abstract Object get(Object key);
 
     //////////////////////////////////////////////////Key///////////////////////////////////////////
@@ -249,6 +253,10 @@ abstract class AbstractReader implements Reader {
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * no exception
+     * @return value of reader
+     */
     protected abstract Object value();
 
     static <M> M convert(Object src, Class<M> targetClass) {

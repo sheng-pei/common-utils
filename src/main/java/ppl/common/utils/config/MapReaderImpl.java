@@ -1,5 +1,7 @@
 package ppl.common.utils.config;
 
+import ppl.common.utils.exception.ReaderException;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

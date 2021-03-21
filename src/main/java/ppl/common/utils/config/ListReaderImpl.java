@@ -1,6 +1,7 @@
 package ppl.common.utils.config;
 
 import ppl.common.utils.config.convert.Converter;
+import ppl.common.utils.exception.ReaderException;
 
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +33,7 @@ final class ListReaderImpl extends AbstractReader {
 
     private Integer toInt(Object key) {
         Converter<Integer> intConverter = Converter.getInstance(Integer.class);
-        return intConverter.convertNullIfConvertExcept(key);
+        return intConverter.convertNullIfException(key);
     }
 
     @Override

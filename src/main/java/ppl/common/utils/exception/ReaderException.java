@@ -1,4 +1,4 @@
-package ppl.common.utils.config;
+package ppl.common.utils.exception;
 
 public class ReaderException extends RuntimeException {
     public ReaderException() {
