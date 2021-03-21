@@ -58,9 +58,11 @@ class DynamicString implements StringReplacer {
                     if (mayVariable) {
                         variableStart = true;
                         mayVariable = false;
-                        RawString raw = new RawString(builder.toString());
-                        res.add(raw);
-                        builder.setLength(0);
+                        if (builder.length() != 0) {
+                            RawString raw = new RawString(builder.toString());
+                            res.add(raw);
+                            builder.setLength(0);
+                        }
                         break;
                     }
                     builder.append(curr);
@@ -77,11 +79,17 @@ class DynamicString implements StringReplacer {
                         break;
                     }
                     if (variableStart) {
+                        if (builder.length() == 0) {
+                            throw new VariablePatternException("Variable name couldn't empty.");
+                        }
+
                         VariableString variable = new VariableString(builder.toString());
                         res.add(variable);
                         builder.setLength(0);
                         variableStart = false;
+                        break;
                     }
+                    builder.append(curr);
                     break;
                 default:
                     if (mayVariable) {
