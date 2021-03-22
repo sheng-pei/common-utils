@@ -129,4 +129,16 @@ class DynamicString implements StringReplacer {
         return builder.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DynamicString that = (DynamicString) o;
+        return Objects.equals(parts, that.parts);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(parts);
+    }
 }
