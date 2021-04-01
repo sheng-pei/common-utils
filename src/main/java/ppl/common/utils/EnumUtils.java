@@ -35,8 +35,11 @@ public class EnumUtils {
 
     @SuppressWarnings("unchecked")
     public static <K> K encode(Enum e, Class<K> keyClazz) {
-        Objects.requireNonNull(e, "Enum is null");
         Objects.requireNonNull(keyClazz, "keyClazz is null");
+        if (e == null) {
+            return null;
+        }
+
         checkEncodeSupport(e.getClass());
 
         Object key = enumToKeyCache.get(e);
@@ -48,7 +51,9 @@ public class EnumUtils {
     }
 
     public static Object encode(Enum e) {
-        Objects.requireNonNull(e, "Enum is null");
+        if (e == null) {
+            return null;
+        }
         checkEncodeSupport(e.getClass());
 
         return enumToKeyCache.get(e);
