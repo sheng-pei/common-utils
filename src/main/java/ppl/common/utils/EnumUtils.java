@@ -135,6 +135,7 @@ public class EnumUtils {
     private static ERROR applyEncoder(Enum<?>[] enums, Method encoder, Map<Object, Enum<?>> keyToEnum) {
         for (Enum<?> e : enums) {
             try {
+                encoder.setAccessible(true);
                 Object key = encoder.invoke(e);
                 if (key == null) {
                     return ERROR.NULL_KEY;
