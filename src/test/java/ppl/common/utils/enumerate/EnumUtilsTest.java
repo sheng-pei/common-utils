@@ -1,4 +1,4 @@
-package ppl.common.utils;
+package ppl.common.utils.enumerate;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,8 +21,10 @@ public class EnumUtilsTest {
         }
 
     }
+
     @Test
     public void test() {
         Assertions.assertEquals(A.U, EnumUtils.enumOf(A.class, 1));
     }
+
 }

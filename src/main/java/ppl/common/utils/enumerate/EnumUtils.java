@@ -7,6 +7,7 @@ import ppl.common.utils.exception.UnknownEnumException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static ppl.common.utils.enumerate.EnumEncoder.ERROR;
 import static ppl.common.utils.enumerate.EnumEncoder.VALID_ENUM_KEY_TYPE;
@@ -14,10 +15,10 @@ import static ppl.common.utils.enumerate.EnumEncoder.VALID_ENUM_KEY_TYPE;
 @SuppressWarnings("rawtypes")
 public class EnumUtils {
 
-    private static final WeakHashMap<Class<? extends Enum>, Object> encoderCache = new WeakHashMap<>();
+    private static final ConcurrentHashMap<Class<? extends Enum>, Object> encoderCache = new ConcurrentHashMap<>();
 
-    private static final WeakHashMap<Class<? extends Enum>, Map<Object, Enum<?>>> keyToEnumCache = new WeakHashMap<>();
-    private static final WeakHashMap<Enum<?>, Object> enumToKeyCache = new WeakHashMap<>();
+    private static final ConcurrentHashMap<Class<? extends Enum>, Map<Object, Enum<?>>> keyToEnumCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Enum<?>, Object> enumToKeyCache = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
     public static <E extends Enum<E>, K> E enumOf(Class<E> enumClass, K key) {
