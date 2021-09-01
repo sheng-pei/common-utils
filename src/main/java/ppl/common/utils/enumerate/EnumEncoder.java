@@ -1,4 +1,6 @@
-package ppl.common.utils;
+package ppl.common.utils.enumerate;
+
+import ppl.common.utils.StringUtils;
 
 import java.lang.annotation.*;
 import java.math.BigInteger;

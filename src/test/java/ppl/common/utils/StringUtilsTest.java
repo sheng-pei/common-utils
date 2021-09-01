@@ -2,259 +2,209 @@ package ppl.common.utils;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 public class StringUtilsTest {
 
     private static final String[] EMPTY_ARRAY = new String[0];
 
-    @Test
-    public void testSplitNullByEmptyRegexSeparator() {
-        String[] actual = StringUtils.split(null, "");
+    @ParameterizedTest
+    @MethodSource("emptySplitProvider")
+    public void testSplitEmpty(String empty, String regex) {
+        String[] actual = StringUtils.split(empty, regex);
         Assertions.assertArrayEquals(EMPTY_ARRAY, actual);
     }
 
-    @Test
-    public void testSplitEmptyStringByEmptyRegexSeparator() {
-        String[] actual = StringUtils.split("", "");
-        Assertions.assertArrayEquals(EMPTY_ARRAY, actual);
+    private static Stream<Arguments> emptySplitProvider() {
+        return Stream.of(
+                Arguments.of("", ""),
+                Arguments.of(null, ""),
+                Arguments.of("", ";*"),
+                Arguments.of(null, ";*"),
+                Arguments.of("", "a"),
+                Arguments.of(null, "a")
+        );
     }
 
-    @Test
-    public void testSplitByEmptyRegexSeparator() {
-        String[] actual = StringUtils.split("abndc", "");
-        String[] expected = {"a", "b", "n", "d", "c"};
+    @ParameterizedTest
+    @MethodSource({"noMatchingProvider"})
+    public void testSplitWithNoMatching(String input, String regex, String[] expected) {
+        String[] actual = StringUtils.split(input, regex);
         Assertions.assertArrayEquals(expected, actual);
     }
 
-    @Test
-    public void testSplitNullByRegexSeparator() {
-        String[] actual = StringUtils.split(null, ",*");
-        Assertions.assertArrayEquals(EMPTY_ARRAY, actual);
+    private static Stream<Arguments> noMatchingProvider() {
+        return Stream.of(
+                Arguments.of("abndc", "", new String[] {"a", "b", "n", "d", "c"}),
+                Arguments.of("a", ";*", new String[] {"a"})
+        );
     }
 
-    @Test
-    public void testSplitEmptyStringByRegexSeparator() {
-        String[] actual = StringUtils.split("", ",*");
-        Assertions.assertArrayEquals(EMPTY_ARRAY, actual);
-    }
-
-    @Test
-    public void testSplitWholeMatchingByRegexSeparator() {
-        String[] actual = StringUtils.split(",", ",*");
-        String[] expected = {""};
+    @ParameterizedTest
+    @MethodSource({"matchingProvider"})
+    public void testSplitWithMatching(String input, String regex, String[] expected) {
+        String[] actual = StringUtils.split(input, regex);
         Assertions.assertArrayEquals(expected, actual);
     }
 
-    @Test
-    public void testSplitHeadPositiveWidthMatchingByRegexSeparator() {
-        String[] actual = StringUtils.split(",a", ",*");
-        String[] expected = {"", "a"};
-        Assertions.assertArrayEquals(expected, actual);
+    private static Stream<Arguments> matchingProvider() {
+        return Stream.of(
+                Arguments.of(";", ";*", new String[] {""}),
+                Arguments.of(";a", ";*", new String[] {"", "a"}),
+                Arguments.of("a;", ";*", new String[] {"a"}),
+                Arguments.of("a;bfd;;;;d;;", ";*", new String[] {"a", "b", "f", "d", "d"})
+        );
     }
 
     @Test
-    public void testSplitHeadZeroWidthMatchingByRegexSeparator() {
-        String[] actual = StringUtils.split("a", ",*");
-        String[] expected = {"a"};
-        Assertions.assertArrayEquals(expected, actual);
-    }
-
-    @Test
-    public void testSplitIgnoreTrailingEmptyStringByRegexSeparator() {
-        String[] actual = StringUtils.split("a,", ",*");
-        String[] expected = {"a"};
-        Assertions.assertArrayEquals(expected, actual);
-    }
-
-    @Test
-    public void testSplitByRegexSeparator() {
-        String[] actual = StringUtils.split("a,bfd,,,,,d,,,,,", ",*");
-        String[] expected = {"a", "b", "f", "d", "d"};
-        Assertions.assertArrayEquals(expected, actual);
-    }
-
-    @Test
-    public void testSplitByNullSeparator() {
+    public void testSplitByNull() {
         Assertions.assertThrows(NullPointerException.class, () -> StringUtils.split("", null));
     }
 
-    @Test
-    public void testUniqueOfNull() {
-        String[] actual = StringUtils.removeDuplicate(null);
-        Assertions.assertArrayEquals(EMPTY_ARRAY, actual);
-    }
-
-    @Test
-    public void testUnique() {
-        String[] input = {"a", "b", "a"};
-        String[] expected = {"a", "b"};
-
-        String[] actual = StringUtils.removeDuplicate(input);
-
+    @ParameterizedTest
+    @MethodSource("uniqueProvider")
+    public void testUniqueOfNull(String[] source, String[] expected) {
+        String[] actual = StringUtils.removeDuplicate(source);
         Assertions.assertArrayEquals(expected, actual);
     }
 
-    @Test
-    public void testIsEmptyOfNull() {
-        Assertions.assertTrue(StringUtils.isEmpty(null));
+    private static Stream<Arguments> uniqueProvider() {
+        return Stream.of(
+                Arguments.of(null, EMPTY_ARRAY),
+                Arguments.of(new String[] {"a", "b", "a"}, new String[] {"a", "b"})
+        );
     }
 
-    @Test
-    public void testIsEmptyOfZeroLengthString() {
-        Assertions.assertTrue(StringUtils.isEmpty(""));
+    @ParameterizedTest
+    @MethodSource("emptyProvider")
+    public void testIsEmpty(String str, boolean expected) {
+        Assertions.assertEquals(expected, StringUtils.isEmpty(str));
     }
 
-    @Test
-    public void testIsEmptyOfNonZeroLengthString() {
-        Assertions.assertFalse(StringUtils.isEmpty(" a,"));
+    private static Stream<Arguments> emptyProvider() {
+        return Stream.of(
+                Arguments.of(null, true),
+                Arguments.of("", true),
+                Arguments.of("a", false)
+        );
     }
 
-    @Test
-    public void testIsNotEmptyOfNull() {
-        Assertions.assertFalse(StringUtils.isNotEmpty(null));
+    @ParameterizedTest
+    @MethodSource("notEmptyProvider")
+    public void testIsNotEmptyOfNull(String str, boolean expected) {
+        Assertions.assertEquals(expected, StringUtils.isNotEmpty(str));
     }
 
-    @Test
-    public void testIsNotEmptyOfZeroLengthString() {
-        Assertions.assertFalse(StringUtils.isNotEmpty(""));
+    private static Stream<Arguments> notEmptyProvider() {
+        return Stream.of(
+                Arguments.of(null, false),
+                Arguments.of("", false),
+                Arguments.of("a", true)
+        );
     }
 
-    @Test
-    public void testIsNotEmptyOfNonZeroLengthString() {
-        Assertions.assertTrue(StringUtils.isNotEmpty(" a,"));
+    @ParameterizedTest
+    @MethodSource("blankProvider")
+    public void testIsBlank(String input, boolean expected) {
+        Assertions.assertEquals(expected, StringUtils.isBlank(input));
     }
 
-    @Test
-    public void testIsBlankOfNull() {
-        Assertions.assertTrue(StringUtils.isBlank(null));
+    private static Stream<Arguments> blankProvider() {
+        return Stream.of(
+                Arguments.of(null, true),
+                Arguments.of("", true),
+                Arguments.of(" \t\n\r", true),
+                Arguments.of(" \t\n\rc\r\n\t ", false),
+                Arguments.of("a", false)
+        );
     }
 
-    @Test
-    public void testIsBlankOfZeroLengthString() {
-        Assertions.assertTrue(StringUtils.isBlank(""));
+    @ParameterizedTest
+    @MethodSource("snakeCaseProvider")
+    public void testToSnakeCase(String input, String expected) {
+        Assertions.assertEquals(expected, StringUtils.toSnakeCase(input));
     }
 
-    @Test
-    public void testIsBlankOfStringContainedOnlyWhitespace() {
-        String whitespace = " \t\n\r";
-        Assertions.assertTrue(StringUtils.isBlank(whitespace));
+    private static Stream<Arguments> snakeCaseProvider() {
+        return Stream.of(
+                Arguments.of("MM", "mm"),
+                Arguments.of("mM", "m_m"),
+                Arguments.of("m_M", "m_m")
+        );
     }
 
-    @Test
-    public void testIsBlankOfStringContainedNonWhitespace() {
-        String whitespace = " \t\n\rc\r\n\t ";
-        Assertions.assertFalse(StringUtils.isBlank(whitespace));
+    @ParameterizedTest
+    @MethodSource("formatProvider")
+    public void testFormatJustSingleReference(String reference, Object[] parameters, String expected) {
+        String replaced = StringUtils.format(reference, parameters);
+        Assertions.assertEquals(expected, replaced);
     }
 
-    @Test
-    public void testToSnakeAndLowerCaseMM() {
-        String MM = "MM";
-        String mm = StringUtils.toSnakeCase(MM);
-        Assertions.assertEquals("mm", mm);
-    }
-
-    @Test
-    public void testToSnakeAndLowerCasemM() {
-        String mM = "mM";
-        String m_m = StringUtils.toSnakeCase(mM);
-        Assertions.assertEquals("m_m", m_m);
-    }
-
-    @Test
-    public void testToSnakeAndLowerCasem_M() {
-        String m_M = "m_M";
-        String m_m = StringUtils.toSnakeCase(m_M);
-        Assertions.assertEquals("m_m", m_m);
-    }
-
-    @Test
-    public void testFormatJustSingleReference() {
-        String singleReference = "{}";
-        String replaced = StringUtils.format(singleReference, "ab");
-        Assertions.assertEquals("ab", replaced);
-    }
-
-    @Test
-    public void testFormatNotSpecialBackslash() {
-        String noReferenceBackslash = "ab\\\\{";
-        String replaced = StringUtils.format(noReferenceBackslash);
-        Assertions.assertEquals("ab\\\\{", replaced);
-    }
-
-    @Test
-    public void testFormatSpecialBackslash() {
-        String specialBackslash = "abc\\\\\\{}";
-        String replaced = StringUtils.format(specialBackslash, "ab");
-        Assertions.assertEquals("abc\\\\{}", replaced);
+    private static Stream<Arguments> formatProvider() {
+        return Stream.of(
+                Arguments.of("{}", new String[] {"ab"}, "ab"),
+                Arguments.of("ab\\\\{", new String[] {}, "ab\\\\{"),
+                Arguments.of("abc\\\\\\{}", new String[] {}, "abc\\\\{}"),
+                Arguments.of("{}abc\\\\{}\\\\\\{}aaaa{}", new String[] {"ab", "cd", "ef"}, "ababc\\\\cd\\\\{}aaaaef")
+        );
     }
 
     @Test
     public void testFormatNotEnoughParameter() {
         String formatString = "{}";
-
         Assertions.assertThrows(IllegalArgumentException.class, () -> StringUtils.format(formatString));
     }
 
-    @Test
-    public void testFormat() {
-        String formatString = "{}abc{}\\\\\\{}aaaa{}";
-        String replaced = StringUtils.format(formatString, "ab", "cd", "ef");
-        Assertions.assertEquals("ababccd\\\\{}aaaaef", replaced);
+    @ParameterizedTest
+    @MethodSource({"literallyEqualityProvider", "nullEqualsEmptyProvider"})
+    public void testEqualsLiterally(String str1, String str2, boolean expected) {
+        Assertions.assertEquals(expected, StringUtils.equalsLiterally(str1, str2));
     }
 
-    @Test
-    public void testEqualsOnCharacterNullEmpty() {
-        Assertions.assertTrue(StringUtils.equalsOnCharacter(null, ""));
+    private static Stream<Arguments> literallyEqualityProvider() {
+        return Stream.of(
+                Arguments.of("\rakj ", "akj", false)
+        );
     }
 
-    @Test
-    public void testEqualsOnCharacterNullNull() {
-        Assertions.assertTrue(StringUtils.equalsOnCharacter(null, null));
+    @ParameterizedTest
+    @MethodSource({"onContentEqualityProvider", "nullEqualsEmptyProvider"})
+    public void testEqualsOnContentNullEmpty(String str1, String str2, boolean expected) {
+        Assertions.assertEquals(expected, StringUtils.equalsOnContent(str1, str2));
     }
 
-    @Test
-    public void testEqualsOnCharacter() {
-        Assertions.assertTrue(StringUtils.equalsOnCharacter("akj", "akj"));
+    private static Stream<Arguments> onContentEqualityProvider() {
+        return Stream.of(
+                Arguments.of("\rakj ", "akj", true)
+        );
     }
 
-    @Test
-    public void testEqualsOnContentNullEmpty() {
-        Assertions.assertTrue(StringUtils.equalsOnContent(null, ""));
+    private static Stream<Arguments> nullEqualsEmptyProvider() {
+        return Stream.of(
+                Arguments.of(null, "", true),
+                Arguments.of("", null, true),
+                Arguments.of(null, null, true),
+                Arguments.of("akj", "akj", true)
+        );
     }
 
-    @Test
-    public void testEqualsOnContentNullNull() {
-        Assertions.assertTrue(StringUtils.equalsOnContent(null, null));
+    @ParameterizedTest
+    @MethodSource("equalityProvider")
+    public void testEquals(String str1, String str2, boolean expected) {
+        Assertions.assertEquals(expected, StringUtils.equals(str1, str2));
     }
 
-    @Test
-    public void testEqualsOnContentBlankNull() {
-        Assertions.assertTrue(StringUtils.equalsOnContent(" \t\n", ""));
-    }
-
-    @Test
-    public void testEqualsOnContent() {
-        Assertions.assertTrue(StringUtils.equalsOnContent("akj", "akj"));
-    }
-
-    @Test
-    public void testEqualsNullNull() {
-        Assertions.assertTrue(StringUtils.equals(null, null));
-    }
-
-    @Test
-    public void testEqualsNullNonnull() {
-        Assertions.assertFalse(StringUtils.equals(null, ""));
-    }
-
-    @Test
-    public void testEqualsNonnullNull() {
-        Assertions.assertFalse(StringUtils.equals("", null));
-    }
-
-    @Test
-    public void testEquals() {
-        Assertions.assertTrue(StringUtils.equals("aavgf", "aavgf"));
+    private static Stream<Arguments> equalityProvider() {
+        return Stream.of(
+                Arguments.of(null, "", false),
+                Arguments.of("", null, false),
+                Arguments.of(null, null, true),
+                Arguments.of("akj", "akj", true)
+        );
     }
 
 }

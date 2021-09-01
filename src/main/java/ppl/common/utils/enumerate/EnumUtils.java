@@ -1,5 +1,6 @@
-package ppl.common.utils;
+package ppl.common.utils.enumerate;
 
+import ppl.common.utils.StringUtils;
 import ppl.common.utils.exception.EnumEncoderNotSupportedException;
 import ppl.common.utils.exception.UnknownEnumException;
 
@@ -7,8 +8,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static ppl.common.utils.EnumEncoder.ERROR;
-import static ppl.common.utils.EnumEncoder.VALID_ENUM_KEY_TYPE;
+import static ppl.common.utils.enumerate.EnumEncoder.ERROR;
+import static ppl.common.utils.enumerate.EnumEncoder.VALID_ENUM_KEY_TYPE;
 
 @SuppressWarnings("rawtypes")
 public class EnumUtils {
@@ -71,10 +72,7 @@ public class EnumUtils {
         loadEnums(enumClass);
 
         Object encoder = encoderCache.get(enumClass);
-        if (encoder instanceof ERROR) {
-            return false;
-        }
-        return true;
+        return !(encoder instanceof ERROR);
     }
 
     public static void checkEncodeSupport(Class<? extends Enum> enumClass) {

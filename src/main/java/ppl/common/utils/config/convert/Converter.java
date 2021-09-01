@@ -1,8 +1,8 @@
 package ppl.common.utils.config.convert;
 
-import ppl.common.utils.EnumUtils;
+import ppl.common.utils.enumerate.EnumUtils;
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.TypeCompatibleUtils;
+import ppl.common.utils.reflect.TypeCompatibleUtils;
 import ppl.common.utils.exception.EnumEncoderNotSupportedException;
 import ppl.common.utils.exception.UnknownEnumException;
 

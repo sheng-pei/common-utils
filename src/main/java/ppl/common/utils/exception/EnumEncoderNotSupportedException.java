@@ -2,7 +2,7 @@ package ppl.common.utils.exception;
 
 import ppl.common.utils.StringUtils;
 
-import static ppl.common.utils.EnumEncoder.ERROR;
+import static ppl.common.utils.enumerate.EnumEncoder.ERROR;
 
 @SuppressWarnings("rawtypes")
 public class EnumEncoderNotSupportedException extends RuntimeException {

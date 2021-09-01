@@ -1,10 +1,12 @@
-package ppl.common.utils;
+package ppl.common.utils.enumerate;
+
+import ppl.common.utils.StringUtils;
+import ppl.common.utils.reflect.TypeCompatibleUtils;
 
 import javax.persistence.AttributeConverter;
 
 /**
  * @author Sheng Pei
- * @date 2020/3/28 23:11
  */
 public abstract class EnumConverter<A extends Enum<A>, D> implements AttributeConverter<A, D> {
 
@@ -35,7 +37,6 @@ public abstract class EnumConverter<A extends Enum<A>, D> implements AttributeCo
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public final D convertToDatabaseColumn(A attribute) {
         return EnumUtils.encode(attribute, keyClazz);
     }

@@ -1,8 +1,10 @@
-package ppl.common.utils;
+package ppl.common.utils.enumerate;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.parser.*;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
+import ppl.common.utils.StringUtils;
+import ppl.common.utils.exception.UnknownEnumException;
 
 import java.lang.reflect.Type;
 import java.math.BigInteger;
@@ -91,9 +93,13 @@ public class CustomParserConfig extends ParserConfig {
         }
 
         private <T> T enumOf(Object value, boolean errorOnEnumNotMatch) {
-            T t = (T) EnumUtils.enumOf(enumClass, value);
-            if (t == null && errorOnEnumNotMatch) {
-                throw new JSONException(StringUtils.format("No enum {} match the value {}", enumClass.getName(), value));
+            T t = null;
+            try {
+                t = (T) EnumUtils.enumOf(enumClass, value);
+            } catch (UnknownEnumException e) {
+                if (errorOnEnumNotMatch) {
+                    throw new JSONException(StringUtils.format("No enum {} match the value {}", enumClass.getName(), value), e);
+                }
             }
             return t;
         }

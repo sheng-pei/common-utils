@@ -1,5 +1,9 @@
 package ppl.common.utils;
 
+import ppl.common.utils.string.PositionedTargets;
+import ppl.common.utils.string.substring.EscapableSubstringFinder;
+import ppl.common.utils.string.Substring;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,8 +24,8 @@ public class StringUtils {
 		int eatenLength = 0;
 		int next = 0;
 		while(next < string.length() && matcher.find(next)) {
-			if (isZeroLength(matcher)) {
-				if (!isZeroLengthPrefixBeforeMatcher(matcher, string, eatenLength)) {
+			if (empty(matcher)) {
+				if (!emptyBeforeMatcher(matcher, eatenLength)) {
 					accumulator.add(prefixBeforeMatcher(matcher, string, eatenLength));
 					eatenLength = matcher.start();
 				}
@@ -38,7 +42,7 @@ public class StringUtils {
 		return accumulator.toArray(EMPTY_STRING_ARRAY);
 	}
 
-	private static boolean isZeroLengthPrefixBeforeMatcher(Matcher matcher, String string, int start) {
+	private static boolean emptyBeforeMatcher(Matcher matcher, int start) {
 		return matcher.start() == start;
 	}
 
@@ -46,7 +50,7 @@ public class StringUtils {
 		return string.substring(start, matcher.start());
 	}
 
-	private static boolean isZeroLength(Matcher matcher) {
+	private static boolean empty(Matcher matcher) {
 		return matcher.end() == matcher.start();
 	}
 
@@ -164,19 +168,12 @@ public class StringUtils {
 
 		EscapableSubstringFinder finder = new EscapableSubstringFinder(REFERENCE);
 
-		int paramIdx = 0;
 		int nxt = 0;
+		PositionedTargets targets = new PositionedTargets(parameters);
 		Substring substring = finder.find(formatCharacters, nxt, formatCharacters.length);
-		while (!substring.isEmpty()) {
+		while (substring != null) {
 			res.append(formatCharacters, nxt, substring.getStart() - nxt);
-			int escapeLen = substring.length() - REFERENCE.length();
-			if (escapeLen % 2 == 0) {
-				res.append(formatCharacters, substring.getStart(), escapeLen >> 1);
-				res.append(getTarget(paramIdx++, parameters));
-			} else {
-				res.append(formatCharacters, substring.getStart(), (escapeLen >> 1) + 1);
-				res.append(REFERENCE);
-			}
+			res.append(replace(substring, targets));
 			nxt = substring.getEnd();
 			substring = finder.find(formatCharacters, nxt, formatCharacters.length);
 		}
@@ -184,11 +181,11 @@ public class StringUtils {
 		return res.toString();
 	}
 
-	private static String getTarget(int paramPos, Object... parameters) {
-		if (paramPos < parameters.length) {
-			return parameters[paramPos].toString();
-		} else {
-			throw new IllegalArgumentException("Not enough parameters");
+	private static String replace(Substring substring, PositionedTargets targets) {
+		try {
+			return substring.replace(targets);
+		} catch (IllegalStateException e) {
+			throw new IllegalArgumentException("Not enough parameters", e);
 		}
 	}
 
@@ -196,7 +193,7 @@ public class StringUtils {
 		return StringUtils.equals(s1 == null ? "" : s1.trim(), s2 == null ? "" : s2.trim());
 	}
 
-	public static boolean equalsOnCharacter(final CharSequence cs1, final CharSequence cs2) {
+	public static boolean equalsLiterally(final CharSequence cs1, final CharSequence cs2) {
 		return StringUtils.equals(cs1 == null ? "" : cs1, cs2 == null ? "" : cs2);
 	}
 

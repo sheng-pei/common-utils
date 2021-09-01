@@ -2,6 +2,8 @@ package ppl.common.utils;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import ppl.common.utils.enumerate.EnumEncoder;
+import ppl.common.utils.enumerate.EnumUtils;
 
 public class EnumUtilsTest {
     enum A {

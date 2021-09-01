@@ -1,7 +1,7 @@
 package ppl.common.utils.config.convert;
 
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.TypeCompatibleUtils;
+import ppl.common.utils.reflect.TypeCompatibleUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
