@@ -1,15 +1,15 @@
-package ppl.common.utils.reflect;
+package ppl.common.utils;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class TypeCompatibleUtils {
+public final class TypeUtils {
 
     private static final Map<Class<?>, Class<?>> primitiveToWrapper;
     private static final Map<Class<?>, Class<?>> wrapperToPrimitive;
 
-    private TypeCompatibleUtils() {}
+    private TypeUtils() {}
 
     static {
         Map<Class<?>, Class<?>> pToW = new HashMap<>();

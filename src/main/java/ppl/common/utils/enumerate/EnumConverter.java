@@ -1,7 +1,7 @@
 package ppl.common.utils.enumerate;
 
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.reflect.TypeCompatibleUtils;
+import ppl.common.utils.TypeUtils;
 
 import javax.persistence.AttributeConverter;
 
@@ -23,7 +23,7 @@ public abstract class EnumConverter<A extends Enum<A>, D> implements AttributeCo
                     )
             );
         }
-        if (!TypeCompatibleUtils.box(EnumUtils.getKeyType(enumClazz)).equals(keyClazz)) {
+        if (!TypeUtils.box(EnumUtils.getKeyType(enumClazz)).equals(keyClazz)) {
             throw new IllegalArgumentException(
                     StringUtils.format(
                             "The type of key of enum({}) is not {}",

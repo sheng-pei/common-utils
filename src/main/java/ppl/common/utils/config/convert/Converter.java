@@ -2,7 +2,7 @@ package ppl.common.utils.config.convert;
 
 import ppl.common.utils.enumerate.EnumUtils;
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.reflect.TypeCompatibleUtils;
+import ppl.common.utils.TypeUtils;
 import ppl.common.utils.enumerate.EnumEncoderNotSupportedException;
 import ppl.common.utils.enumerate.UnknownEnumException;
 
@@ -89,7 +89,7 @@ public class Converter<C> {
                 if (o == null) {
                     return null;
                 }
-                Class<?> wrapper = TypeCompatibleUtils.box(targetClass);
+                Class<?> wrapper = TypeUtils.box(targetClass);
                 try {
                     @SuppressWarnings("unchecked")
                     C res = (C) wrapper.cast(o);

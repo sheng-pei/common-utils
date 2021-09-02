@@ -1,7 +1,7 @@
 package ppl.common.utils.config.convert;
 
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.reflect.TypeCompatibleUtils;
+import ppl.common.utils.TypeUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,16 +13,16 @@ import java.util.stream.Collectors;
 enum BaseType {
 
     INT("int", c -> {
-        return Integer.class.equals(TypeCompatibleUtils.box(c));
+        return Integer.class.equals(TypeUtils.box(c));
     }),
     LONG("long", c -> {
-        return Long.class.equals(TypeCompatibleUtils.box(c));
+        return Long.class.equals(TypeUtils.box(c));
     }),
     DOUBLE("double", c -> {
-        return Double.class.equals(TypeCompatibleUtils.box(c));
+        return Double.class.equals(TypeUtils.box(c));
     }),
     BOOL("bool", c -> {
-        return Boolean.class.equals(TypeCompatibleUtils.box(c));
+        return Boolean.class.equals(TypeUtils.box(c));
     }),
     STRING("string", String.class::equals),
     LIST("list", Collection.class::isAssignableFrom),
