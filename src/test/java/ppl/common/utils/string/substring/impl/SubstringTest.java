@@ -1,11 +1,11 @@
-package ppl.common.utils.string.substring;
+package ppl.common.utils.string.substring.impl;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ppl.common.utils.string.PositionedTargets;
+import ppl.common.utils.string.substring.PositionedParameters;
 
 import java.util.stream.Stream;
 
@@ -15,7 +15,7 @@ public class SubstringTest {
 
     @Test
     public void testConsistentReplace() {
-        PositionedTargets targets = new PositionedTargets(TARGETS);
+        PositionedParameters targets = new PositionedParameters(TARGETS);
         ConsistentSubstring c = new ConsistentSubstring("aa");
         Assertions.assertEquals("tt", c.replace(targets));
         Assertions.assertEquals("vv", targets.get());
@@ -24,7 +24,7 @@ public class SubstringTest {
     @ParameterizedTest
     @MethodSource({"escapableProvider"})
     public void testEscapableReplace(EscapableSubString substring, String target, String next) {
-        PositionedTargets targets = new PositionedTargets(TARGETS);
+        PositionedParameters targets = new PositionedParameters(TARGETS);
         Assertions.assertEquals(target, substring.replace(targets));
         Assertions.assertEquals(next, targets.get());
     }

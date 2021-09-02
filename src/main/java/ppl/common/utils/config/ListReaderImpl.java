@@ -1,7 +1,6 @@
 package ppl.common.utils.config;
 
 import ppl.common.utils.config.convert.Converter;
-import ppl.common.utils.exception.ReaderException;
 
 import java.util.Iterator;
 import java.util.List;

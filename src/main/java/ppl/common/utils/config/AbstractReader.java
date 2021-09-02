@@ -3,7 +3,6 @@ package ppl.common.utils.config;
 import ppl.common.utils.config.convert.ConvertException;
 import ppl.common.utils.config.convert.Converter;
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.exception.ReaderException;
 
 import java.util.LinkedHashMap;
 import java.util.Objects;

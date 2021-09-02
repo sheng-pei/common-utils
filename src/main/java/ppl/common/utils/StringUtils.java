@@ -1,14 +1,16 @@
 package ppl.common.utils;
 
-import ppl.common.utils.string.PositionedTargets;
-import ppl.common.utils.string.substring.EscapableSubstringFinder;
-import ppl.common.utils.string.Substring;
+import ppl.common.utils.string.substring.PositionedParameters;
+import ppl.common.utils.string.substring.impl.EscapableSubstringFinder;
+import ppl.common.utils.string.substring.Substring;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StringUtils {
+public final class StringUtils {
+
+	private StringUtils() { }
 
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
@@ -169,7 +171,7 @@ public class StringUtils {
 		EscapableSubstringFinder finder = new EscapableSubstringFinder(REFERENCE);
 
 		int nxt = 0;
-		PositionedTargets targets = new PositionedTargets(parameters);
+		PositionedParameters targets = new PositionedParameters(parameters);
 		Substring substring = finder.find(formatCharacters, nxt, formatCharacters.length);
 		while (substring != null) {
 			res.append(formatCharacters, nxt, substring.getStart() - nxt);
@@ -181,7 +183,7 @@ public class StringUtils {
 		return res.toString();
 	}
 
-	private static String replace(Substring substring, PositionedTargets targets) {
+	private static String replace(Substring substring, PositionedParameters targets) {
 		try {
 			return substring.replace(targets);
 		} catch (IllegalStateException e) {

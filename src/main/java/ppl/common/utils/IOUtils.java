@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class IOUtils {
+public final class IOUtils {
+
+    private IOUtils() { }
 
     private static final Logger logger = LoggerFactory.getLogger(IOUtils.class);
 

@@ -6,7 +6,9 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 
 import java.io.*;
 
-public class TarUtils {
+public final class TarUtils {
+
+    private TarUtils() { }
 
     private void putIntoTarStream(TarArchiveOutputStream tarStream, File file, String name) {
         TarArchiveEntry tarEntry = new TarArchiveEntry(name);

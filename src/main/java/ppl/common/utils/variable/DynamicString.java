@@ -1,7 +1,5 @@
 package ppl.common.utils.variable;
 
-import ppl.common.utils.exception.VariablePatternException;
-
 import java.util.*;
 
 class DynamicString implements StringReplacer {
@@ -20,8 +18,7 @@ class DynamicString implements StringReplacer {
         boolean mayVariable = false;
         boolean variableStart = false;
         boolean escaped = false;
-        for (int i = 0; i < dynamicArr.length; i++) {
-            char curr = dynamicArr[i];
+        for (char curr : dynamicArr) {
             switch (curr) {
                 case '\\':
                     if (mayVariable) {

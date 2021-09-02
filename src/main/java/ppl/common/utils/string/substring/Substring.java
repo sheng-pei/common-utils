@@ -1,4 +1,4 @@
-package ppl.common.utils.string;
+package ppl.common.utils.string.substring;
 
 /**
  * This substring is subsequence of the source from start to end. Where
@@ -16,7 +16,7 @@ package ppl.common.utils.string;
  * If you want to implement substring for yourself, the best way is to extend ConsistentSubstring.
  */
 public interface Substring {
-    String replace(PositionedTargets targets);
+    String replace(PositionedParameters targets);
     String getSource();
     int getStart();
     int getEnd();

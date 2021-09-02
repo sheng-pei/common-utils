@@ -7,7 +7,9 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ResourceUtils {
+public final class ResourceUtils {
+
+    private ResourceUtils() { }
 
     private static final Pattern JAR_URL_PATTERN = Pattern.compile("^[jJ][aA][rR]:.*!/.*$");
     private static final String FILE = "file";
@@ -45,7 +47,7 @@ public class ResourceUtils {
     }
 
     private static URL newURL(String url) {
-        URL jarUrl = null;
+        URL jarUrl;
         try {
             jarUrl = new URL(url);
         } catch (MalformedURLException e) {

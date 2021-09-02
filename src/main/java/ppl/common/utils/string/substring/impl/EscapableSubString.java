@@ -1,6 +1,6 @@
-package ppl.common.utils.string.substring;
+package ppl.common.utils.string.substring.impl;
 
-import ppl.common.utils.string.PositionedTargets;
+import ppl.common.utils.string.substring.PositionedParameters;
 
 final class EscapableSubString extends ConsistentSubstring {
 
@@ -35,7 +35,7 @@ final class EscapableSubString extends ConsistentSubstring {
     }
 
     @Override
-    public String replace(PositionedTargets targets) {
+    public String replace(PositionedParameters targets) {
         StringBuilder res = new StringBuilder();
         String source = this.getSource();
         if (lenEscape() % 2 == 1) {

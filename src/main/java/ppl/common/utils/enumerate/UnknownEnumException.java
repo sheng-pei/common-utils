@@ -1,4 +1,4 @@
-package ppl.common.utils.exception;
+package ppl.common.utils.enumerate;
 
 public class UnknownEnumException extends RuntimeException {
 

@@ -1,7 +1,7 @@
-package ppl.common.utils.string.substring;
+package ppl.common.utils.string.substring.impl;
 
-import ppl.common.utils.string.Substring;
-import ppl.common.utils.string.SubstringFinder;
+import ppl.common.utils.string.substring.Substring;
+import ppl.common.utils.string.substring.SubstringFinder;
 
 import java.util.Objects;
 

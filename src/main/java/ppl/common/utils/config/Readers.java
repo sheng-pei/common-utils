@@ -1,7 +1,6 @@
 package ppl.common.utils.config;
 
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.exception.ReaderException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -65,9 +64,7 @@ public class Readers {
 
     private static String paramList(List<Class<?>> paramClasses) {
         StringBuilder builder = new StringBuilder();
-        paramClasses.forEach(c -> {
-            builder.append(c.getSimpleName()).append(", ");
-        });
+        paramClasses.forEach(c -> builder.append(c.getSimpleName()).append(", "));
         if (builder.length() > 2) {
             builder.setLength(builder.length() - 2);
         }

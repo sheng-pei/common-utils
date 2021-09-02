@@ -1,4 +1,4 @@
-package ppl.common.utils.string;
+package ppl.common.utils.string.substring;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
@@ -17,7 +17,7 @@ public class PositionedTargetTest {
     }
 
     private static Stream<Arguments> outOfBoundProvider() {
-        PositionedTargets targets = new PositionedTargets();
+        PositionedParameters targets = new PositionedParameters();
         Executable consume = targets::consume;
         Executable get = targets::get;
         return Stream.of(
@@ -29,7 +29,7 @@ public class PositionedTargetTest {
     @ParameterizedTest
     @MethodSource({"outOfBoundProvider"})
     public void testConsume() {
-        PositionedTargets targets = new PositionedTargets("a", "b");
+        PositionedParameters targets = new PositionedParameters("a", "b");
         targets.consume();
         Object actual = targets.get();
         Assertions.assertEquals("b", actual);

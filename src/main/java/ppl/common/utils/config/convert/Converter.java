@@ -4,7 +4,7 @@ import ppl.common.utils.enumerate.EnumUtils;
 import ppl.common.utils.StringUtils;
 import ppl.common.utils.reflect.TypeCompatibleUtils;
 import ppl.common.utils.enumerate.EnumEncoderNotSupportedException;
-import ppl.common.utils.exception.UnknownEnumException;
+import ppl.common.utils.enumerate.UnknownEnumException;
 
 import java.util.HashMap;
 import java.util.Map;

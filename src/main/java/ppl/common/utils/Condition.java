@@ -1,6 +1,8 @@
 package ppl.common.utils;
 
-public class Condition {
+public final class Condition {
+
+    private Condition() { }
 
     public static boolean in(byte value, byte start, byte end) {
         return start <= value && value <= end;

@@ -1,6 +1,6 @@
-package ppl.common.utils.string.substring;
+package ppl.common.utils.string.substring.impl;
 
-import ppl.common.utils.string.Substring;
+import ppl.common.utils.string.substring.Substring;
 
 public abstract class AbstractSimpleSubstringFinder extends AbstractSubstringFinder {
 

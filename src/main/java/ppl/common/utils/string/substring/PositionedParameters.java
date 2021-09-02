@@ -1,19 +1,19 @@
-package ppl.common.utils.string;
+package ppl.common.utils.string.substring;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PositionedTargets {
+public class PositionedParameters {
 
     private final List<Object> targets;
     private int pos = 0;
 
-    public PositionedTargets(Object... targets) {
+    public PositionedParameters(Object... targets) {
         this(Arrays.asList(targets));
     }
 
-    public PositionedTargets(List<Object> targets) {
+    public PositionedParameters(List<Object> targets) {
         if (targets == null) {
             targets = new ArrayList<>();
         }

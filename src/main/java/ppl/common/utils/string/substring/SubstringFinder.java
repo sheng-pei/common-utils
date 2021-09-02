@@ -1,4 +1,4 @@
-package ppl.common.utils.string;
+package ppl.common.utils.string.substring;
 
 public interface SubstringFinder {
     Substring find(String input);

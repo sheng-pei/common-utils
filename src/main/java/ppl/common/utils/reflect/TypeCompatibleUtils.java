@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TypeCompatibleUtils {
+public final class TypeCompatibleUtils {
 
     private static final Map<Class<?>, Class<?>> primitiveToWrapper;
     private static final Map<Class<?>, Class<?>> wrapperToPrimitive;

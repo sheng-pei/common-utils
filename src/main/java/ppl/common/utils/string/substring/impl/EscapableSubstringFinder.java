@@ -1,8 +1,8 @@
-package ppl.common.utils.string.substring;
+package ppl.common.utils.string.substring.impl;
 
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.string.Substring;
-import ppl.common.utils.string.SubstringFinder;
+import ppl.common.utils.string.substring.Substring;
+import ppl.common.utils.string.substring.SubstringFinder;
 
 import java.util.function.Function;
 
@@ -28,7 +28,7 @@ public class EscapableSubstringFinder extends AbstractSubstringFinder {
     public EscapableSubstringFinder(String pattern, char escape,
                                     Function<String, AbstractSimpleSubstringFinder> finderCreator) {
         if (StringUtils.isEmpty(pattern)) {
-            throw new IllegalArgumentException(StringUtils.format("Pattern is empty or null."));
+            throw new IllegalArgumentException("Pattern is empty or null.");
         }
         if (pattern.indexOf(escape) != -1) {
             throw new IllegalArgumentException("Pattern is contain escape: " + escape);

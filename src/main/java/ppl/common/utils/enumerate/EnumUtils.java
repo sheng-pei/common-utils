@@ -1,7 +1,6 @@
 package ppl.common.utils.enumerate;
 
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.exception.UnknownEnumException;
 
 import java.lang.reflect.Method;
 import java.util.*;

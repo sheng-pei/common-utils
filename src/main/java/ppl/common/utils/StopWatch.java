@@ -1,6 +1,6 @@
 package ppl.common.utils;
 
-public class StopWatch {
+public final class StopWatch {
 
     public static StopWatch createStopWatch() {
         return new StopWatch().start();

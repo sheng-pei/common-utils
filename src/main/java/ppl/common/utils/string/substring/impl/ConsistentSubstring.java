@@ -1,7 +1,7 @@
-package ppl.common.utils.string.substring;
+package ppl.common.utils.string.substring.impl;
 
-import ppl.common.utils.string.PositionedTargets;
-import ppl.common.utils.string.Substring;
+import ppl.common.utils.string.substring.PositionedParameters;
+import ppl.common.utils.string.substring.Substring;
 
 import java.util.Objects;
 
@@ -36,7 +36,7 @@ public class ConsistentSubstring implements Substring {
         this.end = end;
     }
 
-    public String replace(PositionedTargets targets) {
+    public String replace(PositionedParameters targets) {
         return targets.consume().toString();
     }
 

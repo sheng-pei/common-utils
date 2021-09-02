@@ -1,4 +1,4 @@
-package ppl.common.utils.string.substring;
+package ppl.common.utils.string.substring.impl;
 
 import ppl.common.utils.StringUtils;
 
@@ -10,7 +10,7 @@ public class SundaySubstringFinder extends AbstractSimpleSubstringFinder {
 
         private Pattern(String pattern) {
             if (StringUtils.isEmpty(pattern)) {
-                throw new IllegalArgumentException(StringUtils.format("Pattern is empty or null."));
+                throw new IllegalArgumentException("Pattern is empty or null.");
             }
             this.pattern = pattern.toCharArray();
         }
