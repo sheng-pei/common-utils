@@ -1,24 +1,19 @@
 package ppl.common.utils.enumerate;
 
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.exception.EnumEncoderNotSupportedException;
 import ppl.common.utils.exception.UnknownEnumException;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static ppl.common.utils.enumerate.EnumEncoder.ERROR;
-import static ppl.common.utils.enumerate.EnumEncoder.VALID_ENUM_KEY_TYPE;
 
 @SuppressWarnings("rawtypes")
 public class EnumUtils {
 
     private static final ConcurrentHashMap<Class<? extends Enum>, Object> encoderCache = new ConcurrentHashMap<>();
 
-    private static final ConcurrentHashMap<Class<? extends Enum>, Map<Object, Enum<?>>> keyToEnumCache = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Enum<?>, Object> enumToKeyCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Class<? extends Enum>, Map<EnumKey, Enum<?>>> keyToEnumCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Enum<?>, EnumKey> enumToKeyCache = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
     public static <E extends Enum<E>, K> E enumOf(Class<E> enumClass, K key) {
@@ -27,7 +22,7 @@ public class EnumUtils {
         Objects.requireNonNull(key, "Key is null");
         checkEncodeSupport(enumClass);
 
-        E e = (E) keyToEnumCache.get(enumClass).get(key);
+        E e = (E) keyToEnumCache.get(enumClass).get(EnumKey.wrap(key));
         if (e == null) {
             throw new UnknownEnumException(enumClass, key);
         }
@@ -35,7 +30,6 @@ public class EnumUtils {
 
     }
 
-    @SuppressWarnings("unchecked")
     public static <K> K encode(Enum e, Class<K> keyClazz) {
         Objects.requireNonNull(keyClazz, "keyClazz is null");
         if (e == null) {
@@ -44,21 +38,23 @@ public class EnumUtils {
 
         checkEncodeSupport(e.getClass());
 
-        Object key = enumToKeyCache.get(e);
-        if (!keyClazz.isInstance(key)) {
-            throw new IllegalArgumentException(StringUtils.format("Could not encode enum({}) to {}", e.getClass().getCanonicalName(), keyClazz.getCanonicalName()));
+        try {
+            return EnumKey.unwrap(enumToKeyCache.get(e), keyClazz);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException(StringUtils.format(
+                    "Could not encode enum({}) to {}",
+                    e.getClass().getCanonicalName(),
+                    keyClazz.getCanonicalName()), ex);
         }
-
-        return (K) key;
     }
 
     public static Object encode(Enum e) {
         if (e == null) {
             return null;
         }
-        checkEncodeSupport(e.getClass());
 
-        return enumToKeyCache.get(e);
+        checkEncodeSupport(e.getClass());
+        return EnumKey.unwrap(enumToKeyCache.get(e));
     }
 
     public static Class<?> getKeyType(Class<? extends Enum> enumClass) {
@@ -71,18 +67,13 @@ public class EnumUtils {
 
     public static boolean isEncodeSupport(Class<? extends Enum> enumClass) {
         loadEnums(enumClass);
-
-        Object encoder = encoderCache.get(enumClass);
-        return !(encoder instanceof ERROR);
+        return !EnumSupport.isError(encoderCache.get(enumClass));
     }
 
     public static void checkEncodeSupport(Class<? extends Enum> enumClass) {
         loadEnums(enumClass);
 
-        Object encoder = encoderCache.get(enumClass);
-        if (encoder instanceof ERROR) {
-            throw new EnumEncoderNotSupportedException((ERROR) encoder, enumClass);
-        }
+        EnumSupport.check(encoderCache.get(enumClass), enumClass);
     }
 
     private static void loadEnums(Class<? extends Enum> enumClass) {
@@ -92,10 +83,10 @@ public class EnumUtils {
             return;
         }
 
-        encoder = loadEncodeMethod(enumClass);
+        encoder = EnumSupport.loadEncodeMethod(enumClass);
         if (encoder instanceof Method) {
-            Map<Object, Enum<?>> keyToEnum = new HashMap<>();
-            ERROR error = applyEncoder(enumClass.getEnumConstants(), (Method) encoder, keyToEnum);
+            Map<EnumKey, Enum<?>> keyToEnum = new HashMap<>();
+            Object error = EnumSupport.applyEncoder(enumClass.getEnumConstants(), (Method) encoder, keyToEnum);
             if (error == null) {
                 keyToEnumCache.put(enumClass, keyToEnum);
                 enumToKeyCache.putAll(invertMap(keyToEnum));
@@ -104,52 +95,6 @@ public class EnumUtils {
             }
         }
         encoderCache.put(enumClass, encoder);
-    }
-
-    private static Object loadEncodeMethod(Class<? extends Enum> enumClass) {
-        List<Method> encoders = new ArrayList<>();
-        Method[] methods = enumClass.getDeclaredMethods();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(EnumEncoder.class)) {
-                if (method.getParameterCount() != 0) {
-                    return ERROR.PARAMETER_UNMATCHED;
-                }
-                Class<?> returnType = method.getReturnType();
-                if (!VALID_ENUM_KEY_TYPE.contains(returnType)) {
-                    return ERROR.INVALID_RETURN_TYPE;
-                }
-                if (!encoders.isEmpty()) {
-                    return ERROR.MULTIPLE_ENCODER;
-                }
-                encoders.add(method);
-            }
-        }
-
-        if (encoders.isEmpty()) {
-            return ERROR.NO_ENUM_ENCODER;
-        }
-        return encoders.get(0);
-    }
-
-    private static ERROR applyEncoder(Enum<?>[] enums, Method encoder, Map<Object, Enum<?>> keyToEnum) {
-        for (Enum<?> e : enums) {
-            try {
-                encoder.setAccessible(true);
-                Object key = encoder.invoke(e);
-                if (key == null) {
-                    return ERROR.NULL_KEY;
-                }
-                if (keyToEnum.containsKey(key)) {
-                    return ERROR.DUPLICATE_ENUM_KEYS;
-                }
-                keyToEnum.put(key, e);
-            } catch (IllegalAccessException exception) {
-                return ERROR.ILLEGAL_ACCESS;
-            } catch (InvocationTargetException exception) {
-                return ERROR.INVOCATION_ERROR;
-            }
-        }
-        return null;
     }
 
     private static <K, V> Map<V, K> invertMap(Map<K, V> input) {
