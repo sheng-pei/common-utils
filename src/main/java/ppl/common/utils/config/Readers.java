@@ -38,7 +38,7 @@ public class Readers {
         } catch (InstantiationException e) {
             throw new IllegalArgumentException(
                     StringUtils.format(
-                            "The specified class {} couldn't instantiate. " +
+                            "The specified class {} couldn't be instantiated. " +
                                     "For example, This class is abstract.",
                             readerClass.getCanonicalName()));
         } catch (InvocationTargetException e) {
@@ -48,12 +48,12 @@ public class Readers {
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException(
                     StringUtils.format(
-                            "The specified class {} couldn't find constructor {}({})",
-                            readerClass.getCanonicalName(), readerClass.getCanonicalName(), paramList(paramClasses)));
+                            "Constructor {}({}) not found in the specified class {}",
+                            readerClass.getCanonicalName(), paramList(paramClasses), readerClass.getCanonicalName()));
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException(
                     StringUtils.format(
-                            "The constructor {}({}) of the specified class {} couldn't be access.",
+                            "The constructor {}({}) of the specified class {} couldn't be accessed.",
                             readerClass.getCanonicalName(), paramList(paramClasses), readerClass.getCanonicalName()));
         }
     }
