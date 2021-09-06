@@ -61,6 +61,27 @@ abstract class AbstractReader implements Reader {
     //////////////////////////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////Getter/////////////////////////////////////////////
+
+    @Override
+    public Byte getByteOrDefault(Object key, Byte def) {
+        return getOrDefault(key, Byte.class, def);
+    }
+
+    @Override
+    public Byte getByte(Object key) {
+        return get(key, Byte.class);
+    }
+
+    @Override
+    public Short getShortOrDefault(Object key, Short def) {
+        return getOrDefault(key, Short.class, def);
+    }
+
+    @Override
+    public Short getShort(Object key) {
+        return get(key, Short.class);
+    }
+
     @Override
     public Integer getIntegerOrDefault(Object key, Integer def) {
         return getOrDefault(key, Integer.class, def);
@@ -189,6 +210,26 @@ abstract class AbstractReader implements Reader {
     @Override
     public String valueString() {
         return value(String.class);
+    }
+
+    @Override
+    public Byte valueByteOrDefault(Byte def) {
+        return valueOrDefault(Byte.class, def);
+    }
+
+    @Override
+    public Byte valueByte() {
+        return value(Byte.class);
+    }
+
+    @Override
+    public Short valueShortOrDefault(Short def) {
+        return valueOrDefault(Short.class, def);
+    }
+
+    @Override
+    public Short valueShort() {
+        return value(Short.class);
     }
 
     @Override

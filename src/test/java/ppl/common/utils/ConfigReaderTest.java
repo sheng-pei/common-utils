@@ -21,6 +21,30 @@ public class ConfigReaderTest {
     };
 
     @Test
+    public void testGetInteger() {
+        Reader reader = Readers.root(configs);
+        Assertions.assertEquals(1, reader.getInteger("int"));
+    }
+
+    @Test
+    public void testGetLong() {
+        Reader reader = Readers.root(configs);
+        Assertions.assertEquals(1L, reader.getLong("int"));
+    }
+
+    @Test
+    public void testGetShort() {
+        Reader reader = Readers.root(configs);
+        Assertions.assertEquals((short) 1, reader.getShort("int"));
+    }
+
+    @Test
+    public void testGetByte() {
+        Reader reader = Readers.root(configs);
+        Assertions.assertEquals((byte) 1, reader.getByte("int"));
+    }
+
+    @Test
     public void testMapIterator() {
         Reader reader = Readers.root(configs);
         Iterator<Reader> itrMap = reader.iterator();

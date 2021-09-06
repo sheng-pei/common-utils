@@ -5,6 +5,14 @@ public interface Value {
 
     String valueString();
 
+    Byte valueByteOrDefault(Byte def);
+
+    Byte valueByte();
+
+    Short valueShortOrDefault(Short def);
+
+    Short valueShort();
+
     Integer valueIntegerOrDefault(Integer def);
 
     Integer valueInteger();

@@ -18,31 +18,23 @@ public class EnumKeyTest {
     private static Stream<Arguments> unwrapProvider() {
         Object emptyObj = new Object();
         return Stream.of(
-                Arguments.of(EnumKey.wrap((byte) 1), BigInteger.class, BigInteger.ONE),
-                Arguments.of(EnumKey.wrap((short) 1), BigInteger.class, BigInteger.ONE),
-                Arguments.of(EnumKey.wrap(1), BigInteger.class, BigInteger.ONE),
-                Arguments.of(EnumKey.wrap(1L), BigInteger.class, BigInteger.ONE),
                 Arguments.of(EnumKey.wrap(BigInteger.ONE), BigInteger.class, BigInteger.ONE),
                 Arguments.of(EnumKey.wrap((byte) 1), Long.class, 1L),
                 Arguments.of(EnumKey.wrap((short) 1), Long.class, 1L),
                 Arguments.of(EnumKey.wrap(1), Long.class, 1L),
                 Arguments.of(EnumKey.wrap(1L), Long.class, 1L),
-                Arguments.of(EnumKey.wrap(BigInteger.ONE), Long.class, 1L),
                 Arguments.of(EnumKey.wrap((byte) 1), Integer.class, 1),
                 Arguments.of(EnumKey.wrap((short) 1), Integer.class, 1),
                 Arguments.of(EnumKey.wrap(1), Integer.class, 1),
                 Arguments.of(EnumKey.wrap(1L), Integer.class, 1),
-                Arguments.of(EnumKey.wrap(BigInteger.ONE), Integer.class, 1),
                 Arguments.of(EnumKey.wrap((byte) 1), Short.class, (short) 1),
                 Arguments.of(EnumKey.wrap((short) 1), Short.class, (short) 1),
                 Arguments.of(EnumKey.wrap(1), Short.class, (short) 1),
                 Arguments.of(EnumKey.wrap(1L), Short.class, (short) 1),
-                Arguments.of(EnumKey.wrap(BigInteger.ONE), Short.class, (short) 1),
                 Arguments.of(EnumKey.wrap((byte) 1), Byte.class, (byte) 1),
                 Arguments.of(EnumKey.wrap((short) 1), Byte.class, (byte) 1),
                 Arguments.of(EnumKey.wrap(1), Byte.class, (byte) 1),
                 Arguments.of(EnumKey.wrap(1L), Byte.class, (byte) 1),
-                Arguments.of(EnumKey.wrap(BigInteger.ONE), Byte.class, (byte) 1),
                 Arguments.of(EnumKey.wrap('c'), char.class, 'c'),
                 Arguments.of(EnumKey.wrap('c'), Character.class, 'c'),
                 Arguments.of(EnumKey.wrap("c"), String.class, "c"),
@@ -81,7 +73,8 @@ public class EnumKeyTest {
                 Arguments.of(EnumKey.wrap(Short.MAX_VALUE), byte.class),
                 Arguments.of(EnumKey.wrap('c'), String.class),
                 Arguments.of(EnumKey.wrap("c"), Character.class),
-                Arguments.of(EnumKey.wrap(new Object()), String.class)
+                Arguments.of(EnumKey.wrap(new Object()), String.class),
+                Arguments.of(EnumKey.wrap(BigInteger.ONE), int.class)
         );
     }
 
@@ -107,31 +100,23 @@ public class EnumKeyTest {
                 Arguments.of(outLong, outLong),
                 Arguments.of(outLong, outLong1),
                 Arguments.of(outInteger, outInteger1),
-                Arguments.of(EnumKey.wrap((byte) 1), EnumKey.wrap(BigInteger.ONE)),
-                Arguments.of(EnumKey.wrap((short) 1), EnumKey.wrap(BigInteger.ONE)),
-                Arguments.of(EnumKey.wrap(1), EnumKey.wrap(BigInteger.ONE)),
-                Arguments.of(EnumKey.wrap(1L), EnumKey.wrap(BigInteger.ONE)),
                 Arguments.of(EnumKey.wrap(BigInteger.ONE), EnumKey.wrap(BigInteger.ONE)),
                 Arguments.of(EnumKey.wrap((byte) 1), EnumKey.wrap(1L)),
                 Arguments.of(EnumKey.wrap((short) 1), EnumKey.wrap(1L)),
                 Arguments.of(EnumKey.wrap(1), EnumKey.wrap(1L)),
                 Arguments.of(EnumKey.wrap(1L), EnumKey.wrap(1L)),
-                Arguments.of(EnumKey.wrap(BigInteger.ONE), EnumKey.wrap(1L)),
                 Arguments.of(EnumKey.wrap((byte) 1), EnumKey.wrap(1)),
                 Arguments.of(EnumKey.wrap((short) 1), EnumKey.wrap(1)),
                 Arguments.of(EnumKey.wrap(1), EnumKey.wrap(1)),
                 Arguments.of(EnumKey.wrap(1L), EnumKey.wrap(1)),
-                Arguments.of(EnumKey.wrap(BigInteger.ONE), EnumKey.wrap(1)),
                 Arguments.of(EnumKey.wrap((byte) 1), EnumKey.wrap((short) 1)),
                 Arguments.of(EnumKey.wrap((short) 1), EnumKey.wrap((short) 1)),
                 Arguments.of(EnumKey.wrap(1), EnumKey.wrap((short) 1)),
                 Arguments.of(EnumKey.wrap(1L), EnumKey.wrap((short) 1)),
-                Arguments.of(EnumKey.wrap(BigInteger.ONE), EnumKey.wrap((short) 1)),
                 Arguments.of(EnumKey.wrap((byte) 1), EnumKey.wrap((byte) 1)),
                 Arguments.of(EnumKey.wrap((short) 1), EnumKey.wrap((byte) 1)),
                 Arguments.of(EnumKey.wrap(1), EnumKey.wrap((byte) 1)),
                 Arguments.of(EnumKey.wrap(1L), EnumKey.wrap((byte) 1)),
-                Arguments.of(EnumKey.wrap(BigInteger.ONE), EnumKey.wrap((byte) 1)),
                 Arguments.of(EnumKey.wrap('c'), EnumKey.wrap('c')),
                 Arguments.of(EnumKey.wrap("c"), EnumKey.wrap("c")),
                 Arguments.of(EnumKey.wrap(emptyObj), EnumKey.wrap(emptyObj))
@@ -146,10 +131,18 @@ public class EnumKeyTest {
 
     private static Stream<Arguments> notEqualsProvider() {
         return Stream.of(
+                Arguments.of(EnumKey.wrap(BigInteger.ONE), EnumKey.wrap((byte) 1)),
+                Arguments.of(EnumKey.wrap(BigInteger.ONE), EnumKey.wrap((short) 1)),
+                Arguments.of(EnumKey.wrap(BigInteger.ONE), EnumKey.wrap(1)),
+                Arguments.of(EnumKey.wrap((byte) 1), EnumKey.wrap(BigInteger.ONE)),
+                Arguments.of(EnumKey.wrap((short) 1), EnumKey.wrap(BigInteger.ONE)),
+                Arguments.of(EnumKey.wrap(1), EnumKey.wrap(BigInteger.ONE)),
+                Arguments.of(EnumKey.wrap(1L), EnumKey.wrap(BigInteger.ONE)),
                 Arguments.of(EnumKey.wrap(1), new Object()),
                 Arguments.of(EnumKey.wrap(1), EnumKey.wrap(BigInteger.TEN)),
                 Arguments.of(EnumKey.wrap('c'), EnumKey.wrap(1)),
-                Arguments.of(EnumKey.wrap("c"), EnumKey.wrap('c'))
+                Arguments.of(EnumKey.wrap("c"), EnumKey.wrap('c')),
+                Arguments.of(EnumKey.wrap(BigInteger.ONE), EnumKey.wrap(1L))
         );
     }
 

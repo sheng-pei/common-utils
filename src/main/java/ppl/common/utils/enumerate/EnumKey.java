@@ -3,7 +3,6 @@ package ppl.common.utils.enumerate;
 import ppl.common.utils.Condition;
 import ppl.common.utils.StringUtils;
 
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -22,7 +21,6 @@ final class EnumKey {
             this.add(Short.class);
             this.add(Integer.class);
             this.add(Long.class);
-            this.add(BigInteger.class);
         }
     });
 
@@ -70,8 +68,6 @@ final class EnumKey {
                 return (T) iKey;
             } else if (isLong(clazz)) {
                 return (T) (Long) iKey.longValue();
-            } else if (clazz.equals(BigInteger.class)) {
-                return (T) BigInteger.valueOf(iKey.longValue());
             } else if (isShort(clazz)) {
                 if (inShort(iKey)) {
                     return (T) (Short) iKey.shortValue();
@@ -87,12 +83,6 @@ final class EnumKey {
             }
         } else if (ck instanceof Long) {
             if (isLong(clazz)) {
-                return (T) ck;
-            } else if (clazz.equals(BigInteger.class)) {
-                return (T) BigInteger.valueOf((Long) ck);
-            }
-        } else if (ck instanceof BigInteger) {
-            if (clazz.equals(BigInteger.class)) {
                 return (T) ck;
             }
         } else if (ck instanceof Character) {
@@ -167,12 +157,6 @@ final class EnumKey {
 
     private Object canonicalKey(Object key) {
         if (INTEGER_KEY_TYPE.contains(key.getClass())) {
-            if (key instanceof BigInteger) {
-                BigInteger big = (BigInteger) key;
-                if (outOfLong(big)) {
-                    return big;
-                }
-            }
             //Integer optimise
             if (key instanceof Integer) {
                 return key;
@@ -186,11 +170,6 @@ final class EnumKey {
         return key;
     }
 
-    private final static BigInteger BIG_MAX_LONG = BigInteger.valueOf(Long.MAX_VALUE);
-    private final static BigInteger BIG_MIN_LONG = BigInteger.valueOf(Long.MIN_VALUE);
-    private static boolean outOfLong(BigInteger big) {
-        return !Condition.in(big, BIG_MIN_LONG, BIG_MAX_LONG);
-    }
     private static boolean outOfInt(Long l) {
         return !Condition.in(l, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }

@@ -1,5 +1,6 @@
 package ppl.common.utils.config.convert;
 
+import ppl.common.utils.Condition;
 import ppl.common.utils.enumerate.EnumUtils;
 import ppl.common.utils.StringUtils;
 import ppl.common.utils.TypeUtils;
@@ -7,7 +8,9 @@ import ppl.common.utils.enumerate.EnumEncoderNotSupportedException;
 import ppl.common.utils.enumerate.UnknownEnumException;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class Converter<C> {
@@ -16,15 +19,48 @@ public class Converter<C> {
     private static final Map<Class<?>, Converter<?>> CONVERTERS = new HashMap<>();
 
     static {
+        Converter<Byte> byteConverter = new Converter<>(o -> {
+            if (o == null) {
+                return null;
+            }
+
+            if (isInteger(o)) {
+                long v = ((Number) o).longValue();
+                if (inByte(v)) {
+                    return (byte) v;
+                }
+            }
+            throw new ConvertException(incompatibleWith(Short.class));
+        });
+        CONVERTERS.put(Byte.class, byteConverter);
+        CONVERTERS.put(byte.class, byteConverter);
+
+        Converter<Short> shortConverter = new Converter<>(o -> {
+            if (o == null) {
+                return null;
+            }
+
+            if (isInteger(o)) {
+                long v = ((Number) o).longValue();
+                if (inShort(v)) {
+                    return (short) v;
+                }
+            }
+            throw new ConvertException(incompatibleWith(Short.class));
+        });
+        CONVERTERS.put(Short.class, shortConverter);
+        CONVERTERS.put(short.class, shortConverter);
+
         Converter<Integer> intConverter = new Converter<>(o -> {
             if (o == null) {
                 return null;
             }
-            if (isCompatible(o, Integer.class)) {
+            if (isInteger(o)) {
                 if (o instanceof Integer) {
                     return (Integer) o;
+                } else if (!(o instanceof Long) || inInt((Long) o)) {
+                    return ((Number) o).intValue();
                 }
-                return ((Number) o).intValue();
             }
             throw new ConvertException(incompatibleWith(Integer.class));
         });
@@ -35,7 +71,7 @@ public class Converter<C> {
             if (o == null) {
                 return null;
             }
-            if (isCompatible(o, Long.class)) {
+            if (isInteger(o)) {
                 if (o instanceof Long) {
                     return (Long) o;
                 }
@@ -61,12 +97,12 @@ public class Converter<C> {
         CONVERTERS.put(double.class, doubleConverter);
     }
 
-    private final static Map<Class<?>, Integer> wrapperToSize = new HashMap<Class<?>, Integer>() {
+    private final static Set<Class<?>> INTEGER_TYPE = new HashSet<Class<?>>() {
         {
-            put(Byte.class, 1);
-            put(Short.class, 2);
-            put(Integer.class, 4);
-            put(Long.class, 8);
+            add(Byte.class);
+            add(Short.class);
+            add(Integer.class);
+            add(Long.class);
         }
     };
 
@@ -74,13 +110,18 @@ public class Converter<C> {
         return StringUtils.format(INCOMPATIBLE_TYPE_MESSAGE, BaseType.nameOf(clazz));
     }
 
-    private static boolean isCompatible(Object source, Class<?> target) {
-        Integer srcSize = wrapperToSize.get(source.getClass());
-        Integer tgtSize = wrapperToSize.get(target);
-        if (srcSize != null && tgtSize != null) {
-            return srcSize <= tgtSize;
-        }
-        return false;
+    private static boolean isInteger(Object source) {
+        return INTEGER_TYPE.contains(source.getClass());
+    }
+
+    private static boolean inInt(Long l) {
+        return Condition.in(l, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+    private static boolean inShort(Long i) {
+        return Condition.in(i, Short.MIN_VALUE, Short.MAX_VALUE);
+    }
+    private static boolean inByte(Long i) {
+        return Condition.in(i, Byte.MIN_VALUE, Byte.MAX_VALUE);
     }
 
     private static class CastConverter<C> extends Converter<C> {

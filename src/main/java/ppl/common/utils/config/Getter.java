@@ -6,6 +6,14 @@ public interface Getter {
 
     String getString(Object key);
 
+    Byte getByteOrDefault(Object key, Byte def);
+
+    Byte getByte(Object key);
+
+    Short getShortOrDefault(Object key, Short def);
+
+    Short getShort(Object key);
+
     Integer getIntegerOrDefault(Object key, Integer def);
 
     Integer getInteger(Object key);
