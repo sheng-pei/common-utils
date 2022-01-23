@@ -1,9 +1,11 @@
-package ppl.common.utils.enumerate;
+package ppl.common.utils.enumerate.fastjson;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.parser.*;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import ppl.common.utils.StringUtils;
+import ppl.common.utils.enumerate.EnumUtils;
+import ppl.common.utils.enumerate.UnknownEnumException;
 
 import java.lang.reflect.Type;
 import java.math.BigInteger;

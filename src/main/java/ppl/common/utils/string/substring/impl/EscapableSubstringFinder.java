@@ -69,10 +69,10 @@ public class EscapableSubstringFinder extends AbstractSubstringFinder {
                 Substring substring = this.finder.find(input, firstUnescape, nextFirstEscape == -1 ? end : nextFirstEscape);
                 if (substring == null) {
                     firstEscape = nextFirstEscape;
-                } else if (substring.getStart() == firstUnescape && firstEscape != firstUnescape) {
-                    return new EscapableSubString(input, firstEscape, firstUnescape, substring.getEnd());
+                } else if (substring.start() == firstUnescape && firstEscape != firstUnescape) {
+                    return new EscapableSubstring(input, firstEscape, firstUnescape, substring.end());
                 } else {
-                    return substring;
+                    return new EscapableSubstring((ppl.common.utils.string.substring.impl.Substring) substring);
                 }
             }
         }

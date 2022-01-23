@@ -1,7 +1,8 @@
-package ppl.common.utils.enumerate;
+package ppl.common.utils.enumerate.hibernate;
 
 import ppl.common.utils.StringUtils;
 import ppl.common.utils.TypeUtils;
+import ppl.common.utils.enumerate.EnumUtils;
 
 import javax.persistence.AttributeConverter;
 

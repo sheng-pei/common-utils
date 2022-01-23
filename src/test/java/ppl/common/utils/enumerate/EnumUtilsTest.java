@@ -94,20 +94,6 @@ public class EnumUtilsTest {
         }
     }
 
-    enum BigEnum {
-        U(BigInteger.ONE);
-
-        private final BigInteger code;
-        BigEnum(BigInteger code) {
-            this.code = code;
-        }
-
-        @EnumEncoder
-        private BigInteger getCode() {
-            return this.code;
-        }
-    }
-
     enum WByteEnum {
         U((byte) 1);
 
@@ -202,8 +188,7 @@ public class EnumUtilsTest {
                 Arguments.of(WShortEnum.class, (short) 1, WShortEnum.U),
                 Arguments.of(WIntEnum.class, 1, WIntEnum.U),
                 Arguments.of(WLongEnum.class, 1L, WLongEnum.U),
-                Arguments.of(WCharEnum.class, 'c', WCharEnum.U),
-                Arguments.of(BigEnum.class, 1, BigEnum.U)
+                Arguments.of(WCharEnum.class, 'c', WCharEnum.U)
         );
     }
 
@@ -231,8 +216,7 @@ public class EnumUtilsTest {
                 Arguments.of(1, WShortEnum.U, int.class),
                 Arguments.of(1, WIntEnum.U, int.class),
                 Arguments.of(1, WLongEnum.U, int.class),
-                Arguments.of('c', WCharEnum.U, char.class),
-                Arguments.of(1, BigEnum.U, int.class)
+                Arguments.of('c', WCharEnum.U, char.class)
         );
     }
 

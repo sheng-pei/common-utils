@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 public class ConfigUtils {
 
-    public static <E> Set<E> toSet(Reader reader, Function<Reader, E> elementConverter) {
+    public static <E> Set<E> toSet(Node reader, Function<Node, E> elementConverter) {
         Objects.requireNonNull(reader, "Reader must not be null.");
         Objects.requireNonNull(elementConverter, "Element converter must not be null.");
         Set<E> res = new HashSet<>();
@@ -13,7 +13,7 @@ public class ConfigUtils {
         return res;
     }
 
-    public static <E> List<E> toList(Reader reader, Function<Reader, E> elementConverter) {
+    public static <E> List<E> toList(Node reader, Function<Node, E> elementConverter) {
         Objects.requireNonNull(reader, "Reader must not be null.");
         Objects.requireNonNull(elementConverter, "Element converter must not be null.");
         List<E> res = new ArrayList<>();
@@ -21,7 +21,7 @@ public class ConfigUtils {
         return res;
     }
 
-    public static <K, V> Map<K, V> toMap(Reader reader, Function<Reader, K> kConverter, Function<Reader, V> vConverter) {
+    public static <K, V> Map<K, V> toMap(Node reader, Function<Node, K> kConverter, Function<Node, V> vConverter) {
         Objects.requireNonNull(reader, "Reader must not be null.");
         Objects.requireNonNull(kConverter, "Key converter must not be null.");
         Objects.requireNonNull(vConverter, "Value converter must not be null.");

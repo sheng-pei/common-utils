@@ -147,16 +147,11 @@ public class StringUtilsTest {
     private static Stream<Arguments> formatProvider() {
         return Stream.of(
                 Arguments.of("{}", new String[] {"ab"}, "ab"),
+                Arguments.of("\\{}", new String[] {}, "{}"),
                 Arguments.of("ab\\\\{", new String[] {}, "ab\\\\{"),
-                Arguments.of("abc\\\\\\{}", new String[] {}, "abc\\\\{}"),
-                Arguments.of("{}abc\\\\{}\\\\\\{}aaaa{}", new String[] {"ab", "cd", "ef"}, "ababc\\\\cd\\\\{}aaaaef")
+                Arguments.of("abc\\\\\\{}", new String[] {}, "abc\\{}"),
+                Arguments.of("{}abc\\\\{}\\\\\\{}aaaa{}", new String[] {"ab", "cd", "ef"}, "ababc\\cd\\{}aaaaef")
         );
-    }
-
-    @Test
-    public void testFormatNotEnoughParameter() {
-        String formatString = "{}";
-        Assertions.assertThrows(IllegalArgumentException.class, () -> StringUtils.format(formatString));
     }
 
     @ParameterizedTest

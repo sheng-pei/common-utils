@@ -5,7 +5,7 @@ import ppl.common.utils.string.substring.SubstringFinder;
 
 import java.util.Objects;
 
-public abstract class AbstractSubstringFinder implements SubstringFinder {
+abstract class AbstractSubstringFinder implements SubstringFinder {
 
     public Substring find(String input) {
         return this.find(input, 0, input.length());
@@ -20,12 +20,15 @@ public abstract class AbstractSubstringFinder implements SubstringFinder {
     }
 
     public Substring find(char[] input, int start, int end) {
-        Objects.requireNonNull(input, "The input is null");
-        if (start > end) {
-            throw new StringIndexOutOfBoundsException("Start is great than end.");
+        Objects.requireNonNull(input, "The input is null.");
+        if (start < 0) {
+            throw new StringIndexOutOfBoundsException(start);
         }
-        if (start < 0 || end > input.length) {
-            throw new StringIndexOutOfBoundsException("Start or end are invalid indices.");
+        if (end > input.length) {
+            throw new StringIndexOutOfBoundsException(end);
+        }
+        if (start > end) {
+            throw new StringIndexOutOfBoundsException(end - start);
         }
         return findInternal(input, start, end);
     }

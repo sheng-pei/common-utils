@@ -1,8 +1,9 @@
-package ppl.common.utils.enumerate;
+package ppl.common.utils.enumerate.fastjson;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.serializer.*;
 import ppl.common.utils.StringUtils;
+import ppl.common.utils.enumerate.EnumUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

@@ -16,10 +16,13 @@ package ppl.common.utils.string.substring;
  * If you want to implement substring for yourself, the best way is to extend ConsistentSubstring.
  */
 public interface Substring {
-    String replace(PositionedParameters targets);
-    String getSource();
-    int getStart();
-    int getEnd();
+    void append(StringBuilder builder, PositionalArguments arguments);
+    void append(StringBuilder builder, String argument);
     boolean isEmpty();
+    int start();
+    int end();
     int length();
+    String string();
+    String string(int offset);
+    String string(int offset, int length);
 }

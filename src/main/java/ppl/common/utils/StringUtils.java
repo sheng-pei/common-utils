@@ -1,6 +1,7 @@
 package ppl.common.utils;
 
-import ppl.common.utils.string.substring.PositionedParameters;
+import ppl.common.utils.string.substring.PositionalArguments;
+import ppl.common.utils.string.substring.impl.ToStringArguments;
 import ppl.common.utils.string.substring.impl.EscapableSubstringFinder;
 import ppl.common.utils.string.substring.Substring;
 
@@ -151,6 +152,10 @@ public final class StringUtils {
 		return indexOfNot(c, string, 0, string.length());
 	}
 
+	public static int indexOf(char c, String string, int pos, int end) {
+		return indexOf(c, string.toCharArray(), pos, end);
+	}
+
 	public static int indexOf(char c, char[] chars, int pos, int end) {
 		for (int idx = pos; idx < end; idx++) {
 			if (chars[idx] == c) {
@@ -163,32 +168,39 @@ public final class StringUtils {
 	private static final String REFERENCE = "{}";
 
 	public static String format(String formatString, Object... parameters) {
-		Objects.requireNonNull(formatString, "The specified formatString is null");
-		StringBuilder res = new StringBuilder();
-
-		char[] formatCharacters = formatString.toCharArray();
-
-		EscapableSubstringFinder finder = new EscapableSubstringFinder(REFERENCE);
-
-		int nxt = 0;
-		PositionedParameters targets = new PositionedParameters(parameters);
-		Substring substring = finder.find(formatCharacters, nxt, formatCharacters.length);
-		while (substring != null) {
-			res.append(formatCharacters, nxt, substring.getStart() - nxt);
-			res.append(replace(substring, targets));
-			nxt = substring.getEnd();
-			substring = finder.find(formatCharacters, nxt, formatCharacters.length);
-		}
-		res.append(formatCharacters, nxt, formatCharacters.length - nxt);
-		return res.toString();
+		Objects.requireNonNull(formatString, "The specified formatString is null.");
+		PositionalArguments arguments = new ToStringArguments(parameters);
+		return pFormat(formatString, arguments);
 	}
 
-	private static String replace(Substring substring, PositionedParameters targets) {
-		try {
-			return substring.replace(targets);
-		} catch (IllegalStateException e) {
-			throw new IllegalArgumentException("Not enough parameters", e);
+	public static String format(String formatString, PositionalArguments arguments) {
+		Objects.requireNonNull(formatString, "The specified formatString is null.");
+		return pFormat(formatString, arguments);
+	}
+
+	private static String pFormat(String formatString, PositionalArguments arguments) {
+		char[] formatCharacters = formatString.toCharArray();
+		EscapableSubstringFinder finder = new EscapableSubstringFinder(REFERENCE);
+
+		Substring substring = finder.find(formatCharacters, 0, formatCharacters.length);
+		if (substring == null) {
+			return formatString;
 		}
+
+		int nxt = 0;
+		StringBuilder res = new StringBuilder();
+		do {
+			res.append(formatCharacters, nxt, substring.start() - nxt);
+			if (arguments.available()) {
+				substring.append(res, arguments);
+			} else {
+				substring.append(res, REFERENCE);
+			}
+			nxt = substring.end();
+			substring = arguments.available() ? finder.find(formatCharacters, nxt, formatCharacters.length) : null;
+		} while (substring != null);
+		res.append(formatCharacters, nxt, formatCharacters.length - nxt);
+		return res.toString();
 	}
 
 	public static boolean equalsOnContent(final String s1, final String s2) {

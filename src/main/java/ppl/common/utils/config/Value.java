@@ -1,33 +1,29 @@
 package ppl.common.utils.config;
 
 public interface Value {
-    String valueStringOrDefault(String def);
+    String textValue(String def);
 
-    String valueString();
+    String textValue();
 
-    Byte valueByteOrDefault(Byte def);
+    Byte byteValue(Byte def);
 
-    Byte valueByte();
+    Byte byteValue();
 
-    Short valueShortOrDefault(Short def);
+    Short shortValue(Short def);
 
-    Short valueShort();
+    Short shortValue();
 
-    Integer valueIntegerOrDefault(Integer def);
+    Integer intValue(Integer def);
 
-    Integer valueInteger();
+    Integer intValue();
 
-    Long valueLongOrDefault(Long def);
+    Long longValue(Long def);
 
-    Long valueLong();
+    Long longValue();
 
-    Boolean valueBooleanOrDefault(Boolean def);
+    Boolean boolValue(Boolean def);
 
-    Boolean valueBoolean();
+    Boolean boolValue();
 
-    <E extends Enum<E>> E valueEnum(Class<E> enumClass);
-
-    <M> M valueOrDefault(Class<M> targetClass, M def);
-
-    <M> M value(Class<M> targetClass);
+//    <E extends Enum<E>> E enumValue(Class<E> enumClass);
 }

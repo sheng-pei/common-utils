@@ -1,102 +1,112 @@
 package ppl.common.utils.string.substring.impl;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.SubstringFinder;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 class SubstringFinderTest {
 
-    private static Function<String, SubstringFinder> SUNDAY_FINDER = SundaySubstringFinder::new;
-    private static Function<String, SubstringFinder> KMP_FINDER = KMPSubstringFinder::new;
-    private static Function<String, SubstringFinder> ESCAPABLE_FINDER = EscapableSubstringFinder::new;
+    private final static Map<String, Function<String, SubstringFinder>> FINDERS = new HashMap<>();
 
-    @ParameterizedTest
-    @MethodSource("illegalArgumentsProvider")
-    public void testConstructorThrowsIllegalArgumentException(Function<String, SubstringFinder> creator, String pattern) {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> creator.apply(pattern));
+    static {
+        FINDERS.put("sunday", SundaySubstringFinder::new);
+        FINDERS.put("kmp", KMPSubstringFinder::new);
     }
 
-    private static Stream<Arguments> illegalArgumentsProvider() {
+    @ParameterizedTest
+    @MethodSource("instantiationProvider")
+    public void testConstructor(String name, String pattern) {
+        FINDERS.get(name).apply(pattern);
+    }
+
+    private static Stream<Arguments> instantiationProvider() {
         return Stream.of(
-                Arguments.of(SUNDAY_FINDER, ""),
-                Arguments.of(SUNDAY_FINDER, null),
-                Arguments.of(KMP_FINDER, ""),
-                Arguments.of(KMP_FINDER, null),
-                Arguments.of(ESCAPABLE_FINDER, ""),
-                Arguments.of(ESCAPABLE_FINDER, null),
-                Arguments.of(ESCAPABLE_FINDER, "\\"),
-                Arguments.of(ESCAPABLE_FINDER, "aba")
+                Arguments.of("sunday", "a"),
+                Arguments.of("sunday", "acveaew"),
+                Arguments.of("kmp", "d"),
+                Arguments.of("kmp", "daefawe")
         );
     }
 
     @ParameterizedTest
-    @MethodSource({"noFindProvider"})
-    public void testNoFind(Function<String, SubstringFinder> creator, String pattern, String input) {
-        SubstringFinder finder = creator.apply(pattern);
+    @MethodSource("instantiationExceptionProvider")
+    public void testConstructorThrowsIllegalArgumentException(String name, String pattern) {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> FINDERS.get(name).apply(pattern));
+    }
+
+    private static Stream<Arguments> instantiationExceptionProvider() {
+        return Stream.of(
+                Arguments.of("sunday", ""),
+                Arguments.of("sunday", null),
+                Arguments.of("kmp", ""),
+                Arguments.of("kmp", null)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource({"notFoundProvider"})
+    public void testNotFound(String name, String pattern, String input) {
+        SubstringFinder finder = FINDERS.get(name).apply(pattern);
         Assertions.assertNull(finder.find(input));
     }
 
-    private static Stream<Arguments> noFindProvider() {
+    private static Stream<Arguments> notFoundProvider() {
         return Stream.of(
-                Arguments.of(SUNDAY_FINDER, "jfieak", "jf"),
-                Arguments.of(KMP_FINDER, "jfieak", "jf"),
-                Arguments.of(ESCAPABLE_FINDER, "jfieak", "jf"),
-                Arguments.of(SUNDAY_FINDER, "nfmei", "ahifeklaiwej"),
-                Arguments.of(KMP_FINDER, "nfmei", "ahifeklaiwej"),
-                Arguments.of(ESCAPABLE_FINDER, "nfmei", "ahifeklaiwej")
+                //len(input) < len(pattern)
+                Arguments.of("sunday", "jfieak", "jf"),
+                Arguments.of("kmp", "jfieak", "jf"),
+                //len(input) == len(pattern)
+                Arguments.of("sunday", "jfieak", "jfieaj"),
+                Arguments.of("kmp", "jfieak", "jfieam"),
+                //len(input) > len(pattern)
+                Arguments.of("sunday", "nfmei", "ahifeklaiwej"),
+                Arguments.of("kmp", "nfmei", "ahifeklaiwej")
         );
     }
 
     @ParameterizedTest
-    @MethodSource({"findFromWholeProvider", "findFromPartOfInputProvider"})
-    public void testFindFromWholeInput(Function<String, SubstringFinder> creator, String pattern, String input, Substring expect) {
-        SubstringFinder finder = creator.apply(pattern);
-        Assertions.assertEquals(expect, finder.find(input));
+    @MethodSource({"findInputProvider"})
+    public void testFindInput(String name, String pattern, String input, ppl.common.utils.string.substring.Substring expected) {
+        SubstringFinder finder = FINDERS.get(name).apply(pattern);
+        Assertions.assertEquals(expected, finder.find(input));
     }
 
-    private static Stream<Arguments> findFromWholeProvider() {
+    private static Stream<Arguments> findInputProvider() {
         return Stream.of(
-                Arguments.of(SUNDAY_FINDER, "abccda", "abccda", new ConsistentSubstring("abccda")),
-                Arguments.of(KMP_FINDER, "GCGCGT", "GCGCGT", new ConsistentSubstring("GCGCGT")),
-                Arguments.of(ESCAPABLE_FINDER, "jfieak", "jfieak", new ConsistentSubstring("jfieak")),
-                Arguments.of(SUNDAY_FINDER, "abccda", "abccdanma", new ConsistentSubstring("abccdanma", 0, 6)),
-                Arguments.of(KMP_FINDER, "GCGCGT", "GCGCGTnma", new ConsistentSubstring("GCGCGTnma", 0, 6)),
-                Arguments.of(ESCAPABLE_FINDER, "jfieak", "jfieakjnma", new ConsistentSubstring("jfieakjnma", 0, 6)),
-                Arguments.of(SUNDAY_FINDER, "abccda", "afewfabccda", new ConsistentSubstring("afewfabccda", 5)),
-                Arguments.of(KMP_FINDER, "GCGCGT", "afewfGCGCGT", new ConsistentSubstring("afewfGCGCGT", 5)),
-                Arguments.of(ESCAPABLE_FINDER, "jfieak", "afewfjfieak", new ConsistentSubstring("afewfjfieak", 5))
+                //input == pattern
+                Arguments.of("sunday", "abccda", "abccda", new Substring("abccda".toCharArray(), 0, 6)),
+                Arguments.of("kmp", "GCGCGT", "GCGCGT", new Substring("GCGCGT".toCharArray(), 0, 6)),
+                //pattern is prefix of input
+                Arguments.of("sunday", "abccda", "abccdanma", new Substring("abccdanma".toCharArray(), 0, 6)),
+                Arguments.of("kmp", "GCGCGT", "GCGCGTnma", new Substring("GCGCGTnma".toCharArray(), 0, 6)),
+                //pattern is suffix of input
+                Arguments.of("sunday", "abccda", "afewfabccda", new Substring("afewfabccda".toCharArray(), 5, 11)),
+                Arguments.of("kmp", "GCGCGT", "afewfGCGCGT", new Substring("afewfGCGCGT".toCharArray(), 5, 11)),
+                //pattern is in the middle of input
+                Arguments.of("sunday", "abccda", "afewfabccda.n;k", new Substring("afewfabccda.n;k".toCharArray(), 5, 11)),
+                Arguments.of("kmp", "GCGCGT", "afewfGCGCGT.n;k", new Substring("afewfGCGCGT.n;k".toCharArray(), 5, 11))
         );
     }
 
     @ParameterizedTest
-    @MethodSource({"findFromPartOfInputProvider"})
-    public void testFindFromPartOfInput(Function<String, SubstringFinder> creator, String pattern, String input, Substring expect) {
-        SubstringFinder finder = creator.apply(pattern);
-        Assertions.assertEquals(expect, finder.find(input, 1, input.length() - 1));
+    @MethodSource({"findInputStartEndProvider"})
+    public void testFindInputStartEnd(String name, String pattern, String input, int start, int end, ppl.common.utils.string.substring.Substring expected) {
+        SubstringFinder finder = FINDERS.get(name).apply(pattern);
+        Assertions.assertEquals(expected, finder.find(input, start, end));
     }
 
-    private static Stream<Arguments> findFromPartOfInputProvider() {
+    private static Stream<Arguments> findInputStartEndProvider() {
         return Stream.of(
-                Arguments.of(SUNDAY_FINDER, "abccda", "ababccdacda", new ConsistentSubstring("ababccdacda", 2, 8)),
-                Arguments.of(KMP_FINDER, "GCGCGT", "GCGCGCGTCGT", new ConsistentSubstring("GCGCGCGTCGT", 2, 8)),
-                Arguments.of(ESCAPABLE_FINDER, "jfieak", "afewfjfieaknma", new ConsistentSubstring("afewfjfieaknma", 5, 11))
+                Arguments.of("sunday", "abccda", "ababccdacda", 1, 10, new Substring("ababccdacda".toCharArray(), 2, 8)),
+                Arguments.of("kmp", "GCGCGT", "GCGCGCGTCGT", 1, 10, new Substring("GCGCGCGTCGT".toCharArray(), 2, 8))
         );
-    }
-
-    @Test
-    public void testFindSubstringWithEscapeCharacter() {
-        EscapableSubstringFinder finder = new EscapableSubstringFinder("{}");
-
-        String input = "aa\\\\{}bb";
-        Substring actual = finder.find(input);
-        Assertions.assertEquals(new EscapableSubString(input, 2, 4, 6), actual);
     }
 
 }
