@@ -23,7 +23,11 @@ public class ToStringArguments implements PositionalArguments {
         }
 
         Object res = this.targets[this.pos++];
-        return res == null ? "null" : res.toString();
+        return convert(res);
+    }
+
+    protected String convert(Object obj) {
+        return obj == null ? "null" : obj.toString();
     }
 
 }

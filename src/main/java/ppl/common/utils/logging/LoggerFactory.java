@@ -8,9 +8,11 @@ public abstract class LoggerFactory {
         LoggerFactory factory = get();
         Logger selfLogger = factory.newInstance(LoggerFactory.class.getName());
         if (factory instanceof Slf4jLoggerFactory) {
-
+            selfLogger.debug("Use slf4j library.");
         } else if (factory instanceof JdkLoggerFactory) {
-
+            selfLogger.debug("Use JUL library.");
+        } else {
+            throw new IllegalStateException("No log library is found.");
         }
         INSTANCE = factory;
     }

@@ -8,6 +8,7 @@ import javax.persistence.AttributeConverter;
 
 /**
  * @author Sheng Pei
+ * TODO, org.hibernate.usertype.UserType
  */
 public abstract class EnumConverter<A extends Enum<A>, D> implements AttributeConverter<A, D> {
 
