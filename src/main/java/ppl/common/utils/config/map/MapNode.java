@@ -1,9 +1,6 @@
 package ppl.common.utils.config.map;
 
-import ppl.common.utils.config.AbstractNode;
-import ppl.common.utils.config.Node;
-import ppl.common.utils.config.Nodes;
-import ppl.common.utils.config.NullNode;
+import ppl.common.utils.config.*;
 
 import java.util.*;
 
@@ -29,13 +26,16 @@ public final class MapNode extends AbstractNode {
     @Override
     public Node getChild(String fieldName) {
         String path = childPath(fieldName);
+        if (!this.map.containsKey(fieldName)) {
+            return new MissingNode(path);
+        }
         return Nodes.createByPath(path, this.map.get(fieldName));
     }
 
     @Override
     public Node getChild(Integer index) {
         String path = childPath(index);
-        return new NullNode(path);
+        return new MissingNode(path);
     }
 
     @Override
@@ -45,62 +45,77 @@ public final class MapNode extends AbstractNode {
 
     @Override
     public String textValue(String def) {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public String textValue() {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public Byte byteValue(Byte def) {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public Byte byteValue() {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public Short shortValue(Short def) {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public Short shortValue() {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public Integer intValue(Integer def) {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public Integer intValue() {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public Long longValue(Long def) {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public Long longValue() {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public Boolean boolValue(Boolean def) {
-        return null;
+        throw new UnsupportedOperationException("Container node");
     }
 
     @Override
     public Boolean boolValue() {
-        return null;
+        throw new UnsupportedOperationException("Container node");
+    }
+
+    @Override
+    public Double doubleValue() {
+        throw new UnsupportedOperationException("Container node");
+    }
+
+    @Override
+    public Double doubleValue(Double def) {
+        throw new UnsupportedOperationException("Container node");
+    }
+
+    @Override
+    public <E extends Enum<E>> E enumValue(Class<E> enumClass) {
+        throw new UnsupportedOperationException("Container node");
     }
 
     private class Iter implements Iterator<Node> {

@@ -1,6 +1,11 @@
 package ppl.common.utils.config;
 
 public interface Value {
+
+    default boolean isMissing() {
+        return false;
+    }
+
     String textValue(String def);
 
     String textValue();
@@ -25,5 +30,10 @@ public interface Value {
 
     Boolean boolValue();
 
-//    <E extends Enum<E>> E enumValue(Class<E> enumClass);
+    Double doubleValue();
+
+    Double doubleValue(Double def);
+
+    <E extends Enum<E>> E enumValue(Class<E> enumClass);
+
 }

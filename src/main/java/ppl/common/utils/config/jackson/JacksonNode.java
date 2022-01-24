@@ -1,41 +1,44 @@
-package ppl.common.utils.config;
+package ppl.common.utils.config.jackson;
 
-import java.util.Collections;
+import com.fasterxml.jackson.databind.JsonNode;
+import ppl.common.utils.config.AbstractNode;
+import ppl.common.utils.config.Node;
+
 import java.util.Iterator;
 
-public final class NullNode extends AbstractNode {
+public class JacksonNode extends AbstractNode {
 
-    public NullNode() {
+    private final JsonNode json;
+
+    JacksonNode(JsonNode json) {
         super();
-    }
-
-    public NullNode(String path) {
-        super(path);
+        this.json = json;
     }
 
     @Override
     public int size() {
-        return 0;
+        return json.size();
     }
 
     @Override
     public Node getChild(String fieldName) {
-        return new MissingNode(childPath(fieldName));
+        json.get(fieldName);
+        return null;
     }
 
     @Override
     public Node getChild(Integer index) {
-        return new MissingNode(childPath(index));
+        return null;
     }
 
     @Override
     public Iterator<Node> iterator() {
-        return Collections.emptyIterator();
+        return null;
     }
 
     @Override
     public String textValue(String def) {
-        return def;
+        return null;
     }
 
     @Override
@@ -45,7 +48,7 @@ public final class NullNode extends AbstractNode {
 
     @Override
     public Byte byteValue(Byte def) {
-        return def;
+        return null;
     }
 
     @Override
@@ -55,7 +58,7 @@ public final class NullNode extends AbstractNode {
 
     @Override
     public Short shortValue(Short def) {
-        return def;
+        return null;
     }
 
     @Override
@@ -65,7 +68,7 @@ public final class NullNode extends AbstractNode {
 
     @Override
     public Integer intValue(Integer def) {
-        return def;
+        return null;
     }
 
     @Override
@@ -75,7 +78,7 @@ public final class NullNode extends AbstractNode {
 
     @Override
     public Long longValue(Long def) {
-        return def;
+        return null;
     }
 
     @Override
@@ -85,7 +88,7 @@ public final class NullNode extends AbstractNode {
 
     @Override
     public Boolean boolValue(Boolean def) {
-        return def;
+        return null;
     }
 
     @Override
@@ -100,7 +103,7 @@ public final class NullNode extends AbstractNode {
 
     @Override
     public Double doubleValue(Double def) {
-        return def;
+        return null;
     }
 
     @Override

@@ -3,14 +3,19 @@ package ppl.common.utils.config;
 import java.util.Collections;
 import java.util.Iterator;
 
-public final class NullNode extends AbstractNode {
+public final class MissingNode extends AbstractNode {
 
-    public NullNode() {
+    public MissingNode() {
         super();
     }
 
-    public NullNode(String path) {
+    public MissingNode(String path) {
         super(path);
+    }
+
+    @Override
+    public boolean isMissing() {
+        return true;
     }
 
     @Override

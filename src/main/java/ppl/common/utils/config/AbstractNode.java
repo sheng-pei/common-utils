@@ -28,24 +28,6 @@ public abstract class AbstractNode implements Node {
         return this.path;
     }
 
-//    @Override
-//    public final Node getChild(String fieldName) {
-//        Matcher matcher = FIELD_NAME_PATTERN.matcher(fieldName);
-//        if (!matcher.matches()) {
-//            throw new IllegalArgumentException("Invalid field name: " + fieldName +
-//                    ". No letter '[', ']', '{' and '}' is accepted by field name.");
-//        }
-//        return unsafeGetChild(fieldName);
-//    }
-//
-//    @Override
-//    public final Node getChild(Integer index) {
-//        if (index == null || index < 0) {
-//            throw new IllegalArgumentException("Index must be nonnegative.");
-//        }
-//        return unsafeGetChild(index);
-//    }
-
     protected final String childPath(String fieldName) {
         Matcher matcher = FIELD_NAME_PATTERN.matcher(fieldName);
         if (!matcher.matches()) {
@@ -64,9 +46,5 @@ public abstract class AbstractNode implements Node {
 
         return this.path + ".[" + index + "]";
     }
-
-//    protected abstract Node unsafeGetChild(String fieldName);
-//
-//    protected abstract Node unsafeGetChild(Integer index);
 
 }
