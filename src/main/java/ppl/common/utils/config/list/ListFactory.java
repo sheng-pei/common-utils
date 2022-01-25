@@ -30,6 +30,7 @@ public class ListFactory implements NodeFactory {
         if (!accept(obj)) {
             throw new IllegalArgumentException("Not list.");
         }
+
         return new ListNode(path, (List<?>) obj);
     }
 }

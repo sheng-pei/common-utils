@@ -1,4 +1,4 @@
-package ppl.common.utils.config.convert;
+package ppl.common.utils.config;
 
 public class ConvertException extends RuntimeException {
     public ConvertException() {

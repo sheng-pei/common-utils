@@ -2,9 +2,9 @@ package ppl.common.utils.config;
 
 public interface Value {
 
-    default boolean isMissing() {
-        return false;
-    }
+    byte[] binaryValue();
+
+    byte[] binaryValue(byte[] def);
 
     String textValue(String def);
 

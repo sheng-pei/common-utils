@@ -38,6 +38,14 @@ public interface Node extends Value {
     String PATH_SEPARATOR = ".";
     Pattern FIELD_NAME_PATTERN = Pattern.compile("^[^\\[\\]\\{\\}]+$");
 
+    default boolean isMissing() {
+        return false;
+    }
+
+    default boolean isContainer() {
+        return false;
+    }
+
     /**
      * @return the key of this node. for elements of a List node, [1] for example,
      * for fields of a Object node, fieldName or {fieldName} to avoid ambiguity;

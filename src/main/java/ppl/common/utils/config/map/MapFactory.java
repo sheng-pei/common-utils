@@ -21,6 +21,7 @@ public class MapFactory implements NodeFactory {
         if (!accept(obj)) {
             throw new IllegalArgumentException("Not map.");
         }
+
         return new MapNode((Map<?, ?>) obj);
     }
 
@@ -29,6 +30,7 @@ public class MapFactory implements NodeFactory {
         if (!accept(obj)) {
             throw new IllegalArgumentException("Not map.");
         }
+
         return new MapNode(path, (Map<?, ?>) obj);
     }
 }

@@ -1,24 +1,36 @@
 package ppl.common.utils.config;
 
 /**
- * Check if the object can be accepted by NodeFactory one by one, until any NodeFactory accepting the object.
+ * Factory interface for node {@link Node} instances of tree config.
  */
 public interface NodeFactory {
+
     /**
-     * Please return nonnegative order value, if you want to create your own NodeFactory.
-     * You can create NodeFactory with negative order value, if you do know what you are doing.
-     * If the different NodeFactories have same order value, please make sure no object can be accepted by them.
+     * Get the order value of a factory.
      * @return order value.
      */
     int order();
 
     /**
-     * Check if the specified obj can be accepted by this NodeFactory.
-     * @param obj target obj.
-     * @return true if accepted, otherwise false.
+     * Check if the specified material can be accepted for processing.
+     * @param material the material to process.
+     * @return true if the specified material can be accepted for processing, false if not.
      */
-    boolean accept(Object obj);
+    boolean accept(Object material);
 
-    Node createRoot(Object obj);
-    Node create(String path, Object obj);
+    /**
+     * Create a root node out of the material.
+     * @param material the material to process.
+     * @return
+     */
+    Node createRoot(Object material);
+
+    /**
+     * Create a node out of the material.
+     * @param path the config path of the created node.
+     * @param material the material to process.
+     * @return
+     */
+    Node create(String path, Object material);
+
 }

@@ -2,6 +2,7 @@ package ppl.common.utils.config.convert;
 
 import ppl.common.utils.Condition;
 import ppl.common.utils.StringUtils;
+import ppl.common.utils.config.ConvertException;
 import ppl.common.utils.enumerate.EnumEncoderNotSupportedException;
 import ppl.common.utils.enumerate.EnumUtils;
 import ppl.common.utils.logging.Logger;

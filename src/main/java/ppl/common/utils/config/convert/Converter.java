@@ -1,20 +1,11 @@
 package ppl.common.utils.config.convert;
 
-import ppl.common.utils.Condition;
-import ppl.common.utils.enumerate.EnumUtils;
+import ppl.common.utils.config.ConvertException;
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.TypeUtils;
-import ppl.common.utils.enumerate.EnumEncoderNotSupportedException;
-import ppl.common.utils.enumerate.UnknownEnumException;
 import ppl.common.utils.logging.Logger;
 import ppl.common.utils.logging.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class Converter<C> {
 

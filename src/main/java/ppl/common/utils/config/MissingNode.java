@@ -39,6 +39,16 @@ public final class MissingNode extends AbstractNode {
     }
 
     @Override
+    public byte[] binaryValue() {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] binaryValue(byte[] def) {
+        return new byte[0];
+    }
+
+    @Override
     public String textValue(String def) {
         return def;
     }

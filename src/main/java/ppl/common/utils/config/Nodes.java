@@ -1,6 +1,7 @@
 package ppl.common.utils.config;
 
 import ppl.common.utils.StringUtils;
+import ppl.common.utils.config.jackson.JacksonFactory;
 import ppl.common.utils.config.list.ListFactory;
 import ppl.common.utils.config.list.ListNode;
 import ppl.common.utils.config.map.MapFactory;
@@ -15,19 +16,20 @@ import java.util.function.Function;
 
 public class Nodes {
 
-    public static List<NodeFactory> factories;
+    private static final List<NodeFactory> FACTORIES;
 
     static {
         List<NodeFactory> factories = new ArrayList<>();
         factories.add(new ScalarFactory());
         factories.add(new ListFactory());
         factories.add(new MapFactory());
+        factories.add(new JacksonFactory());
         ServiceLoader<NodeFactory> loader = ServiceLoader.load(NodeFactory.class);
         for (NodeFactory factory : loader) {
             factories.add(factory);
         }
         factories.sort(Comparator.comparing(NodeFactory::order, Comparator.reverseOrder()));
-        Nodes.factories = factories;
+        FACTORIES = factories;
     }
 
     private Nodes() {}
@@ -37,7 +39,7 @@ public class Nodes {
             return new NullNode();
         }
 
-        for (NodeFactory factory : factories) {
+        for (NodeFactory factory : FACTORIES) {
             if (factory.accept(object)) {
                 return factory.createRoot(object);
             }
@@ -51,7 +53,7 @@ public class Nodes {
             return new NullNode(path);
         }
 
-        for (NodeFactory factory : factories) {
+        for (NodeFactory factory : FACTORIES) {
             if (factory.accept(object)) {
                 return factory.create(path, object);
             }
