@@ -15,8 +15,10 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Utility class for instantiating various nodes of the tree config, except for {@link MissingNode}. The specific work
- * is delegates to one of {@link NodeFactory NodeFactories}. The factories will be sorted by 
+ * Utility class for instantiating various nodes of tree configs, except for {@link MissingNode}. The specific work
+ * is delegates to one of {@link NodeFactory NodeFactories}. Each factory has an order value. And lower order values
+ * have higher priority. If some factories have the same order value, this class uses the factory's register order to
+ * break the tie.
  */
 public class Nodes {
 
@@ -39,43 +41,48 @@ public class Nodes {
     private Nodes() {}
 
     /**
-     * Method for creating root node of tree config. 算法描述 工厂 accept create meterial
+     * Method for creating a root node. This method iterates all factories according to the priority to check that
+     * the specified meterial is accepted by one of factories. Once an accepting factory is visited, it will create
+     * a root node out of the specified material. And this method will stop iterating.
      * @param material the material to process.
-     * @return root node out of the specified meterial. It is created by a factory that accepts the meterial .
+     * @return root node out of the specified meterial. It is created by a factory that accepts the meterial and
+     * has highest priority.
      * @throws IllegalArgumentException if no factory accepts the specified meterial.
      */
-    public static Node root(Object meterial) {
-        if (meterial == null) {
+    public static Node root(Object material) {
+        if (material == null) {
             return new NullNode();
         }
 
-        for (NodeFactory factory : FACTORIES) {
-            if (factory.accept(meterial)) {
-                return factory.createRoot(meterial);
-            }
-        }
-
-        throw new IllegalArgumentException("No NodeFactory accept this object.");
+        return visitFactories(material).createRoot(material);
     }
 
     /**
-     *
-     * @param path
-     * @param object
-     * @return
+     * Method for creating a node whose path is the specified path. This method iterates all factories according to the
+     * priority to check that the specified material is accepted by one of the factories. Once an accepting factory
+     * is visited, it will create a node out of the material. Then this method will stop iterating.
+     * @param path the path of this node.
+     * @param material the material to process.
+     * @return a node out of the specified material whose path is the specified path. It is created by a factory that
+     * accepts the material and has highest priority.
+     * @throws IllegalArgumentException if no factory accepts the specified material.
      */
-    public static Node createByPath(String path, Object object) {
-        if (object == null) {
+    public static Node createByPath(String path, Object material) {
+        if (material == null) {
             return new NullNode(path);
         }
 
+        return visitFactories(material).create(path, material);
+    }
+
+    private static NodeFactory visitFactories(Object material) {
         for (NodeFactory factory : FACTORIES) {
-            if (factory.accept(object)) {
-                return factory.create(path, object);
+            if (factory.accept(material)) {
+                return factory;
             }
         }
 
-        throw new IllegalArgumentException("No NodeFactory accept this object.");
+        throw new IllegalArgumentException("No NodeFactory accepts this material.");
     }
 
 }
