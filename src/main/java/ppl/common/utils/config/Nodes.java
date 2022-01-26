@@ -14,6 +14,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * Utility class for instantiating nodes of the tree config, except for {@link MissingNode}.
+ */
 public class Nodes {
 
     private static final List<NodeFactory> FACTORIES;
@@ -34,6 +37,11 @@ public class Nodes {
 
     private Nodes() {}
 
+    /**
+     *
+     * @param object
+     * @return
+     */
     public static Node root(Object object) {
         if (object == null) {
             return new NullNode();
@@ -48,6 +56,12 @@ public class Nodes {
         throw new IllegalArgumentException("No NodeFactory accept this object.");
     }
 
+    /**
+     *
+     * @param path
+     * @param object
+     * @return
+     */
     public static Node createByPath(String path, Object object) {
         if (object == null) {
             return new NullNode(path);

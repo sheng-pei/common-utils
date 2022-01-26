@@ -33,6 +33,11 @@ public class JacksonNode extends AbstractNode {
     }
 
     @Override
+    public boolean isRoot() {
+        return false;
+    }
+
+    @Override
     public int size() {
         return json.size();
     }

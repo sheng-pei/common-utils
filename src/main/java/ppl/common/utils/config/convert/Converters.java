@@ -37,11 +37,6 @@ public final class Converters {
     private final Map<Class<?>, Converter<?>> CUSTOM_CONVERTERS = new HashMap<>();
 
     private Converters() {
-        Converter<Character> charConverter = new Converter<>("char", (o, c) -> {
-            return Character.class.cast(o);
-        });
-        SYSTEM_CONVERTERS.put(Character.class, charConverter);
-        SYSTEM_CONVERTERS.put(char.class, charConverter);
 
         Converter<Byte> byteConverter = new Converter<>("byte", (o, c) -> {
             if (o == null) {

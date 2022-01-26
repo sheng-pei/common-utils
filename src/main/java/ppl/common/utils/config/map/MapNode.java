@@ -25,6 +25,11 @@ public final class MapNode extends AbstractNode {
     }
 
     @Override
+    public boolean isRoot() {
+        return false;
+    }
+
+    @Override
     public int size() {
         return this.map.size();
     }

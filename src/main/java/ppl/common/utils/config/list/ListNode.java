@@ -21,6 +21,11 @@ public final class ListNode extends AbstractNode {
     }
 
     @Override
+    public boolean isRoot() {
+        return false;
+    }
+
+    @Override
     public int size() {
         return this.list.size();
     }

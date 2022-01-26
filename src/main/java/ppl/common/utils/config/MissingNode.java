@@ -19,6 +19,11 @@ public final class MissingNode extends AbstractNode {
     }
 
     @Override
+    public boolean isRoot() {
+        return false;
+    }
+
+    @Override
     public int size() {
         return 0;
     }

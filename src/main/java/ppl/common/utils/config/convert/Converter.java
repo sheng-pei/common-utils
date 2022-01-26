@@ -42,7 +42,7 @@ public class Converter<C> {
         try {
             return this.convertFunc.apply(obj, targetClazz);
         } catch (Throwable t) {
-            throw new ConvertException(StringUtils.format(INCOMPATIBLE_TYPE_MESSAGE, this.name), t);
+            throw new ConvertException(StringUtils.format(INCOMPATIBLE_TYPE_MESSAGE, targetClazz.getName()), t);
         }
     }
 
