@@ -141,8 +141,8 @@ public interface Value {
      * Method for accessing enum data that is converted from the data this node contains.
      * @param enumClass the enum class needed.
      * @return Returns, by default, enum data that matches the specified class. The data this node contains is
-     * deserialized using {@link ppl.common.utils.enumerate.EnumEncoder} first. If the specified class is not support
-     * {@link ppl.common.utils.enumerate.EnumEncoder}, using named or ordinal instead.
+     * deserialized using {@link ppl.common.utils.enumerate.EnumEncoder @EnumEncoder} first. If the specified class is not support
+     * {@link ppl.common.utils.enumerate.EnumEncoder @EnumEncoder}, using named or ordinal instead.
      * @throws ConvertException if no conversion is possible from the data this node contains to enum data.
      */
     <E extends Enum<E>> E enumValue(Class<E> enumClass);

@@ -15,7 +15,8 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Utility class for instantiating nodes of the tree config, except for {@link MissingNode}.
+ * Utility class for instantiating various nodes of the tree config, except for {@link MissingNode}. The specific work
+ * is delegates to one of {@link NodeFactory NodeFactories}. The factories will be sorted by 
  */
 public class Nodes {
 
@@ -38,18 +39,19 @@ public class Nodes {
     private Nodes() {}
 
     /**
-     *
-     * @param object
-     * @return
+     * Method for creating root node of tree config. 算法描述 工厂 accept create meterial
+     * @param material the material to process.
+     * @return root node out of the specified meterial. It is created by a factory that accepts the meterial .
+     * @throws IllegalArgumentException if no factory accepts the specified meterial.
      */
-    public static Node root(Object object) {
-        if (object == null) {
+    public static Node root(Object meterial) {
+        if (meterial == null) {
             return new NullNode();
         }
 
         for (NodeFactory factory : FACTORIES) {
-            if (factory.accept(object)) {
-                return factory.createRoot(object);
+            if (factory.accept(meterial)) {
+                return factory.createRoot(meterial);
             }
         }
 
