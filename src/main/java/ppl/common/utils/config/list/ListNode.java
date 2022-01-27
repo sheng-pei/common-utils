@@ -10,12 +10,12 @@ public final class ListNode extends AbstractNode {
 
     private final List<?> list;
 
-    public ListNode(List<?> list) {
+    ListNode(List<?> list) {
         super();
         this.list = list;
     }
 
-    public ListNode(String path, List<?> list) {
+    ListNode(String path, List<?> list) {
         super(path);
         this.list = list;
     }
@@ -140,7 +140,7 @@ public final class ListNode extends AbstractNode {
     private class Iter implements Iterator<Node> {
 
         private int cursor = 0;
-        private Iterator<?> iter;
+        private final Iterator<?> iter;
 
         private Iter() {
             this.iter = ListNode.this.iterator();

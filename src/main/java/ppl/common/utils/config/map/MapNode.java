@@ -9,12 +9,12 @@ public final class MapNode extends AbstractNode {
 
     private final Map<?, ?> map;
 
-    public MapNode(Map<?, ?> map) {
+    MapNode(Map<?, ?> map) {
         super();
         this.map = map;
     }
 
-    public MapNode(String path, Map<?, ?> map) {
+    MapNode(String path, Map<?, ?> map) {
         super(path);
         this.map = map;
     }

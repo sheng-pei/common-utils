@@ -14,12 +14,12 @@ public final class ScalarNode extends AbstractNode {
 
     private final Object scalar;
 
-    public ScalarNode(Object scalar) {
+    ScalarNode(Object scalar) {
         super();
         this.scalar = scalar;
     }
 
-    public ScalarNode(String path, Object scalar) {
+    ScalarNode(String path, Object scalar) {
         super(path);
         this.scalar = scalar;
     }
