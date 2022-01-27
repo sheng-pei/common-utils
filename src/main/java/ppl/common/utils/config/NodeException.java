@@ -1,5 +1,8 @@
 package ppl.common.utils.config;
 
+/**
+ * Signal fatal problems with parsing content in container node.
+ */
 public class NodeException extends RuntimeException {
     public NodeException() {
         super();

@@ -8,6 +8,8 @@ import ppl.common.utils.config.map.MapFactory;
 import ppl.common.utils.config.map.MapNode;
 import ppl.common.utils.config.scalar.ScalarFactory;
 import ppl.common.utils.config.scalar.ScalarNode;
+import ppl.common.utils.logging.Logger;
+import ppl.common.utils.logging.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -17,11 +19,13 @@ import java.util.function.Function;
 /**
  * Utility class for instantiating various nodes of tree configs, except for {@link MissingNode}. The specific work
  * is delegates to one of {@link NodeFactory NodeFactories}. Each factory has an order value. And lower order values
- * have higher priority. If some factories have the same order value, this class uses the factory's register order to
- * break the tie.
+ * have higher priority. If you want to custom NodeFactory, please give a nonnegative order value with it. Otherwise
+ * this utility will ignore it. Meanwhile, it is your responsibility to make sure that no two factories have the
+ * same order value. If some factories have the same order value, this utility will ignore one of them.
  */
 public class Nodes {
 
+    private static final Logger logger = LoggerFactory.getLogger(Nodes.class);
     private static final List<NodeFactory> FACTORIES;
 
     static {
@@ -30,8 +34,25 @@ public class Nodes {
         factories.add(new ListFactory());
         factories.add(new MapFactory());
         factories.add(new JacksonFactory());
+
+        Map<Integer, NodeFactory> seen = new HashMap<>();
         ServiceLoader<NodeFactory> loader = ServiceLoader.load(NodeFactory.class);
         for (NodeFactory factory : loader) {
+            if (factory.order() < 0) {
+                logger.warn("Ignore the custom NodeFactory \"{}\". " +
+                                "Because the order value of this factory is negative.",
+                        factory.getClass().getName());
+                continue;
+            }
+
+            if (seen.containsKey(factory.order())) {
+                logger.warn("Ignore the custom NodeFactory \"{}\". " +
+                                "Because the order value of this factory is the same as that of the factory \"{}\".",
+                        factory.getClass().getName(), seen.get(factory.order()).getClass().getName());
+                continue;
+            }
+
+            seen.put(factory.order(), factory);
             factories.add(factory);
         }
         factories.sort(Comparator.comparing(NodeFactory::order, Comparator.reverseOrder()));

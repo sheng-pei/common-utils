@@ -85,6 +85,7 @@ public interface Node extends Value {
      * @param fieldName name of a field to get.
      * @return the node you expected if this node is an object node and has the specified field,
      * otherwise {@link MissingNode} is returned.
+     * @throws NodeException when fatal problems happen.
      */
     Node getChild(String fieldName);
 
@@ -93,6 +94,7 @@ public interface Node extends Value {
      * @param index index of element to get.
      * @return the node you expected if this node is an array node and contains the specified element,
      * otherwise {@link MissingNode} is returned.
+     * @throws NodeException when fatal problems happen.
      */
     Node getChild(Integer index);
 
