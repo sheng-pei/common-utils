@@ -1,11 +1,8 @@
-package ppl.common.utils.config.jackson;
+package ppl.common.utils.config.nodes.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import ppl.common.utils.config.Node;
 import ppl.common.utils.config.NodeFactory;
-import ppl.common.utils.config.list.ListNode;
-
-import java.util.List;
 
 public class JacksonFactory implements NodeFactory {
     @Override
@@ -24,11 +21,7 @@ public class JacksonFactory implements NodeFactory {
 
     @Override
     public Node createRoot(Object obj) {
-        if (!accept(obj)) {
-            throw new IllegalArgumentException("Not jackson.");
-        }
-
-        return new JacksonNode((JsonNode) obj);
+        return create(Node.ROOT_PATH, obj);
     }
 
     @Override

@@ -1,27 +1,19 @@
-package ppl.common.utils.config.scalar;
+package ppl.common.utils.config.nodes;
 
-import ppl.common.utils.config.AbstractNode;
-import ppl.common.utils.config.MissingNode;
 import ppl.common.utils.config.Node;
-import ppl.common.utils.config.NullNode;
-import ppl.common.utils.config.convert.Converter;
-import ppl.common.utils.config.convert.Converters;
 
 import java.util.Collections;
 import java.util.Iterator;
 
-public final class ScalarNode extends AbstractNode {
+public final class MissingNode extends AbstractNode {
 
-    private final Object scalar;
-
-    ScalarNode(Object scalar) {
-        super();
-        this.scalar = scalar;
+    public MissingNode(String path) {
+        super(path);
     }
 
-    ScalarNode(String path, Object scalar) {
-        super(path);
-        this.scalar = scalar;
+    @Override
+    public boolean isMissing() {
+        return true;
     }
 
     @Override
@@ -61,84 +53,76 @@ public final class ScalarNode extends AbstractNode {
 
     @Override
     public String textValue(String def) {
-        String res = textValue();
-        return res == null ? def : res;
+        return def;
     }
 
     @Override
     public String textValue() {
-        return Converters.convert(scalar, String.class);
+        return null;
     }
 
     @Override
     public Byte byteValue(Byte def) {
-        Byte res = byteValue();
-        return res == null ? def : res;
+        return def;
     }
 
     @Override
     public Byte byteValue() {
-        return Converters.convert(scalar, Byte.class);
+        return null;
     }
 
     @Override
     public Short shortValue(Short def) {
-        Short res = shortValue();
-        return res == null ? def : res;
+        return def;
     }
 
     @Override
     public Short shortValue() {
-        return Converters.convert(scalar, Short.class);
+        return null;
     }
 
     @Override
     public Integer intValue(Integer def) {
-        Integer res = intValue();
-        return res == null ? def : res;
+        return def;
     }
 
     @Override
     public Integer intValue() {
-        return Converters.convert(scalar, Integer.class);
+        return null;
     }
 
     @Override
     public Long longValue(Long def) {
-        Long res = longValue();
-        return res == null ? def : res;
+        return def;
     }
 
     @Override
     public Long longValue() {
-        return Converters.convert(scalar, Long.class);
+        return null;
     }
 
     @Override
     public Boolean boolValue(Boolean def) {
-        Boolean res = boolValue();
-        return res == null ? def : res;
+        return def;
     }
 
     @Override
     public Boolean boolValue() {
-        return Converters.convert(scalar, Boolean.class);
+        return null;
     }
 
     @Override
     public Double doubleValue() {
-        return Converters.convert(scalar, Double.class);
+        return null;
     }
 
     @Override
     public Double doubleValue(Double def) {
-        Double res = doubleValue();
-        return res == null ? def : res;
+        return def;
     }
 
     @Override
     public <E extends Enum<E>> E enumValue(Class<E> enumClass) {
-        return Converters.convert(scalar, enumClass);
+        return null;
     }
-
 }

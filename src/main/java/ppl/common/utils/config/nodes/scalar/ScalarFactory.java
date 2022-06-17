@@ -1,4 +1,4 @@
-package ppl.common.utils.config.scalar;
+package ppl.common.utils.config.nodes.scalar;
 
 import ppl.common.utils.config.Node;
 import ppl.common.utils.config.NodeFactory;
@@ -16,7 +16,7 @@ public class ScalarFactory implements NodeFactory {
 
     @Override
     public Node createRoot(Object obj) {
-        return new ScalarNode(obj);
+        return create(Node.ROOT_PATH, obj);
     }
 
     @Override

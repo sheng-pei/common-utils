@@ -1,13 +1,11 @@
-package ppl.common.utils.config;
+package ppl.common.utils.config.nodes;
+
+import ppl.common.utils.config.Node;
 
 import java.util.Collections;
 import java.util.Iterator;
 
 public final class NullNode extends AbstractNode {
-
-    public NullNode() {
-        super();
-    }
 
     public NullNode(String path) {
         super(path);

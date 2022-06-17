@@ -1,6 +1,8 @@
-package ppl.common.utils.config.list;
+package ppl.common.utils.config.nodes.list;
 
 import ppl.common.utils.config.*;
+import ppl.common.utils.config.nodes.AbstractNode;
+import ppl.common.utils.config.nodes.MissingNode;
 
 import java.util.Iterator;
 import java.util.List;
@@ -9,11 +11,6 @@ import java.util.NoSuchElementException;
 public final class ListNode extends AbstractNode {
 
     private final List<?> list;
-
-    ListNode(List<?> list) {
-        super();
-        this.list = list;
-    }
 
     ListNode(String path, List<?> list) {
         super(path);

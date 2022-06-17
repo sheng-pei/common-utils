@@ -1,18 +1,15 @@
-package ppl.common.utils.config.map;
+package ppl.common.utils.config.nodes.map;
 
 import ppl.common.utils.config.*;
 import ppl.common.utils.config.ConvertException;
+import ppl.common.utils.config.nodes.AbstractNode;
+import ppl.common.utils.config.nodes.MissingNode;
 
 import java.util.*;
 
 public final class MapNode extends AbstractNode {
 
     private final Map<?, ?> map;
-
-    MapNode(Map<?, ?> map) {
-        super();
-        this.map = map;
-    }
 
     MapNode(String path, Map<?, ?> map) {
         super(path);

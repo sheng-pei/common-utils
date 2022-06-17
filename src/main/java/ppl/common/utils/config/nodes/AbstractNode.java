@@ -1,4 +1,6 @@
-package ppl.common.utils.config;
+package ppl.common.utils.config.nodes;
+
+import ppl.common.utils.config.Node;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,18 +10,32 @@ public abstract class AbstractNode implements Node {
     private final int keyStart;
     private final String path;
 
-    protected AbstractNode() {
-        this.keyStart = 1;
-        this.path = Node.ROOT_PATH;
-    }
-
     protected AbstractNode(String path) {
         this.keyStart = path.lastIndexOf(Node.PATH_SEPARATOR) + 1;
         this.path = path;
     }
 
     @Override
-    public final String key() {
+    public final Integer index() {
+        String k = key();
+        if (k.startsWith("[")) {
+            return Integer.parseInt(k.substring(1, k.length() - 1));
+        }
+        return null;
+    }
+
+    @Override
+    public final String fieldName() {
+        String k = key();
+        if (k.startsWith("{")) {
+            return k.substring(1, k.length() - 1);
+        } else if (!k.startsWith("[")) {
+            return k;
+        }
+        return null;
+    }
+
+    private final String key() {
         return this.path.substring(this.keyStart);
     }
 

@@ -1,4 +1,4 @@
-package ppl.common.utils.config.list;
+package ppl.common.utils.config.nodes.list;
 
 import ppl.common.utils.config.Node;
 import ppl.common.utils.config.NodeFactory;
@@ -18,11 +18,7 @@ public class ListFactory implements NodeFactory {
 
     @Override
     public Node createRoot(Object obj) {
-        if (!accept(obj)) {
-            throw new IllegalArgumentException("Not list.");
-        }
-
-        return new ListNode((List<?>) obj);
+        return create(Node.ROOT_PATH, obj);
     }
 
     @Override

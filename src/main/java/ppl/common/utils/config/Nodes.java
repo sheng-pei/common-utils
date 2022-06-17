@@ -1,20 +1,25 @@
 package ppl.common.utils.config;
 
-import ppl.common.utils.config.jackson.JacksonFactory;
-import ppl.common.utils.config.list.ListFactory;
-import ppl.common.utils.config.map.MapFactory;
-import ppl.common.utils.config.scalar.ScalarFactory;
+import ppl.common.utils.config.nodes.MissingNode;
+import ppl.common.utils.config.nodes.NullNode;
+import ppl.common.utils.config.nodes.jackson.JacksonFactory;
+import ppl.common.utils.config.nodes.list.ListFactory;
+import ppl.common.utils.config.nodes.map.MapFactory;
+import ppl.common.utils.config.nodes.scalar.ScalarFactory;
 import ppl.common.utils.logging.Logger;
 import ppl.common.utils.logging.LoggerFactory;
 
 import java.util.*;
+import java.util.regex.Matcher;
 
 /**
- * Utility class for instantiating various nodes of tree configs, except for {@link MissingNode}. The specific work
- * is delegates to one of {@link NodeFactory NodeFactories}. Each factory has an order value. And higher order values
- * have higher priority. If you want to custom NodeFactory, please give a nonnegative order value with it. Otherwise
- * this utility will ignore it. Meanwhile, it is your responsibility to make sure that no two factories have the
- * same order value. If some factories have the same order value, this utility will ignore one of them.
+ * Utility class for making various {@link Node}s except for {@link MissingNode}.
+ * Node making is delegated to {@link NodeFactory}s, each of which requires an
+ * order value. The factory with a higher order value has higher priority in node
+ * making. If you want to implement factory for yourself, please provide a nonnegative
+ * order value for it. Otherwise this factory will be ignored by this utility.
+ * Meanwhile, it is your responsibility to make sure that no two factories have the
+ * same order value. Otherwise, this utility will keep one of them and ignore the others.
  */
 public class Nodes {
 
@@ -67,11 +72,7 @@ public class Nodes {
      * @throws IllegalArgumentException if no factory accepts the specified material.
      */
     public static Node root(Object material) {
-        if (material == null) {
-            return new NullNode();
-        }
-
-        return visitFactories(material).createRoot(material);
+        return createByPath(Node.ROOT_PATH, material);
     }
 
     /**
@@ -87,6 +88,13 @@ public class Nodes {
      * @throws IllegalArgumentException if no factory accepts the specified material.
      */
     public static Node createByPath(String path, Object material) {
+        Matcher matcher = Node.PATH_PATTERN.matcher(path);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Invalid path: " + path + ". Use a period('.') for root " +
+                    "or string composed of cells which are result of concating a period('.') and a key " +
+                    "which is '[' index ']' or field name string with no letter '[', ']', or '{' field name '}'.");
+        }
+
         if (material == null) {
             return new NullNode(path);
         }

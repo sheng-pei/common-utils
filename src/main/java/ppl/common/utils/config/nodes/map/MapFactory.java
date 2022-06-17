@@ -1,4 +1,4 @@
-package ppl.common.utils.config.map;
+package ppl.common.utils.config.nodes.map;
 
 import ppl.common.utils.config.Node;
 import ppl.common.utils.config.NodeFactory;
@@ -18,11 +18,7 @@ public class MapFactory implements NodeFactory {
 
     @Override
     public Node createRoot(Object obj) {
-        if (!accept(obj)) {
-            throw new IllegalArgumentException("Not map.");
-        }
-
-        return new MapNode((Map<?, ?>) obj);
+        return create(Node.ROOT_PATH, obj);
     }
 
     @Override

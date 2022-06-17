@@ -1,5 +1,7 @@
 package ppl.common.utils.config;
 
+import ppl.common.utils.config.nodes.MissingNode;
+
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
@@ -35,6 +37,7 @@ public interface Node extends Value {
     String ROOT_PATH = ".";
     String PATH_SEPARATOR = ".";
     Pattern FIELD_NAME_PATTERN = Pattern.compile("^[^\\[\\]\\{\\}]+$");
+    Pattern PATH_PATTERN = Pattern.compile("^\\.|(\\.(\\[[0-9]+\\]|\\{[^\\[\\]\\{\\}]+\\}|[^\\[\\]\\{\\}]+))+$");
 
     /**
      * Method that returns true for "virtual" nodes which represent missing entries constructed by accessor methods
@@ -60,12 +63,14 @@ public interface Node extends Value {
     boolean isRoot();
 
     /**
-     * Method that returns the key of this node. For elements of an array node, given [1] as an example;
-     * for fields of an object node, given fieldName or {fieldName} to avoid ambiguity as examples;
-     * for root, empty string.
-     * @return the key of this node.
+     * @return the index of this node if it is in an array, otherwise null.
      */
-    String key();
+    Integer index();
+
+    /**
+     * @return the field name of this node if it is in an object, otherwise null.
+     */
+    String fieldName();
 
     /**
      * Method that returns the path of this node, for example ".key1.key2". The keys "", "key1" and "key2"

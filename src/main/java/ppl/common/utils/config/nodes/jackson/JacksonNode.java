@@ -1,26 +1,21 @@
-package ppl.common.utils.config.jackson;
+package ppl.common.utils.config.nodes.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.POJONode;
 import ppl.common.utils.config.*;
-import ppl.common.utils.config.scalar.ScalarNode;
+import ppl.common.utils.config.nodes.AbstractNode;
+import ppl.common.utils.config.nodes.MissingNode;
 import ppl.common.utils.logging.Logger;
 import ppl.common.utils.logging.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 
 public class JacksonNode extends AbstractNode {
 
     private final static Logger logger = LoggerFactory.getLogger(JacksonNode.class);
 
     private final JsonNode json;
-
-    JacksonNode(JsonNode json) {
-        super();
-        this.json = json;
-    }
 
     JacksonNode(String path, JsonNode json) {
         super(path);
