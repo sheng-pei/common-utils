@@ -18,11 +18,6 @@ public final class ScalarNode extends AbstractNode {
     }
 
     @Override
-    public boolean isRoot() {
-        return false;
-    }
-
-    @Override
     public int size() {
         return 0;
     }
@@ -43,12 +38,12 @@ public final class ScalarNode extends AbstractNode {
     }
 
     @Override
-    public byte[] binaryValue() {
+    public byte[] binaryValue(byte[] def) {
         return new byte[0];
     }
 
     @Override
-    public byte[] binaryValue(byte[] def) {
+    public byte[] binaryValue() {
         return new byte[0];
     }
 
@@ -119,14 +114,14 @@ public final class ScalarNode extends AbstractNode {
     }
 
     @Override
-    public Double doubleValue() {
-        return Converters.convert(scalar, Double.class);
-    }
-
-    @Override
     public Double doubleValue(Double def) {
         Double res = doubleValue();
         return res == null ? def : res;
+    }
+
+    @Override
+    public Double doubleValue() {
+        return Converters.convert(scalar, Double.class);
     }
 
     @Override

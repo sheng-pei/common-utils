@@ -28,11 +28,6 @@ public class JacksonNode extends AbstractNode {
     }
 
     @Override
-    public boolean isRoot() {
-        return false;
-    }
-
-    @Override
     public int size() {
         return json.size();
     }
@@ -89,12 +84,12 @@ public class JacksonNode extends AbstractNode {
     }
 
     @Override
-    public byte[] binaryValue() {
+    public byte[] binaryValue(byte[] def) {
         return new byte[0];
     }
 
     @Override
-    public byte[] binaryValue(byte[] def) {
+    public byte[] binaryValue() {
         return new byte[0];
     }
 
@@ -196,7 +191,7 @@ public class JacksonNode extends AbstractNode {
     }
 
     @Override
-    public Double doubleValue() {
+    public Double doubleValue(Double def) {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");
         }
@@ -204,7 +199,7 @@ public class JacksonNode extends AbstractNode {
     }
 
     @Override
-    public Double doubleValue(Double def) {
+    public Double doubleValue() {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");
         }

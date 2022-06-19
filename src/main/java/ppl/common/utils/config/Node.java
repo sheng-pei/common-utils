@@ -36,8 +36,7 @@ public interface Node extends Value {
 
     String ROOT_PATH = ".";
     String PATH_SEPARATOR = ".";
-    Pattern FIELD_NAME_PATTERN = Pattern.compile("^[^\\[\\]\\{\\}]+$");
-    Pattern PATH_PATTERN = Pattern.compile("^\\.|(\\.(\\[[0-9]+\\]|\\{[^\\[\\]\\{\\}]+\\}|[^\\[\\]\\{\\}]+))+$");
+    Pattern PATH_PATTERN = Pattern.compile("^(\\.)|(?:(\\.)(?:\\[[0-9]+]|\\{[^\\[\\]{}]+}|[^\\[\\]{}.]+))+$");
 
     /**
      * Method that returns true for "virtual" nodes which represent missing entries constructed by accessor methods

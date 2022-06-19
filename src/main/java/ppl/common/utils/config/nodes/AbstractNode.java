@@ -3,7 +3,6 @@ package ppl.common.utils.config.nodes;
 import ppl.common.utils.config.Node;
 
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public abstract class AbstractNode implements Node {
 
@@ -11,8 +10,22 @@ public abstract class AbstractNode implements Node {
     private final String path;
 
     protected AbstractNode(String path) {
-        this.keyStart = path.lastIndexOf(Node.PATH_SEPARATOR) + 1;
+        Matcher matcher = Node.PATH_PATTERN.matcher(path);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException(
+                    "Invalid path: " + path + ". Use a period('.') for root " +
+                            "or string composed of cells which are result of " +
+                            "concatenating a period('.') and a key which is '[' index ']' " +
+                            "or field name, nonempty string with no letter '[', ']', or '{' field name '}'.");
+        }
+
+        this.keyStart = path.equals(".") ? 1 : matcher.end(matcher.groupCount());
         this.path = path;
+    }
+
+    @Override
+    public final boolean isRoot() {
+        return path.equals(ROOT_PATH);
     }
 
     @Override
@@ -35,7 +48,7 @@ public abstract class AbstractNode implements Node {
         return null;
     }
 
-    private final String key() {
+    private String key() {
         return this.path.substring(this.keyStart);
     }
 
@@ -45,22 +58,19 @@ public abstract class AbstractNode implements Node {
     }
 
     protected final String childPath(String fieldName) {
-        Matcher matcher = FIELD_NAME_PATTERN.matcher(fieldName);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Invalid field name: " + fieldName +
-                    ". No letter '[', ']', '{' and '}' is acceptable.");
+        if (fieldName.startsWith("{") || fieldName.startsWith("[")) {
+            throw new IllegalArgumentException("FieldName do not allow for starting with '{' or '['.");
         }
-
-        String key = fieldName.contains(".") ? "{" + fieldName + "}" : fieldName;
-        return this.path + "." + key;
+        String key = fieldName.contains(PATH_SEPARATOR) ? "{" + fieldName + "}" : fieldName;
+        return this.path + (isRoot() ? "" : PATH_SEPARATOR) + key;
     }
 
     protected final String childPath(Integer index) {
         if (index == null || index < 0) {
-            throw new IllegalArgumentException("Index must be nonnegative.");
+            throw new IllegalArgumentException("Index must be non-negative.");
         }
-
-        return this.path + ".[" + index + "]";
+        String key = "[" + index + "]";
+        return this.path + (isRoot() ? "" : PATH_SEPARATOR) + key;
     }
 
 }

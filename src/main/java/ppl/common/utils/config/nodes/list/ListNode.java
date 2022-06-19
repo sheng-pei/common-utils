@@ -18,11 +18,6 @@ public final class ListNode extends AbstractNode {
     }
 
     @Override
-    public boolean isRoot() {
-        return false;
-    }
-
-    @Override
     public int size() {
         return this.list.size();
     }
@@ -50,13 +45,13 @@ public final class ListNode extends AbstractNode {
     }
 
     @Override
-    public byte[] binaryValue() {
-        return new byte[0];
+    public byte[] binaryValue(byte[] def) {
+        throw new ConvertException("Container node");
     }
 
     @Override
-    public byte[] binaryValue(byte[] def) {
-        return new byte[0];
+    public byte[] binaryValue() {
+        throw new ConvertException("Container node");
     }
 
     @Override
@@ -120,12 +115,12 @@ public final class ListNode extends AbstractNode {
     }
 
     @Override
-    public Double doubleValue() {
+    public Double doubleValue(Double def) {
         throw new ConvertException("Container node");
     }
 
     @Override
-    public Double doubleValue(Double def) {
+    public Double doubleValue() {
         throw new ConvertException("Container node");
     }
 

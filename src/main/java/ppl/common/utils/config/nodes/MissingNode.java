@@ -17,11 +17,6 @@ public final class MissingNode extends AbstractNode {
     }
 
     @Override
-    public boolean isRoot() {
-        return false;
-    }
-
-    @Override
     public int size() {
         return 0;
     }
@@ -42,13 +37,13 @@ public final class MissingNode extends AbstractNode {
     }
 
     @Override
-    public byte[] binaryValue() {
-        return new byte[0];
+    public byte[] binaryValue(byte[] def) {
+        return def;
     }
 
     @Override
-    public byte[] binaryValue(byte[] def) {
-        return new byte[0];
+    public byte[] binaryValue() {
+        return null;
     }
 
     @Override
@@ -112,13 +107,13 @@ public final class MissingNode extends AbstractNode {
     }
 
     @Override
-    public Double doubleValue() {
-        return null;
+    public Double doubleValue(Double def) {
+        return def;
     }
 
     @Override
-    public Double doubleValue(Double def) {
-        return def;
+    public Double doubleValue() {
+        return null;
     }
 
     @Override
