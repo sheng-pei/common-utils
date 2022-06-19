@@ -47,16 +47,6 @@ public final class MapNode extends AbstractNode {
     }
 
     @Override
-    public byte[] binaryValue(byte[] def) {
-        throw new ConvertException("Container node");
-    }
-
-    @Override
-    public byte[] binaryValue() {
-        throw new ConvertException("Container node");
-    }
-
-    @Override
     public String textValue(String def) {
         throw new ConvertException("Container node");
     }

@@ -32,16 +32,6 @@ public final class NullNode extends AbstractNode {
     }
 
     @Override
-    public byte[] binaryValue(byte[] def) {
-        return def;
-    }
-
-    @Override
-    public byte[] binaryValue() {
-        return null;
-    }
-
-    @Override
     public String textValue(String def) {
         return def;
     }

@@ -43,7 +43,7 @@ public final class Converters {
                 return null;
             }
 
-            if (isInteger(o)) {
+            if (isInteger(o.getClass())) {
                 long v = ((Number) o).longValue();
                 if (inByte(v)) {
                     return (byte) v;
@@ -59,7 +59,7 @@ public final class Converters {
                 return null;
             }
 
-            if (isInteger(o)) {
+            if (isInteger(o.getClass())) {
                 long v = ((Number) o).longValue();
                 if (inShort(v)) {
                     return (short) v;
@@ -74,7 +74,7 @@ public final class Converters {
             if (o == null) {
                 return null;
             }
-            if (isInteger(o)) {
+            if (isInteger(o.getClass())) {
                 if (o instanceof Integer) {
                     return (Integer) o;
                 } else if (!(o instanceof Long) || inInt((Long) o)) {
@@ -90,7 +90,7 @@ public final class Converters {
             if (o == null) {
                 return null;
             }
-            if (isInteger(o)) {
+            if (isInteger(o.getClass())) {
                 if (o instanceof Long) {
                     return (Long) o;
                 }
@@ -115,9 +115,7 @@ public final class Converters {
         SYSTEM_CONVERTERS.put(Double.class, doubleConverter);
         SYSTEM_CONVERTERS.put(double.class, doubleConverter);
 
-        Converter<String> stringConverter = new Converter<>("string", (o, c) -> {
-            return String.class.cast(o);
-        });
+        Converter<String> stringConverter = new Converter<>("string", (o, c) -> (String) o);
         SYSTEM_CONVERTERS.put(String.class, stringConverter);
 
         Converter<Enum<?>> enumConverter = new Converter<Enum<?>>("enum", (o, c) -> {
@@ -130,26 +128,30 @@ public final class Converters {
             Class<? extends Enum> enumClass = (Class) c;
             try {
                 EnumUtils.checkEncodeSupport(enumClass);
-                return EnumUtils.enumOf(enumClass, o);
+                @SuppressWarnings("unchecked")
+                Enum<?> res = EnumUtils.enumOf(enumClass, o);
+                return res;
             } catch (EnumEncoderNotSupportedException e) {
                 logger.debug("The enum class {} is not support enum encoder. Use named or ordinal instead.", e);
             }
 
-            if (isInteger(o)) {
+            if (isInteger(o.getClass())) {
                 long value = ((Number) o).longValue();
                 if (inInt(value)) {
                     return (Enum<?>) c.getEnumConstants()[(int) value];
                 }
             } else if (o instanceof String) {
-                return Enum.valueOf(enumClass, (String) o);
+                @SuppressWarnings("unchecked")
+                Enum<?> res = Enum.valueOf(enumClass, (String) o);
+                return res;
             }
             throw new IllegalArgumentException();
         });
         SYSTEM_CONVERTERS.put(Enum.class, enumConverter);
     }
 
-    private boolean isInteger(Object source) {
-        return INTEGER_TYPE.contains(source.getClass());
+    private boolean isInteger(Class<?> clazz) {
+        return INTEGER_TYPE.contains(clazz);
     }
     private boolean inInt(Long l) {
         return Condition.in(l, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -161,24 +163,20 @@ public final class Converters {
         return Condition.in(i, Byte.MIN_VALUE, Byte.MAX_VALUE);
     }
 
-    public <T> void pushCustom(Class<T> targetClazz, Converter<T> converter) {
-        if (targetClazz.equals(Enum.class)) {
-            throw new IllegalArgumentException("java.lang.Enum is not supported.");
-        }
-
+    public <T> void addConverter(Class<T> targetClazz, Converter<T> converter) {
         if (SYSTEM_CONVERTERS.containsKey(targetClazz) || targetClazz.isEnum()) {
-            Converter<?> system = SYSTEM_CONVERTERS.get(targetClazz);
-            logger.warn("Ignore this custom converter for {}, use system converter instead.", system.name());
+            logger.warn("Ignore this converter to {}, use system converter instead.", targetClazz.getName());
             return;
         }
 
         if (CUSTOM_CONVERTERS.containsKey(targetClazz)) {
-            logger.warn("Remove old custom converter for {}.", targetClazz.getName());
+            logger.warn("Remove old converter to {}.", targetClazz.getName());
         }
         CUSTOM_CONVERTERS.put(targetClazz, converter);
     }
 
-    public <T> Converter<T> getConverter(Class<T> targetClazz) {
+    @SuppressWarnings("unchecked")
+    private <T> Converter<T> getConverter(Class<T> targetClazz) {
         if (targetClazz.isEnum()) {
             return (Converter<T>) SYSTEM_CONVERTERS.get(Enum.class);
         } else if (SYSTEM_CONVERTERS.containsKey(targetClazz)) {
@@ -233,8 +231,8 @@ public final class Converters {
 
     private static <T> T internalConvert(Object obj, Class<T> clazz) {
         Converter<T> converter = Converters.getInstance().getConverter(clazz);
-        assert converter != null : "No " + converter.name() + " converter.";
-        return converter.convert(obj);
+        assert converter != null : "No converter to " + clazz.getName();
+        return converter.convert(obj, clazz);
     }
 
 }

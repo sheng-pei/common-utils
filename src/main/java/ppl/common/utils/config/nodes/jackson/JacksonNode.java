@@ -84,16 +84,6 @@ public class JacksonNode extends AbstractNode {
     }
 
     @Override
-    public byte[] binaryValue(byte[] def) {
-        return new byte[0];
-    }
-
-    @Override
-    public byte[] binaryValue() {
-        return new byte[0];
-    }
-
-    @Override
     public String textValue(String def) {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");

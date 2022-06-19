@@ -48,11 +48,6 @@ public class ScalarNodeTest {
     }
 
     @Test
-    void binaryValue() {
-        Assertions.assertArrayEquals("string".getBytes(), SCALAR.binaryValue());
-    }
-
-    @Test
     void textValue() {
     }
 

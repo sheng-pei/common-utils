@@ -2,14 +2,11 @@ package ppl.common.utils.config.convert;
 
 import ppl.common.utils.config.ConvertException;
 import ppl.common.utils.StringUtils;
-import ppl.common.utils.logging.Logger;
-import ppl.common.utils.logging.LoggerFactory;
 
+import java.util.Objects;
 import java.util.function.BiFunction;
 
 public class Converter<C> {
-
-    private static final Logger logger = LoggerFactory.getLogger(Converter.class);
 
     private static final String INCOMPATIBLE_TYPE_MESSAGE = "Incompatible with {}";
 
@@ -17,12 +14,16 @@ public class Converter<C> {
     private final BiFunction<Object, Class<?>, C> convertFunc;
 
     public Converter(String name, BiFunction<Object, Class<?>, C> convertFunc) {
+        Objects.requireNonNull(name, "Name is null.");
+        Objects.requireNonNull(convertFunc, "ConvertFunction is null.");
         this.name = name;
         this.convertFunc = convertFunc;
     }
 
-    public Converter(Class<?> targetClazz, BiFunction<Object, Class<?>, C> convertFunc) {
-        this.name = targetClazz.getCanonicalName();
+    public Converter(Class<?> targetClass, BiFunction<Object, Class<?>, C> convertFunc) {
+        Objects.requireNonNull(targetClass, "TargetClass is null.");
+        Objects.requireNonNull(convertFunc, "ConvertFunction is null.");
+        this.name = targetClass.getCanonicalName();
         this.convertFunc = convertFunc;
     }
 
@@ -38,11 +39,11 @@ public class Converter<C> {
         }
     }
 
-    public C convert(Object obj, Class<C> targetClazz) {
+    public C convert(Object obj, Class<C> targetClass) {
         try {
-            return this.convertFunc.apply(obj, targetClazz);
+            return this.convertFunc.apply(obj, targetClass);
         } catch (Throwable t) {
-            throw new ConvertException(StringUtils.format(INCOMPATIBLE_TYPE_MESSAGE, targetClazz.getName()), t);
+            throw new ConvertException(StringUtils.format(INCOMPATIBLE_TYPE_MESSAGE, targetClass.getName()), t);
         }
     }
 

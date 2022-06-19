@@ -1,26 +1,9 @@
 package ppl.common.utils.config;
 
 /**
- * Marker interface used to denote accesors for value node.
+ * Marker interface used to denote accessors for value node.
  */
 public interface Value {
-
-    /**
-     * Method for accessing binary data which is converted from the data this node contains.
-     * @param def the default binary data.
-     * @return Returns, by default, binary data as it is if this node is a binary node. Returns, by default,
-     * decoded base64 data if it is a text node. The specified default value will be returned if this node is
-     * a null or missing node.
-     * @throws ConvertException if no conversion is possible from the data this node contains to binary data.
-     */
-    byte[] binaryValue(byte[] def);
-
-    /**
-     * Method similar to {@link #binaryValue(byte[])} except that the default value is always null.
-     * @return binary data as described at the "Returns" paragraph of method {@link #binaryValue(byte[])}
-     * @throws ConvertException if no conversion is possible from the data this node contains to binary data.
-     */
-    byte[] binaryValue();
 
     /**
      * Method for accessing text data which is converted from the data this node contains.
@@ -34,7 +17,7 @@ public interface Value {
 
     /**
      * Method similar to {@link #textValue(String)} except that the default value is always null.
-     * @return text data as described at the "Returns" paragraph of method {@link #textValue()}
+     * @return text data as described at the "Returns" paragraph of method {@link #textValue(String)}
      * @throws ConvertException if no conversion is possible from the data this node contains to text data.
      */
     String textValue();
