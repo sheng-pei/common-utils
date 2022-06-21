@@ -5,25 +5,42 @@ import ppl.common.utils.StringUtils;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Converter<C> {
 
     private static final String INCOMPATIBLE_TYPE_MESSAGE = "Incompatible with {}";
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static final Converter CAST_CONVERTER = new Converter("string", c -> true, (o, c) -> {
+        Class clazz = (Class) c;
+        return clazz.cast(o);
+    });
+
+    public static <T> Converter<T> castConverter() {
+        @SuppressWarnings("unchecked")
+        Converter<T> converter = (Converter<T>) CAST_CONVERTER;
+        return converter;
+    }
 
     private final String name;
-    private final BiFunction<Object, Class<?>, C> convertFunc;
+    private final Function<Class<?>, Boolean> acceptFunc;
+    private final BiFunction<Object, Class<C>, C> convertFunc;
 
-    public Converter(String name, BiFunction<Object, Class<?>, C> convertFunc) {
+    public Converter(String name, Function<Class<?>, Boolean> acceptFunc, BiFunction<Object, Class<C>, C> convertFunc) {
         Objects.requireNonNull(name, "Name is null.");
+        Objects.requireNonNull(acceptFunc, "AcceptFunction is null.");
         Objects.requireNonNull(convertFunc, "ConvertFunction is null.");
         this.name = name;
+        this.acceptFunc = acceptFunc;
         this.convertFunc = convertFunc;
     }
 
-    public Converter(Class<?> targetClass, BiFunction<Object, Class<?>, C> convertFunc) {
+    public Converter(Class<C> targetClass, Function<Class<?>, Boolean> acceptFunc, BiFunction<Object, Class<C>, C> convertFunc) {
         Objects.requireNonNull(targetClass, "TargetClass is null.");
+        Objects.requireNonNull(acceptFunc, "AcceptFunction is null.");
         Objects.requireNonNull(convertFunc, "ConvertFunction is null.");
         this.name = targetClass.getCanonicalName();
+        this.acceptFunc = acceptFunc;
         this.convertFunc = convertFunc;
     }
 
@@ -31,15 +48,11 @@ public class Converter<C> {
         return this.name;
     }
 
-    public C convert(Object obj) {
-        try {
-            return this.convertFunc.apply(obj, null);
-        } catch (Throwable t) {
-            throw new ConvertException(StringUtils.format(INCOMPATIBLE_TYPE_MESSAGE, this.name));
-        }
+    public final boolean accept(Class<?> targetClass) {
+        return this.acceptFunc.apply(targetClass);
     }
 
-    public C convert(Object obj, Class<C> targetClass) {
+    public final C convert(Object obj, Class<C> targetClass) {
         try {
             return this.convertFunc.apply(obj, targetClass);
         } catch (Throwable t) {

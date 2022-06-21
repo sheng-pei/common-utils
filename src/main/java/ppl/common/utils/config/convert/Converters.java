@@ -1,31 +1,23 @@
 package ppl.common.utils.config.convert;
 
 import ppl.common.utils.Condition;
-import ppl.common.utils.StringUtils;
-import ppl.common.utils.config.ConvertException;
+import ppl.common.utils.cache.ConcurrentCache;
+import ppl.common.utils.config.convert.cache.Cache;
 import ppl.common.utils.enumerate.EnumEncoderNotSupportedException;
 import ppl.common.utils.enumerate.EnumUtils;
 import ppl.common.utils.logging.Logger;
 import ppl.common.utils.logging.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class Converters {
 
     private static final Logger logger = LoggerFactory.getLogger(Converters.class);
 
-    private static final String INCOMPATIBLE_TYPE_MESSAGE = "Incompatible with {}";
-
     private static final Converters INSTANCE = new Converters();
 
-    public static Converters getInstance() {
-        return INSTANCE;
-    }
-
-    private final Set<Class<?>> INTEGER_TYPE = new HashSet<Class<?>>() {
+    private static final Set<Class<?>> INTEGER_TYPE = new HashSet<Class<?>>() {
         {
             add(Byte.class);
             add(Short.class);
@@ -33,12 +25,46 @@ public final class Converters {
             add(Long.class);
         }
     };
-    private final Map<Class<?>, Converter<?>> SYSTEM_CONVERTERS = new HashMap<>();
-    private final Map<Class<?>, Converter<?>> CUSTOM_CONVERTERS = new HashMap<>();
+
+    private static boolean isInteger(Class<?> clazz) {
+        return INTEGER_TYPE.contains(clazz);
+    }
+    private static boolean inInt(Long l) {
+        return Condition.in(l, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+    private static boolean inShort(Long i) {
+        return Condition.in(i, Short.MIN_VALUE, Short.MAX_VALUE);
+    }
+    private static boolean inByte(Long i) {
+        return Condition.in(i, Byte.MIN_VALUE, Byte.MAX_VALUE);
+    }
+
+    public static Converters getInstance() {
+        return INSTANCE;
+    }
+
+    private final Map<Class<?>, Converter<?>> systemConverters;
+    private final List<Converter<?>> customConverters = new CopyOnWriteArrayList<>();
+    private final Cache<Class<?>, Converter<?>> customConverterCache = new Cache<Class<?>, Converter<?>>() {
+
+        private final ConcurrentCache<Class<?>, Converter<?>> cache = new ConcurrentCache<>(100);
+
+        @Override
+        public Converter<?> get(Class<?> aClass) {
+            return cache.get(aClass);
+        }
+
+        @Override
+        public void put(Class<?> aClass, Converter<?> converter) {
+            cache.put(aClass, converter);
+        }
+    };
 
     private Converters() {
 
-        Converter<Byte> byteConverter = new Converter<>("byte", (o, c) -> {
+        Map<Class<?>, Converter<?>> systemConverters = new HashMap<>();
+
+        Converter<Byte> byteConverter = new Converter<>("byte", Byte.class::equals, (o, c) -> {
             if (o == null) {
                 return null;
             }
@@ -51,10 +77,10 @@ public final class Converters {
             }
             throw new IllegalArgumentException();
         });
-        SYSTEM_CONVERTERS.put(Byte.class, byteConverter);
-        SYSTEM_CONVERTERS.put(byte.class, byteConverter);
+        systemConverters.put(Byte.class, byteConverter);
+        systemConverters.put(byte.class, byteConverter);
 
-        Converter<Short> shortConverter = new Converter<>("short", (o, c) -> {
+        Converter<Short> shortConverter = new Converter<>("short", Short.class::equals, (o, c) -> {
             if (o == null) {
                 return null;
             }
@@ -67,10 +93,10 @@ public final class Converters {
             }
             throw new IllegalArgumentException();
         });
-        SYSTEM_CONVERTERS.put(Short.class, shortConverter);
-        SYSTEM_CONVERTERS.put(short.class, shortConverter);
+        systemConverters.put(Short.class, shortConverter);
+        systemConverters.put(short.class, shortConverter);
 
-        Converter<Integer> intConverter = new Converter<>("int", (o, c) -> {
+        Converter<Integer> intConverter = new Converter<>("int", Integer.class::equals, (o, c) -> {
             if (o == null) {
                 return null;
             }
@@ -83,10 +109,10 @@ public final class Converters {
             }
             throw new IllegalArgumentException();
         });
-        SYSTEM_CONVERTERS.put(Integer.class, intConverter);
-        SYSTEM_CONVERTERS.put(int.class, intConverter);
+        systemConverters.put(Integer.class, intConverter);
+        systemConverters.put(int.class, intConverter);
 
-        Converter<Long> longConverter = new Converter<>("long", (o, c) -> {
+        Converter<Long> longConverter = new Converter<>("long", Long.class::equals, (o, c) -> {
             if (o == null) {
                 return null;
             }
@@ -98,10 +124,10 @@ public final class Converters {
             }
             throw new IllegalArgumentException();
         });
-        SYSTEM_CONVERTERS.put(Long.class, longConverter);
-        SYSTEM_CONVERTERS.put(long.class, longConverter);
+        systemConverters.put(Long.class, longConverter);
+        systemConverters.put(long.class, longConverter);
 
-        Converter<Double> doubleConverter = new Converter<>("double", (o, c) -> {
+        Converter<Double> doubleConverter = new Converter<>("double", Double.class::equals, (o, c) -> {
             if (o == null) {
                 return null;
             }
@@ -112,20 +138,20 @@ public final class Converters {
             }
             throw new IllegalArgumentException();
         });
-        SYSTEM_CONVERTERS.put(Double.class, doubleConverter);
-        SYSTEM_CONVERTERS.put(double.class, doubleConverter);
+        systemConverters.put(Double.class, doubleConverter);
+        systemConverters.put(double.class, doubleConverter);
 
-        Converter<String> stringConverter = new Converter<>("string", (o, c) -> (String) o);
-        SYSTEM_CONVERTERS.put(String.class, stringConverter);
+        Converter<String> stringConverter = new Converter<>("string", String.class::equals, (o, c) -> (String) o);
+        systemConverters.put(String.class, stringConverter);
 
-        Converter<Enum<?>> enumConverter = new Converter<Enum<?>>("enum", (o, c) -> {
+        Converter<Enum<?>> enumConverter = new Converter<>("enum", Enum.class::isAssignableFrom, (o, c) -> {
 
             if (o == null) {
                 return null;
             }
 
-            @SuppressWarnings({"unchecked", "rawtypes"})
-            Class<? extends Enum> enumClass = (Class) c;
+            @SuppressWarnings("rawtypes")
+            Class<? extends Enum> enumClass = c;
             try {
                 EnumUtils.checkEncodeSupport(enumClass);
                 @SuppressWarnings("unchecked")
@@ -138,7 +164,7 @@ public final class Converters {
             if (isInteger(o.getClass())) {
                 long value = ((Number) o).longValue();
                 if (inInt(value)) {
-                    return (Enum<?>) c.getEnumConstants()[(int) value];
+                    return c.getEnumConstants()[(int) value];
                 }
             } else if (o instanceof String) {
                 @SuppressWarnings("unchecked")
@@ -147,42 +173,59 @@ public final class Converters {
             }
             throw new IllegalArgumentException();
         });
-        SYSTEM_CONVERTERS.put(Enum.class, enumConverter);
+        systemConverters.put(Enum.class, enumConverter);
+
+        this.systemConverters = systemConverters;
     }
 
-    private boolean isInteger(Class<?> clazz) {
-        return INTEGER_TYPE.contains(clazz);
-    }
-    private boolean inInt(Long l) {
-        return Condition.in(l, Integer.MIN_VALUE, Integer.MAX_VALUE);
-    }
-    private boolean inShort(Long i) {
-        return Condition.in(i, Short.MIN_VALUE, Short.MAX_VALUE);
-    }
-    private boolean inByte(Long i) {
-        return Condition.in(i, Byte.MIN_VALUE, Byte.MAX_VALUE);
+    public <T> void addConverter(Converter<T> converter) {
+        customConverters.add(converter);
     }
 
-    public <T> void addConverter(Class<T> targetClazz, Converter<T> converter) {
-        if (SYSTEM_CONVERTERS.containsKey(targetClazz) || targetClazz.isEnum()) {
-            logger.warn("Ignore this converter to {}, use system converter instead.", targetClazz.getName());
-            return;
+    private <T> Converter<T> getConverter(Class<T> targetClazz) {
+        Converter<T> converter = getSystemConverter(targetClazz);
+        if (converter == null) {
+            converter = getCustomConverter(targetClazz);
         }
-
-        if (CUSTOM_CONVERTERS.containsKey(targetClazz)) {
-            logger.warn("Remove old converter to {}.", targetClazz.getName());
+        if (converter == null) {
+            converter = Converter.castConverter();
         }
-        CUSTOM_CONVERTERS.put(targetClazz, converter);
+        return converter;
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Converter<T> getConverter(Class<T> targetClazz) {
+    private <T> Converter<T> getSystemConverter(Class<T> targetClazz) {
         if (targetClazz.isEnum()) {
-            return (Converter<T>) SYSTEM_CONVERTERS.get(Enum.class);
-        } else if (SYSTEM_CONVERTERS.containsKey(targetClazz)) {
-            return (Converter<T>) SYSTEM_CONVERTERS.get(targetClazz);
+            return (Converter<T>) systemConverters.get(Enum.class);
+        } else if (systemConverters.containsKey(targetClazz)) {
+            return (Converter<T>) systemConverters.get(targetClazz);
         }
-        return (Converter<T>) CUSTOM_CONVERTERS.get(targetClazz);
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Converter<T> getCustomConverter(Class<T> targetClazz) {
+        Converter<T> converter = (Converter<T>) this.customConverterCache.get(targetClazz);
+        if (converter != null) {
+            return converter;
+        }
+
+        converter = findCustomConverter(targetClazz);
+        if (converter != null) {
+            this.customConverterCache.put(targetClazz, converter);
+            return converter;
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Converter<T> findCustomConverter(Class<T> targetClazz) {
+        for (Converter<?> c : customConverters) {
+            if (c.accept(targetClazz)) {
+                return (Converter<T>) c;
+            }
+        }
+        return null;
     }
 
     public static Character charValue(Object obj) {
@@ -218,15 +261,7 @@ public final class Converters {
     }
 
     public static <T> T convert(Object obj, Class<T> clazz) {
-        Converter<T> converter = Converters.getInstance().getConverter(clazz);
-        if (converter == null) {
-            try {
-                return clazz.cast(obj);
-            } catch (ClassCastException e) {
-                throw new ConvertException(StringUtils.format(INCOMPATIBLE_TYPE_MESSAGE, clazz.getName()), e);
-            }
-        }
-        return converter.convert(obj, clazz);
+        return internalConvert(obj, clazz);
     }
 
     private static <T> T internalConvert(Object obj, Class<T> clazz) {

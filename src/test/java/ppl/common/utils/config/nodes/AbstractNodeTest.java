@@ -37,16 +37,6 @@ public class AbstractNodeTest {
         }
 
         @Override
-        public byte[] binaryValue(byte[] def) {
-            throw new UnsupportedOperationException("");
-        }
-
-        @Override
-        public byte[] binaryValue() {
-            throw new UnsupportedOperationException("");
-        }
-
-        @Override
         public String textValue(String def) {
             throw new UnsupportedOperationException("");
         }

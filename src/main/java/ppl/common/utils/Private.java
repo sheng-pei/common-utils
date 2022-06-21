@@ -2,7 +2,7 @@ package ppl.common.utils;
 
 import java.lang.annotation.*;
 
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.SOURCE)
 @Documented
 @Inherited
