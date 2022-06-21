@@ -64,6 +64,9 @@ public final class Converters {
 
         Map<Class<?>, Converter<?>> systemConverters = new HashMap<>();
 
+        systemConverters.put(char.class, Converter.castConverter());
+        systemConverters.put(Character.class, Converter.castConverter());
+
         Converter<Byte> byteConverter = new Converter<>("byte", Byte.class::equals, (o, c) -> {
             if (o == null) {
                 return null;
@@ -126,6 +129,9 @@ public final class Converters {
         });
         systemConverters.put(Long.class, longConverter);
         systemConverters.put(long.class, longConverter);
+
+        systemConverters.put(float.class, Converter.castConverter());
+        systemConverters.put(Float.class, Converter.castConverter());
 
         Converter<Double> doubleConverter = new Converter<>("double", Double.class::equals, (o, c) -> {
             if (o == null) {
@@ -246,6 +252,10 @@ public final class Converters {
 
     public static Long longValue(Object obj) {
         return internalConvert(obj, Long.class);
+    }
+
+    public static Float floatValue(Object obj) {
+        return internalConvert(obj, Float.class);
     }
 
     public static Double doubleValue(Object obj) {

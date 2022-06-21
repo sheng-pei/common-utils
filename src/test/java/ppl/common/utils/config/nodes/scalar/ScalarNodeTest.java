@@ -24,7 +24,6 @@ public class ScalarNodeTest {
     @Test
     void getChildByFieldName() {
         Node child = SCALAR.getChild("a");
-        Assertions.assertTrue(child.isMissing());
         Assertions.assertEquals(".a", child.path());
 
         child = child.getChild("a.b");
@@ -34,7 +33,6 @@ public class ScalarNodeTest {
     @Test
     void getChildByIndex() {
         Node child = SCALAR.getChild(1);
-        Assertions.assertTrue(child.isMissing());
         Assertions.assertEquals(".[1]", child.path());
 
         child = child.getChild(1);
