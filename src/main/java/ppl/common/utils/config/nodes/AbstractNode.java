@@ -58,19 +58,31 @@ public abstract class AbstractNode implements Node {
     }
 
     protected final String childPath(String fieldName) {
-        if (fieldName.startsWith("{") || fieldName.startsWith("[")) {
+        if (fieldName.equals("") || fieldName.startsWith("{") || fieldName.startsWith("[")) {
             throw new IllegalArgumentException("FieldName do not allow for starting with '{' or '['.");
         }
-        String key = fieldName.contains(PATH_SEPARATOR) ? "{" + fieldName + "}" : fieldName;
-        return this.path + (isRoot() ? "" : PATH_SEPARATOR) + key;
+
+        return String.format("%s%s%s", this.path, pathSeparator(), pathKeyOnFieldName(fieldName));
+    }
+
+    private String pathKeyOnFieldName(String fieldName) {
+        return fieldName.contains(PATH_SEPARATOR) ? "{" + fieldName + "}" : fieldName;
     }
 
     protected final String childPath(Integer index) {
         if (index == null || index < 0) {
             throw new IllegalArgumentException("Index must be non-negative.");
         }
-        String key = "[" + index + "]";
-        return this.path + (isRoot() ? "" : PATH_SEPARATOR) + key;
+
+        return String.format("%s%s%s", this.path, pathSeparator(), pathKeyOnIndex(index));
+    }
+
+    private String pathKeyOnIndex(Integer index) {
+        return "[" + index + "]";
+    }
+
+    private String pathSeparator() {
+        return isRoot() ? "" : PATH_SEPARATOR;
     }
 
 }
