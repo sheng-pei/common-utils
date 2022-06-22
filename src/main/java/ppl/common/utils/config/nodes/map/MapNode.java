@@ -123,11 +123,11 @@ public final class MapNode extends AbstractNode {
 
     private class Iter implements Iterator<Node> {
 
-        private final Iterator<Map.Entry<?, ?>> iter;
+        private final Iterator<Map.Entry<String, ?>> iter;
 
         private Iter() {
             @SuppressWarnings({"rawtypes", "unchecked"})
-            Set<Map.Entry<?, ?>> entries = (Set) MapNode.this.map.entrySet();
+            Set<Map.Entry<String, ?>> entries = (Set) MapNode.this.map.entrySet();
             this.iter = entries.iterator();
         }
 

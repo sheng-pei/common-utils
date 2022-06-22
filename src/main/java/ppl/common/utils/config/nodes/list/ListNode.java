@@ -18,6 +18,11 @@ public final class ListNode extends AbstractNode {
     }
 
     @Override
+    public boolean isContainer() {
+        return true;
+    }
+
+    @Override
     public int size() {
         return this.list.size();
     }
@@ -125,7 +130,7 @@ public final class ListNode extends AbstractNode {
         private final Iterator<?> iter;
 
         private Iter() {
-            this.iter = ListNode.this.iterator();
+            this.iter = ListNode.this.list.iterator();
         }
 
         @Override

@@ -27,6 +27,6 @@ public class MapFactory implements NodeFactory {
             throw new IllegalArgumentException("Not map.");
         }
 
-        return new MapNode(path, (Map<?, ?>) obj);
+        return new MapNode(path, (Map<String, ?>) obj);
     }
 }
