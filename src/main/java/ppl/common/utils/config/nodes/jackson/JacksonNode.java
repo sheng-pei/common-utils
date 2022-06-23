@@ -3,12 +3,16 @@ package ppl.common.utils.config.nodes.jackson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.POJONode;
 import ppl.common.utils.config.*;
+import ppl.common.utils.config.convert.Converters;
 import ppl.common.utils.config.nodes.AbstractNode;
 import ppl.common.utils.config.nodes.MissingNode;
+import ppl.common.utils.config.nodes.iterator.ArrayIterator;
+import ppl.common.utils.config.nodes.iterator.ObjectIterator;
 import ppl.common.utils.logging.Logger;
 import ppl.common.utils.logging.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 
 public class JacksonNode extends AbstractNode {
@@ -80,16 +84,17 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public Iterator<Node> iterator() {
-        return null;
+        if (this.json.isArray()) {
+            return new ArrayIterator(this.json.iterator(), this::childPath);
+        } else if (this.json.isObject()) {
+            return new ObjectIterator(this.json.fields(), this::childPath);
+        }
+        return Collections.emptyIterator();
     }
 
     @Override
     public String textValue(String def) {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
-        }
-
-        return null;
+        return textValue();
     }
 
     @Override
@@ -97,15 +102,12 @@ public class JacksonNode extends AbstractNode {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");
         }
-        return null;
+        return Converters.stringValue(json);
     }
 
     @Override
     public Byte byteValue(Byte def) {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
-        }
-        return null;
+        return byteValue();
     }
 
     @Override
@@ -113,15 +115,12 @@ public class JacksonNode extends AbstractNode {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");
         }
-        return null;
+        return Converters.byteValue(json);
     }
 
     @Override
     public Short shortValue(Short def) {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
-        }
-        return null;
+        return shortValue();
     }
 
     @Override
@@ -129,15 +128,12 @@ public class JacksonNode extends AbstractNode {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");
         }
-        return null;
+        return Converters.shortValue(json);
     }
 
     @Override
     public Integer intValue(Integer def) {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
-        }
-        return null;
+        return intValue();
     }
 
     @Override
@@ -145,15 +141,12 @@ public class JacksonNode extends AbstractNode {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");
         }
-        return null;
+        return Converters.intValue(json);
     }
 
     @Override
     public Long longValue(Long def) {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
-        }
-        return null;
+        return longValue();
     }
 
     @Override
@@ -161,15 +154,12 @@ public class JacksonNode extends AbstractNode {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");
         }
-        return null;
+        return Converters.longValue(json);
     }
 
     @Override
     public Boolean boolValue(Boolean def) {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
-        }
-        return null;
+        return boolValue();
     }
 
     @Override
@@ -177,15 +167,12 @@ public class JacksonNode extends AbstractNode {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");
         }
-        return null;
+        return Converters.boolValue(json);
     }
 
     @Override
     public Double doubleValue(Double def) {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
-        }
-        return null;
+        return doubleValue();
     }
 
     @Override
@@ -193,7 +180,7 @@ public class JacksonNode extends AbstractNode {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");
         }
-        return null;
+        return Converters.doubleValue(json);
     }
 
     @Override
@@ -201,6 +188,7 @@ public class JacksonNode extends AbstractNode {
         if (json.isContainerNode()) {
             throw new ConvertException("Container node.");
         }
-        return null;
+        return Converters.convert(json, enumClass);
     }
+
 }

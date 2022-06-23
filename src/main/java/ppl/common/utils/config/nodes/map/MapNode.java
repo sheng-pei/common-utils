@@ -4,6 +4,7 @@ import ppl.common.utils.config.*;
 import ppl.common.utils.config.ConvertException;
 import ppl.common.utils.config.nodes.AbstractNode;
 import ppl.common.utils.config.nodes.MissingNode;
+import ppl.common.utils.config.nodes.iterator.ObjectIterator;
 
 import java.util.*;
 
@@ -43,7 +44,7 @@ public final class MapNode extends AbstractNode {
 
     @Override
     public Iterator<Node> iterator() {
-        return new Iter();
+        return new ObjectIterator(this.map.entrySet().iterator(), this::childPath);
     }
 
     @Override
@@ -119,44 +120,6 @@ public final class MapNode extends AbstractNode {
     @Override
     public <E extends Enum<E>> E enumValue(Class<E> enumClass) {
         throw new ConvertException("Container node");
-    }
-
-    private class Iter implements Iterator<Node> {
-
-        private final Iterator<Map.Entry<String, ?>> iter;
-
-        private Iter() {
-            @SuppressWarnings({"rawtypes", "unchecked"})
-            Set<Map.Entry<String, ?>> entries = (Set) MapNode.this.map.entrySet();
-            this.iter = entries.iterator();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.iter.hasNext();
-        }
-
-        @Override
-        public Node next() {
-            Map.Entry<?, ?> entry = this.iter.next();
-            if (!(entry.getKey() instanceof String)) {
-                throw new IllegalStateException("Non-string fieldName is unsupported.");
-            }
-
-            String path;
-            try {
-                path = childPath((String) entry.getKey());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalStateException(e.getMessage(), e);
-            }
-
-            try {
-                return Nodes.createByPath(path, entry.getValue());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalStateException("Invalid config: " + path, e);
-            }
-        }
-
     }
 
 }

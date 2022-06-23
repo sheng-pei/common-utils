@@ -1,5 +1,6 @@
 package ppl.common.utils.config.convert;
 
+import com.fasterxml.jackson.databind.node.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,7 +58,10 @@ class ConvertersTest {
                 Arguments.of(Long.class, 1L),
                 Arguments.of(Integer.class, 1),
                 Arguments.of(Short.class, (short) 1),
-                Arguments.of(Byte.class, (byte) 1)
+                Arguments.of(Byte.class, (byte) 1),
+                Arguments.of(IntNode.class, new IntNode(1)),
+                Arguments.of(LongNode.class, new LongNode(1L)),
+                Arguments.of(ShortNode.class, new ShortNode((short) 1))
         );
     }
 
@@ -71,7 +75,10 @@ class ConvertersTest {
         return Stream.of(
                 Arguments.of(Long.class, 256L),
                 Arguments.of(Integer.class, 256),
-                Arguments.of(Short.class, (short) 256)
+                Arguments.of(Short.class, (short) 256),
+                Arguments.of(IntNode.class, new IntNode(256)),
+                Arguments.of(LongNode.class, new LongNode(256L)),
+                Arguments.of(ShortNode.class, new ShortNode((short) 256))
         );
     }
 
@@ -95,7 +102,9 @@ class ConvertersTest {
     private static Stream<Arguments> outOfShortProvider() {
         return Stream.of(
                 Arguments.of(Long.class, Short.MAX_VALUE + 1),
-                Arguments.of(Integer.class, Short.MAX_VALUE + 1)
+                Arguments.of(Integer.class, Short.MAX_VALUE + 1),
+                Arguments.of(IntNode.class, new IntNode(Short.MAX_VALUE + 1)),
+                Arguments.of(LongNode.class, new LongNode(Short.MAX_VALUE + 1))
         );
     }
 
@@ -118,7 +127,8 @@ class ConvertersTest {
 
     private static Stream<Arguments> outOfIntProvider() {
         return Stream.of(
-                Arguments.of(Long.class, Integer.MAX_VALUE + 1L)
+                Arguments.of(Long.class, Integer.MAX_VALUE + 1L),
+                Arguments.of(LongNode.class, Integer.MAX_VALUE + 1L)
         );
     }
 
@@ -144,13 +154,6 @@ class ConvertersTest {
         Assertions.assertThrows(ConvertException.class, () -> Converters.longValue(new Object()));
     }
 
-    private static Stream<Arguments> floatProvider() {
-        return Stream.of(
-                Arguments.of(Float.class, 1.0f),
-                Arguments.of(Double.class, 1.0)
-        );
-    }
-
     @Test
     void floatValue() {
         Assertions.assertEquals(1.0f, Converters.floatValue(1.0f));
@@ -162,6 +165,13 @@ class ConvertersTest {
         Assertions.assertThrows(ConvertException.class, () -> Converters.floatValue(new Object()));
     }
 
+    private static Stream<Arguments> floatProvider() {
+        return Stream.of(
+                Arguments.of(Float.class, 1.0f),
+                Arguments.of(Double.class, 1.0)
+        );
+    }
+
     @ParameterizedTest(name = "convert {1}({0}) to double")
     @MethodSource("floatProvider")
     void doubleValue(Class<?> sourceType, Object source) {
@@ -171,16 +181,31 @@ class ConvertersTest {
     @Test
     void doubleValueExceptionCausedByNonRealNumber() {
         Assertions.assertThrows(ConvertException.class, () -> Converters.doubleValue(new Object()));
+        Assertions.assertThrows(ConvertException.class, () -> Converters.doubleValue(new LongNode(1)));
+    }
+
+    @Test
+    void boolValue() {
+        Assertions.assertEquals(false, Converters.boolValue(false));
+        Assertions.assertEquals(false, Converters.boolValue(BooleanNode.valueOf(false)));
+    }
+
+    @Test
+    void boolValueExceptionCausedByNonBoolean() {
+        Assertions.assertThrows(ConvertException.class, () -> Converters.boolValue(new Object()));
+        Assertions.assertThrows(ConvertException.class, () -> Converters.boolValue(new IntNode(1)));
     }
 
     @Test
     void stringValue() {
         Assertions.assertEquals("", Converters.stringValue(""));
+        Assertions.assertEquals("", Converters.stringValue(new TextNode("")));
     }
 
     @Test
     void stringValueException() {
         Assertions.assertThrows(ConvertException.class, () -> Converters.stringValue(1L));
+        Assertions.assertThrows(ConvertException.class, () -> Converters.stringValue(new LongNode(1L)));
     }
 
     private enum Standard {
@@ -208,11 +233,13 @@ class ConvertersTest {
     @Test
     void enumValueByName() {
         Assertions.assertEquals(Standard.A, Converters.enumValue("A", Standard.class));
+        Assertions.assertEquals(Standard.A, Converters.enumValue(new TextNode("A"), Standard.class));
     }
 
     @Test
     void enumValueByOrdinal() {
         Assertions.assertEquals(Standard.B, Converters.enumValue(1, Standard.class));
+        Assertions.assertEquals(Standard.B, Converters.enumValue(new IntNode(1), Standard.class));
     }
 
     @Test
@@ -223,11 +250,18 @@ class ConvertersTest {
     @Test
     void enumValueByEnumEncoder() {
         Assertions.assertEquals(Coder.A, Converters.enumValue(3, Coder.class));
+        Assertions.assertEquals(Coder.A, Converters.enumValue(new IntNode(3), Coder.class));
     }
 
     @Test
     void enumValueByEnumEncoderExceptionCausedByNotFound() {
         Assertions.assertThrows(ConvertException.class, () -> Converters.enumValue(9, Coder.class));
+    }
+
+    @Test
+    void enumValueExceptionCausedByUnsupportedKey() {
+        Assertions.assertThrows(ConvertException.class, () -> Converters.enumValue(new Object(), Coder.class));
+        Assertions.assertThrows(ConvertException.class, () -> Converters.enumValue(new DoubleNode(1.0), Coder.class));
     }
 
     @Test

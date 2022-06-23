@@ -39,79 +39,72 @@ public final class ScalarNode extends AbstractNode {
 
     @Override
     public String textValue(String def) {
-        String res = textValue();
-        return res == null ? def : res;
+        return textValue();
     }
 
     @Override
     public String textValue() {
-        return Converters.convert(scalar, String.class);
+        return Converters.stringValue(scalar);
     }
 
     @Override
     public Byte byteValue(Byte def) {
-        Byte res = byteValue();
-        return res == null ? def : res;
+        return byteValue();
     }
 
     @Override
     public Byte byteValue() {
-        return Converters.convert(scalar, Byte.class);
+        return Converters.byteValue(scalar);
     }
 
     @Override
     public Short shortValue(Short def) {
-        Short res = shortValue();
-        return res == null ? def : res;
+        return shortValue();
     }
 
     @Override
     public Short shortValue() {
-        return Converters.convert(scalar, Short.class);
+        return Converters.shortValue(scalar);
     }
 
     @Override
     public Integer intValue(Integer def) {
-        Integer res = intValue();
-        return res == null ? def : res;
+        return intValue();
     }
 
     @Override
     public Integer intValue() {
-        return Converters.convert(scalar, Integer.class);
+        return Converters.intValue(scalar);
     }
 
     @Override
     public Long longValue(Long def) {
-        Long res = longValue();
-        return res == null ? def : res;
+        return longValue();
     }
 
     @Override
     public Long longValue() {
-        return Converters.convert(scalar, Long.class);
+        return Converters.longValue(scalar);
     }
 
     @Override
     public Boolean boolValue(Boolean def) {
-        Boolean res = boolValue();
-        return res == null ? def : res;
+        return boolValue();
     }
 
     @Override
     public Boolean boolValue() {
-        return Converters.convert(scalar, Boolean.class);
+        return Converters.boolValue(scalar);
     }
 
     @Override
     public Double doubleValue(Double def) {
-        Double res = doubleValue();
-        return res == null ? def : res;
+        return doubleValue();
     }
 
     @Override
     public Double doubleValue() {
-        return Converters.convert(scalar, Double.class);
+        return Converters.doubleValue(scalar);
     }
 
     @Override

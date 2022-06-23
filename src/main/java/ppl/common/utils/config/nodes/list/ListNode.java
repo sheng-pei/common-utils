@@ -3,10 +3,10 @@ package ppl.common.utils.config.nodes.list;
 import ppl.common.utils.config.*;
 import ppl.common.utils.config.nodes.AbstractNode;
 import ppl.common.utils.config.nodes.MissingNode;
+import ppl.common.utils.config.nodes.iterator.ArrayIterator;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public final class ListNode extends AbstractNode {
 
@@ -46,7 +46,7 @@ public final class ListNode extends AbstractNode {
 
     @Override
     public Iterator<Node> iterator() {
-        return new Iter();
+        return new ArrayIterator(this.list.iterator(), this::childPath);
     }
 
     @Override
@@ -122,32 +122,6 @@ public final class ListNode extends AbstractNode {
     @Override
     public <E extends Enum<E>> E enumValue(Class<E> enumClass) {
         throw new ConvertException("Container node");
-    }
-
-    private class Iter implements Iterator<Node> {
-
-        private int cursor = 0;
-        private final Iterator<?> iter;
-
-        private Iter() {
-            this.iter = ListNode.this.list.iterator();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.iter.hasNext();
-        }
-
-        @Override
-        public Node next() {
-            try {
-                Object ele = iter.next();
-                return Nodes.createByPath(ListNode.this.childPath(this.cursor ++), ele);
-            } catch (NoSuchElementException e) {
-                throw new NoSuchElementException("No such element: " + ListNode.this.childPath(this.cursor));
-            }
-        }
-
     }
 
 }
