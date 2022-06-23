@@ -46,9 +46,7 @@ class ListNodeTest {
     @Test
     void iterator() {
         List<Object> actual = new ArrayList<>();
-        Iterator<Node> iter = LIST_NODE.iterator();
-        while (iter.hasNext()) {
-            Node node = iter.next();
+        for (Node node : LIST_NODE) {
             actual.add(node.textValue());
         }
 

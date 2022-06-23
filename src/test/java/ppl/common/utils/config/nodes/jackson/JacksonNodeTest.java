@@ -94,9 +94,7 @@ class JacksonNodeTest {
     @Test
     void iteratorMap() {
         Set<Integer> s = new HashSet<>();
-        Iterator<Node> iter = MAP.iterator();
-        while (iter.hasNext()) {
-            Node n = iter.next();
+        for (Node n : MAP) {
             s.add(n.intValue());
         }
 
@@ -108,9 +106,7 @@ class JacksonNodeTest {
     @Test
     void iteratorList() {
         List<Integer> a = new ArrayList<>();
-        Iterator<Node> iter = LIST.iterator();
-        while (iter.hasNext()) {
-            Node n = iter.next();
+        for (Node n : LIST) {
             a.add(n.intValue());
         }
         Assertions.assertArrayEquals(new Integer[] {1, 2}, a.toArray());

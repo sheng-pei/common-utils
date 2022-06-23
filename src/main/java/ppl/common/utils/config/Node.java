@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * </ol>
  * </p>
  */
-public interface Node extends Value {
+public interface Node extends Value, Iterable<Node> {
 
     String ROOT_PATH = ".";
     String PATH_SEPARATOR = ".";

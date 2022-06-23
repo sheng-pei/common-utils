@@ -9,7 +9,6 @@ import java.util.Iterator;
 public class ScalarNodeTest {
 
     private static final ScalarNode SCALAR = new ScalarNode(Node.ROOT_PATH, "string");
-    private static final ScalarNode NULL_SCALAR = new ScalarNode(Node.ROOT_PATH, null);
 
     @Test
     void isContainer() {
@@ -49,40 +48,5 @@ public class ScalarNodeTest {
     void iterator() {
         Iterator<Node> iter = SCALAR.iterator();
         Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    void textValueOnDefault() {
-        Assertions.assertEquals("string", NULL_SCALAR.textValue("string"));
-    }
-
-    @Test
-    void byteValueOnDefault() {
-        Assertions.assertEquals((byte) 1, NULL_SCALAR.byteValue((byte) 1));
-    }
-
-    @Test
-    void shortValueOnDefault() {
-        Assertions.assertEquals((short) 1, NULL_SCALAR.shortValue((short) 1));
-    }
-
-    @Test
-    void intValueOnDefault() {
-        Assertions.assertEquals(1, NULL_SCALAR.intValue(1));
-    }
-
-    @Test
-    void longValueOnDefault() {
-        Assertions.assertEquals(1L, NULL_SCALAR.longValue(1L));
-    }
-
-    @Test
-    void boolValueOnDefault() {
-        Assertions.assertEquals(false, NULL_SCALAR.boolValue(false));
-    }
-
-    @Test
-    void doubleValueOnDefault() {
-        Assertions.assertEquals(1.0, NULL_SCALAR.doubleValue(1.0));
     }
 }

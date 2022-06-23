@@ -68,9 +68,7 @@ class MapNodeTest {
     @Test
     void iterator() {
         Set<Object> actual = new HashSet<>();
-        Iterator<Node> iter = MAP_NODE.iterator();
-        while (iter.hasNext()) {
-            Node node = iter.next();
+        for (Node node : MAP_NODE) {
             actual.add(node.textValue());
         }
 
@@ -83,9 +81,8 @@ class MapNodeTest {
     @Test
     void iteratorException() {
         Assertions.assertThrows(IllegalStateException.class, () -> {
-            Iterator<Node> iter = INVALID_MAP_NODE.iterator();
-            while (iter.hasNext()) {
-                iter.next();
+            for (Node node : INVALID_MAP_NODE) {
+                node.textValue();
             }
         });
     }
@@ -126,7 +123,7 @@ class MapNodeTest {
     }
 
     private enum Standard {
-        A, B, C;
+        A, B, C
     }
 
     @Test
