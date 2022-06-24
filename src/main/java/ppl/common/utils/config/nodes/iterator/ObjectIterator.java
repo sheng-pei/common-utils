@@ -1,6 +1,7 @@
 package ppl.common.utils.config.nodes.iterator;
 
 import ppl.common.utils.config.Node;
+import ppl.common.utils.config.NodeException;
 import ppl.common.utils.config.Nodes;
 
 import java.util.Iterator;
@@ -25,20 +26,20 @@ public class ObjectIterator implements Iterator<Node> {
     public Node next() {
         Map.Entry<?, ?> entry = this.iter.next();
         if (!(entry.getKey() instanceof String)) {
-            throw new IllegalStateException("Non-string fieldName is unsupported.");
+            throw new NodeException("Non-string fieldName is unsupported.");
         }
 
         String path;
         try {
             path = childPathCreator.apply((String) entry.getKey());
         } catch (IllegalArgumentException e) {
-            throw new IllegalStateException("Invalid fieldName: " + entry.getKey(), e);
+            throw new NodeException("Invalid fieldName: " + entry.getKey(), e);
         }
 
         try {
             return Nodes.createByPath(path, entry.getValue());
         } catch (IllegalArgumentException e) {
-            throw new IllegalStateException(String.format("Unrecognized value type: %s of path: %s",
+            throw new NodeException(String.format("Unrecognized value type: %s of path: %s",
                     entry.getValue() == null ? "null" : entry.getValue().getClass().getName(), path
             ), e);
         }

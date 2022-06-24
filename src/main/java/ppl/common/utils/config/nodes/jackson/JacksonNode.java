@@ -17,8 +17,6 @@ import java.util.Iterator;
 
 public class JacksonNode extends AbstractNode {
 
-    private final static Logger logger = LoggerFactory.getLogger(JacksonNode.class);
-
     private final JsonNode json;
 
     JacksonNode(String path, JsonNode json) {

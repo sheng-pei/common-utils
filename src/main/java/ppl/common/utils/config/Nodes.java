@@ -1,6 +1,5 @@
 package ppl.common.utils.config;
 
-import ppl.common.utils.Private;
 import ppl.common.utils.config.nodes.MissingNode;
 import ppl.common.utils.config.nodes.NullNode;
 import ppl.common.utils.config.nodes.jackson.JacksonFactory;
@@ -11,7 +10,6 @@ import ppl.common.utils.logging.Logger;
 import ppl.common.utils.logging.LoggerFactory;
 
 import java.util.*;
-import java.util.regex.Matcher;
 
 /**
  * Utility class for making various {@link Node}s except for {@link MissingNode}.
