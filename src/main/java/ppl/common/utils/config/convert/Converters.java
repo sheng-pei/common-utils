@@ -1,20 +1,20 @@
 package ppl.common.utils.config.convert;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ppl.common.utils.Condition;
 import ppl.common.utils.cache.ConcurrentCache;
 import ppl.common.utils.config.convert.cache.Cache;
 import ppl.common.utils.enumerate.EnumEncoderNotSupportedException;
 import ppl.common.utils.enumerate.EnumUtils;
-import ppl.common.utils.logging.Logger;
-import ppl.common.utils.logging.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class Converters {
 
-    private static final Logger logger = LoggerFactory.getLogger(Converters.class);
+    private static final Logger logger = LoggerFactory.getLogger((Converters.class));
 
     private static final Converters INSTANCE = new Converters();
 
