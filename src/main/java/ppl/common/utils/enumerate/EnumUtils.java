@@ -5,6 +5,7 @@ import ppl.common.utils.StringUtils;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 @SuppressWarnings("rawtypes")
 public class EnumUtils {
@@ -65,35 +66,39 @@ public class EnumUtils {
     }
 
     public static boolean isEncodeSupport(Class<? extends Enum> enumClass) {
-        loadEnums(enumClass);
+        getEnums(enumClass);
         return !EnumSupport.isError(encoderCache.get(enumClass));
     }
 
     public static void checkEncodeSupport(Class<? extends Enum> enumClass) {
-        loadEnums(enumClass);
+        getEnums(enumClass);
 
         EnumSupport.check(encoderCache.get(enumClass), enumClass);
     }
 
-    private static void loadEnums(Class<? extends Enum> enumClass) {
-
-        Object encoder = encoderCache.get(enumClass);
-        if (encoder != null) {
-            return;
+    private static void getEnums(Class<? extends Enum> enumClass) {
+        //fix bug: ConcurrentHashMap.computeIfAbsent(k,f) locks bin when k present
+        //https://bugs.openjdk.org/browse/JDK-8161372
+        if (null == encoderCache.get(enumClass)) {
+            encoderCache.computeIfAbsent(enumClass, ec -> loadEnums(ec, es -> {
+                keyToEnumCache.put(enumClass, es);
+                enumToKeyCache.putAll(invertMap(es));
+            }));
         }
+    }
 
-        encoder = EnumSupport.loadEncodeMethod(enumClass);
+    private static Object loadEnums(Class<? extends Enum> enumClass, Consumer<Map<EnumKey, Enum<?>>> enumsConsumer) {
+        Object encoder = EnumSupport.loadEncodeMethod(enumClass);
         if (encoder instanceof Method) {
-            Map<EnumKey, Enum<?>> keyToEnum = new HashMap<>();
-            Object error = EnumSupport.applyEncoder(enumClass.getEnumConstants(), (Method) encoder, keyToEnum);
+            Map<EnumKey, Enum<?>> enums = new HashMap<>();
+            Object error = EnumSupport.applyEncoder(enumClass.getEnumConstants(), (Method) encoder, enums);
             if (error == null) {
-                keyToEnumCache.put(enumClass, keyToEnum);
-                enumToKeyCache.putAll(invertMap(keyToEnum));
+                enumsConsumer.accept(enums);
             } else {
                 encoder = error;
             }
         }
-        encoderCache.put(enumClass, encoder);
+        return encoder;
     }
 
     private static <K, V> Map<V, K> invertMap(Map<K, V> input) {
