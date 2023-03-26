@@ -219,7 +219,7 @@ public class Command {
         }
 
         private boolean isShortOption(String arg) {
-            return arg.length() > 2 &&
+            return arg.length() >= 2 &&
                     arg.startsWith(SHORT_OPTION_PREFIX) &&
                     !arg.startsWith(SHORT_OPTION_PREFIX, 1);
         }
@@ -267,5 +267,27 @@ public class Command {
 
     public List<String> getRemainArgs() {
         return remainArgs;
+    }
+
+    public static void main(String[] args) {
+        Command command = new Command();
+        command.addResolver(Resolver.required("host", 'h'));
+        command.addResolver(Resolver.required("port", 'p',
+                Converter.INTEGER_CONVERTER,
+                new Validator<Integer>() {
+                    @Override
+                    public String comment() {
+                        return "Must be in [0, 65535]";
+                    }
+
+                    @Override
+                    public boolean isValid(Integer value) {
+                        return 0 <= value && value <= 65535;
+                    }
+                }));
+        command.init(args);
+
+        System.out.println(command.get("host"));
+        System.out.println(command.get("port"));
     }
 }
