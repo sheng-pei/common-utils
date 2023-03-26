@@ -1,20 +1,24 @@
 package ppl.common.utils.enumerate;
 
+@SuppressWarnings("unused")
 public class UnknownEnumException extends RuntimeException {
 
-    private Class<? extends Enum<?>> enumClass;
+    @SuppressWarnings("rawtypes")
+    private Class<? extends Enum> enumClass;
     private Object key;
 
     public UnknownEnumException() {
         super();
     }
 
-    public UnknownEnumException(Class<? extends Enum<?>> enumClass, Object key) {
+    @SuppressWarnings("rawtypes")
+    public UnknownEnumException(Class<? extends Enum> enumClass, Object key) {
         this.enumClass = enumClass;
         this.key = key;
     }
 
-    public UnknownEnumException(Class<? extends Enum<?>> enumClass, Object key, Throwable cause) {
+    @SuppressWarnings("rawtypes")
+    public UnknownEnumException(Class<? extends Enum> enumClass, Object key, Throwable cause) {
         super(cause);
         this.enumClass = enumClass;
         this.key = key;

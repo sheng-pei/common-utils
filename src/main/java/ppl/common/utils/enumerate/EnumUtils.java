@@ -16,7 +16,7 @@ public class EnumUtils {
     private static final ConcurrentHashMap<Enum<?>, EnumKey> enumToKeyCache = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
-    public static <E extends Enum<E>, K> E enumOf(Class<E> enumClass, K key) {
+    public static <E extends Enum, K> E enumOf(Class<E> enumClass, K key) {
 
         Objects.requireNonNull(enumClass, "Enum class is null");
         Objects.requireNonNull(key, "Key is null");
