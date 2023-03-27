@@ -11,9 +11,21 @@ public class Command {
     private static final String LONG_OPTION_PREFIX = "--";
     private static final String SHORT_OPTION_PREFIX = "-";
 
-    private final Set<Resolver<?>> allResolvers;
-    private final Map<String, Resolver<?>> longOptions;
-    private final Map<String, Resolver<?>> shortOptions;
+    @SuppressWarnings("rawtypes")
+    private static final Set<Class<? extends Argument>> SUPPORTED_ARGUMENT_TYPE;
+
+    static {
+        @SuppressWarnings("rawtypes")
+        Set<Class<? extends Argument>> supported = new HashSet<>();
+        supported.add(Position.class);
+        supported.add(Option.class);
+        SUPPORTED_ARGUMENT_TYPE = Collections.unmodifiableSet(supported);
+    }
+
+    private final Set<Argument<?>> allArguments;
+    private final Map<String, Option<?>> longOptions;
+    private final Map<String, Option<?>> shortOptions;
+    private final Map<Integer, Position<?>> positions;
 
     private final Map<String, Optional<?>> parsedArgs;
     private final List<String> remainArgs;
@@ -22,72 +34,91 @@ public class Command {
         this(Collections.emptyList());
     }
 
-    public Command(List<Resolver<?>> resolvers) {
-        this.allResolvers = new HashSet<>();
+    public Command(List<Argument<?>> arguments) {
+        this.allArguments = new HashSet<>();
 
-        Map<String, Resolver<?>> lOptions = new HashMap<>();
-        Map<String, Resolver<?>> sOptions = new HashMap<>();
-        for (Resolver<?> resolver : resolvers) {
-            _addResolver(resolver);
-            addLongOption(lOptions, resolver);
-            addShortOption(sOptions, resolver);
-        }
-        longOptions = lOptions;
-        shortOptions = sOptions;
+        this.positions = new HashMap<>();
+        this.longOptions = new HashMap<>();
+        this.shortOptions = new HashMap<>();
+        addArguments(arguments);
 
         this.remainArgs = new ArrayList<>();
         this.parsedArgs = new HashMap<>();
     }
 
-    public void addResolver(Resolver<?> resolver) {
-        _addResolver(resolver);
-        addLongOption(longOptions, resolver);
-        addShortOption(shortOptions, resolver);
-    }
-
-    private void _addResolver(Resolver<?> resolver) {
-        if (allResolvers.contains(resolver)) {
-            throw new CommandLineException(StringUtils.format(
-                    "Argument '{}' is already exists.",
-                    resolver.getArgument()));
+    public void addArguments(List<Argument<?>> arguments) {
+        for (Argument<?> argument : arguments) {
+            addArgument(argument);
         }
-        allResolvers.add(resolver);
     }
 
-    private static void addLongOption(Map<String, Resolver<?>> lOptions, Resolver<?> resolver) {
-        resolver.getNames().forEach(name -> {
+    public void addArgument(Argument<?> argument) {
+        _addArgument(argument);
+        if (argument instanceof Option) {
+            addLongOption(longOptions, (Option<?>) argument);
+            addShortOption(shortOptions, (Option<?>) argument);
+        } else if (argument instanceof Position) {
+            addPosition(positions, (Position<?>) argument);
+        } else {
+            throw new IllegalArgumentException(StringUtils.format(
+                    "Cannot put argument of type '{}' into command. Please use '{}'.",
+                    argument.getClass().getCanonicalName(), SUPPORTED_ARGUMENT_TYPE));
+        }
+    }
+
+    private void _addArgument(Argument<?> argument) {
+        if (allArguments.contains(argument)) {
+            throw new IllegalArgumentException(StringUtils.format(
+                    "Argument {} is already exists.",
+                    argument.getName()));
+        }
+        allArguments.add(argument);
+    }
+
+    private static void addLongOption(Map<String, Option<?>> lOptions, Option<?> option) {
+        option.getLongOptions().forEach(name -> {
             if (lOptions.containsKey(name)) {
-                throw new CommandLineException(StringUtils.format(
+                throw new IllegalArgumentException(StringUtils.format(
                         "Long option '{}' in '{}' is already exists in '{}'.",
-                        name, resolver, lOptions.get(name)));
+                        name, option, lOptions.get(name)));
             }
-            lOptions.put(name, resolver);
+            lOptions.put(name, option);
         });
     }
 
-    private static void addShortOption(Map<String, Resolver<?>> sOptions, Resolver<?> resolver) {
-        resolver.getShortNames().forEach(name -> {
+    private static void addShortOption(Map<String, Option<?>> sOptions, Option<?> option) {
+        option.getShortOptions().forEach(name -> {
             if (sOptions.containsKey(name)) {
-                throw new CommandLineException(StringUtils.format(
+                throw new IllegalArgumentException(StringUtils.format(
                         "Short option '{}' in '{}' is already exists in '{}'.",
-                        name, resolver, sOptions.get(name)));
+                        name, option, sOptions.get(name)));
             }
-            sOptions.put(name, resolver);
+            sOptions.put(name, option);
         });
     }
 
-    public void init(String[] args) {
+    private static void addPosition(Map<Integer, Position<?>> positions, Position<?> position) {
+        int pos = position.getPosition();
+        if (positions.containsKey(pos)) {
+            throw new IllegalArgumentException(StringUtils.format(
+                    "Position '{}' in '{}' is already exists in '{}'.",
+                    pos, position, positions.get(pos)));
+        }
+        positions.put(pos, position);
+    }
+
+    public void init(String[] args) throws CommandLineException {
         Parser parser = new Parser(args);
         parser.parse();
-        for (Resolver<?> resolver : allResolvers) {
-            if (resolver.isRequired() && !parsedArgs.containsKey(resolver.getArgument())) {
+        for (Argument<?> argument : allArguments) {
+            if (argument.isRequired() && !parsedArgs.containsKey(argument.getName())) {
                 throw new CommandLineException(StringUtils.format(
-                        "Argument '{}' is not specified in command line.", resolver.getArgument()));
+                        "Argument '{}' is not specified in command line.", argument.getName()));
             }
         }
-        for (Resolver<?> resolver : allResolvers) {
-            if (!parsedArgs.containsKey(resolver.getArgument())) {
-                parsedArgs.put(resolver.getArgument(), resolver.getDefaultValue());
+        for (Argument<?> argument : allArguments) {
+            if (!parsedArgs.containsKey(argument.getName())) {
+                parsedArgs.put(argument.getName(), argument.getDefaultValue());
             }
         }
     }
@@ -120,11 +151,11 @@ public class Command {
         }
 
         private void parseShortOption(char shortOption, String arg) {
-            Resolver<?> resolver = resolverOfShortOption(shortOption, arg);
-            if (resolver.isToggle()) {
+            Option<?> option = resolverOfShortOption(shortOption, arg);
+            if (option.isToggle()) {
                 parseToggleShortOptions(arg);
             } else {
-                parseNonToggleShortOption(resolver, shortOption, arg);
+                parseNonToggleShortOption(option, shortOption, arg);
             }
         }
 
@@ -135,36 +166,38 @@ public class Command {
         }
 
         private void parseToggleShortOption(char shortOption, String arg) {
-            Resolver<?> resolver = resolverOfShortOption(shortOption, arg);
-            if (!resolver.isToggle()) {
+            Option<?> option = resolverOfShortOption(shortOption, arg);
+            if (!option.isToggle()) {
                 throw new CommandLineException(StringUtils.format(
                         "Non-toggle short option '{}' must not be in '{}'",
                         shortOption, arg));
             }
-            parsedArgs.put(resolver.getArgument(), Optional.of(true));
+            parsedArgs.put(option.getName(), Optional.of(true));
         }
 
-        private Resolver<?> resolverOfShortOption(char shortOption, String arg) {
-            Resolver<?> resolver = shortOptions.get(Character.toString(shortOption));
-            if (resolver == null) {
+        private Option<?> resolverOfShortOption(char shortOption, String arg) {
+            Option<?> option = shortOptions.get(Character.toString(shortOption));
+            if (option == null) {
                 throw new CommandLineException(StringUtils.format(
                         "Unknown short option '{}' in '{}'.", shortOption, arg));
             }
-            return resolver;
+            return option;
         }
 
-        private void parseNonToggleShortOption(Resolver<?> resolver, char shortOption, String arg) {
+        private void parseNonToggleShortOption(Option<?> option, char shortOption, String arg) {
             if (arg.length() == 2) {
-                resolveNextValue(resolver, Character.toString(shortOption), false);
+                resolveNextValue(option, Character.toString(shortOption), false);
             } else {
-                resolveValueInShortOption(resolver, shortOption, arg);
+                resolveValueInShortOption(option, shortOption, arg);
             }
         }
 
-        private void resolveValueInShortOption(Resolver<?> resolver, char shortOption, String arg) {
+        private void resolveValueInShortOption(Option<?> option, char shortOption, String arg) {
             try {
-                parsedArgs.put(resolver.getArgument(),
-                        resolver.resolve(arg.substring(2)));
+                parsedArgs.put(option.getName(),
+                        option.resolve(arg.substring(2)));
+            } catch (UnsupportedOperationException e) {
+                throw e;
             } catch (Throwable t) {
                 throw new CommandLineException(StringUtils.format(
                         "Invalid value for short option '{}' in '{}'.",
@@ -173,27 +206,29 @@ public class Command {
         }
 
         private void parseLongOption(String name) {
-            Resolver<?> resolver = resolverOfLongOption(name);
-            if (resolver.isToggle()) {
-                parsedArgs.put(resolver.getArgument(), Optional.of(true));
+            Option<?> option = resolverOfLongOption(name);
+            if (option.isToggle()) {
+                parsedArgs.put(option.getName(), Optional.of(true));
             } else {
-                resolveNextValue(resolver, name, true);
+                resolveNextValue(option, name, true);
             }
         }
 
-        private Resolver<?> resolverOfLongOption(String longOption) {
-            Resolver<?> resolver = longOptions.get(longOption);
-            if (resolver == null) {
+        private Option<?> resolverOfLongOption(String longOption) {
+            Option<?> option = longOptions.get(longOption);
+            if (option == null) {
                 throw new CommandLineException(StringUtils.format(
                         "Unknown long option '{}'.", longOption));
             }
-            return resolver;
+            return option;
         }
 
-        private void resolveNextValue(Resolver<?> resolver, String name, boolean longOption) {
+        private void resolveNextValue(Option<?> option, String name, boolean longOption) {
             try {
-                parsedArgs.put(resolver.getArgument(),
-                        resolver.resolve(nextValue(name)));
+                parsedArgs.put(option.getName(),
+                        option.resolve(nextValue(name)));
+            } catch (UnsupportedOperationException e) {
+                throw e;
             } catch (Throwable t) {
                 throw new CommandLineException(
                         StringUtils.format("Invalid value for {} option '{}'.",
@@ -271,8 +306,8 @@ public class Command {
 
     public static void main(String[] args) {
         Command command = new Command();
-        command.addResolver(Resolver.required("host", 'h'));
-        command.addResolver(Resolver.required("port", 'p',
+        command.addArgument(Option.requiredIdentity("host", 'h'));
+        command.addArgument(Option.required("port", 'p',
                 Converter.INTEGER_CONVERTER,
                 new Validator<Integer>() {
                     @Override
