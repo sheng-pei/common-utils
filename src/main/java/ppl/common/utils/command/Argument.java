@@ -94,4 +94,54 @@ public abstract class Argument<V> {
         Argument<?> argument = (Argument<?>) obj;
         return getName().equals(argument.getName());
     }
+
+    static abstract class Builder<V, T extends Builder<V, T>> {
+        protected String name;
+        protected boolean required;
+        protected V defaultValue;
+        protected Converter<V> converter;
+        protected Validator<V> validator;
+
+        @SuppressWarnings("unchecked")
+        protected T withSuper(Argument<V> argument) {
+            this.name = argument.getName();
+            this.required = argument.isRequired();
+            this.defaultValue = argument.defaultValue;
+            this.converter = argument.converter;
+            this.validator = argument.validator;
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T withName(String name) {
+            this.name = name;
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T withRequired(boolean required) {
+            this.required = required;
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T withDefaultValue(V defaultValue) {
+            this.defaultValue = defaultValue;
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T withConverter(Converter<V> converter) {
+            this.converter = converter;
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T withValidator(Validator<V> validator) {
+            this.validator = validator;
+            return (T) this;
+        }
+
+    }
+
 }

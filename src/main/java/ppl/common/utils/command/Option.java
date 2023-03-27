@@ -27,11 +27,15 @@ public class Option<V> extends Argument<V> {
     }
 
     public static Option<Boolean> toggle(String name, Set<String> longOptions, Set<Character> shortOptions) {
-        return new Option<>(name,
-                longOptions,
-                shortOptions,
-                false, true,
-                false, null, null);
+        return new Builder<Boolean>().withName(name)
+                .withLongOptions(longOptions)
+                .withShortOptions(shortOptions)
+                .withRequired(false)
+                .withToggle(true)
+                .withDefaultValue(false)
+                .withConverter(null)
+                .withValidator(null)
+                .build();
     }
 
     public static Option<String> requiredIdentity(String longOption) {
@@ -102,11 +106,16 @@ public class Option<V> extends Argument<V> {
                                          Validator<V> validator) {
         Objects.requireNonNull(converter, "Converter is required.");
         Objects.requireNonNull(validator, "Validator is required.");
-        return new Option<>(name,
-                longOptions,
-                shortOptions,
-                true, false,
-                null, converter, validator);
+        return new Builder<V>()
+                .withName(name)
+                .withLongOptions(longOptions)
+                .withShortOptions(shortOptions)
+                .withRequired(true)
+                .withToggle(false)
+                .withDefaultValue(null)
+                .withConverter(converter)
+                .withValidator(validator)
+                .build();
     }
 
     public static <V> Option<V> optional(
@@ -130,15 +139,20 @@ public class Option<V> extends Argument<V> {
             Validator<V> validator) {
         Objects.requireNonNull(converter, "Converter is required.");
         Objects.requireNonNull(validator, "Validator is required.");
-        return new Option<>(name,
-                Collections.unmodifiableSet(new HashSet<>(longOptions)),
-                Collections.unmodifiableSet(new HashSet<>(shortOptions)),
-                false, false,
-                defaultValue, converter, validator);
+        return new Builder<V>()
+                .withName(name)
+                .withLongOptions(longOptions)
+                .withShortOptions(shortOptions)
+                .withRequired(false)
+                .withToggle(false)
+                .withDefaultValue(defaultValue)
+                .withConverter(converter)
+                .withValidator(validator)
+                .build();
     }
 
     private final Set<String> longOptions;
-    private final Set<String> shortOptions;
+    private final Set<Character> shortOptions;
     private final boolean toggle;
 
     private Option(String name,
@@ -159,7 +173,6 @@ public class Option<V> extends Argument<V> {
         this.shortOptions = Collections.unmodifiableSet(shortOptions.stream()
                 .filter(Objects::nonNull)
                 .peek(Option::checkShortOption)
-                .map(Object::toString)
                 .collect(Collectors.toSet()));
         if (this.longOptions.isEmpty() && this.shortOptions.isEmpty()) {
             throw new IllegalArgumentException("Long options or short options must not be empty.");
@@ -187,11 +200,16 @@ public class Option<V> extends Argument<V> {
         return name;
     }
 
+    public Builder<V> with() {
+        return new Builder<V>()
+                .with(this);
+    }
+
     public Set<String> getLongOptions() {
         return this.longOptions;
     }
 
-    public Set<String> getShortOptions() {
+    public Set<Character> getShortOptions() {
         return this.shortOptions;
     }
 
@@ -202,5 +220,41 @@ public class Option<V> extends Argument<V> {
     @Override
     public String toString() {
         return StringUtils.format("position argument '{}'", getName());
+    }
+
+    public static class Builder<V> extends Argument.Builder<V, Builder<V>> {
+        private Set<String> longOptions;
+        private Set<Character> shortOptions;
+        private boolean toggle;
+
+        private Builder<V> with(Option<V> option) {
+            return new Builder<V>()
+                    .withSuper(option)
+                    .withLongOptions(option.getLongOptions())
+                    .withShortOptions(option.getShortOptions());
+        }
+
+        public Builder<V> withLongOptions(Set<String> longOptions) {
+            this.longOptions = longOptions;
+            return this;
+        }
+
+        public Builder<V> withShortOptions(Set<Character> shortOptions) {
+            this.shortOptions = shortOptions;
+            return this;
+        }
+
+        public Builder<V> withToggle(boolean toggle) {
+            this.toggle = toggle;
+            return this;
+        }
+
+        public Option<V> build() {
+            return new Option<>(name,
+                    longOptions, shortOptions,
+                    required, toggle,
+                    defaultValue, converter, validator);
+        }
+
     }
 }

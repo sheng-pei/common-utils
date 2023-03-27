@@ -22,9 +22,11 @@ public class Command {
         SUPPORTED_ARGUMENT_TYPE = Collections.unmodifiableSet(supported);
     }
 
+    private final Map<String, Command> commands;  //DAG
+
     private final Set<Argument<?>> allArguments;
     private final Map<String, Option<?>> longOptions;
-    private final Map<String, Option<?>> shortOptions;
+    private final Map<Character, Option<?>> shortOptions;
     private final Map<Integer, Position<?>> positions;
 
     private final Map<String, Optional<?>> parsedArgs;
@@ -35,6 +37,7 @@ public class Command {
     }
 
     public Command(List<Argument<?>> arguments) {
+        this.commands = new HashMap<>();
         this.allArguments = new HashSet<>();
 
         this.positions = new HashMap<>();
@@ -86,7 +89,7 @@ public class Command {
         });
     }
 
-    private static void addShortOption(Map<String, Option<?>> sOptions, Option<?> option) {
+    private static void addShortOption(Map<Character, Option<?>> sOptions, Option<?> option) {
         option.getShortOptions().forEach(name -> {
             if (sOptions.containsKey(name)) {
                 throw new IllegalArgumentException(StringUtils.format(
@@ -108,6 +111,9 @@ public class Command {
     }
 
     public void init(String[] args) throws CommandLineException {
+        checkPositions();
+        ensureRequiredPositionConsecutive();
+
         Parser parser = new Parser(args);
         parser.parse();
         for (Argument<?> argument : allArguments) {
@@ -119,6 +125,30 @@ public class Command {
         for (Argument<?> argument : allArguments) {
             if (!parsedArgs.containsKey(argument.getName())) {
                 parsedArgs.put(argument.getName(), argument.getDefaultValue());
+            }
+        }
+    }
+
+    private void checkPositions() {
+        Integer maxPosition = positions.keySet().stream()
+                .max(Integer::compareTo)
+                .orElse(0);
+        if (maxPosition != positions.size()) {
+            throw new IllegalStateException("Position arguments must be consecutive.");
+        }
+    }
+
+    private void ensureRequiredPositionConsecutive() {
+        int optional = 1;
+        for (int i = 1; i <= positions.size(); i++) {
+            Position<?> position = positions.get(i);
+            if (position.isRequired()) {
+                if (i > optional) {
+                    for (int j = optional; j < i; j++) {
+                        positions.put(j, positions.get(j).with().withRequired(true).build());
+                    }
+                }
+                optional = i + 1;
             }
         }
     }
@@ -176,7 +206,7 @@ public class Command {
         }
 
         private Option<?> resolverOfShortOption(char shortOption, String arg) {
-            Option<?> option = shortOptions.get(Character.toString(shortOption));
+            Option<?> option = shortOptions.get(shortOption);
             if (option == null) {
                 throw new CommandLineException(StringUtils.format(
                         "Unknown short option '{}' in '{}'.", shortOption, arg));
@@ -306,6 +336,11 @@ public class Command {
 
     public static void main(String[] args) {
         Command command = new Command();
+        command.addArgument(Position.requiredIdentity("t1", 1));
+        command.addArgument(Position.optionalIdentity("t2", 2));
+        command.addArgument(Position.requiredIdentity("t3", 3));
+        command.addArgument(Position.optionalIdentity("t4", 4));
+        command.addArgument(Position.optionalIdentity("t5", 5));
         command.addArgument(Option.requiredIdentity("host", 'h'));
         command.addArgument(Option.required("port", 'p',
                 Converter.INTEGER_CONVERTER,
@@ -320,6 +355,13 @@ public class Command {
                         return 0 <= value && value <= 65535;
                     }
                 }));
+        System.out.println(command.positions.get(2).isRequired());
+        System.out.println(command.positions.get(4).isRequired());
+        System.out.println(command.positions.get(5).isRequired());
+        command.ensureRequiredPositionConsecutive();
+        System.out.println(command.positions.get(2).isRequired());
+        System.out.println(command.positions.get(4).isRequired());
+        System.out.println(command.positions.get(5).isRequired());
         command.init(args);
 
         System.out.println(command.get("host"));
