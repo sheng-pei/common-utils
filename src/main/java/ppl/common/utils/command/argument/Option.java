@@ -155,7 +155,7 @@ public class Option<V> extends BaseArgument<V> {
     @Override
     public String toString() {
         return StringUtils.format(
-                "argument: (short option->{}, long option->{}, name->{})",
+                "short option->{}, long option->{}, name->{}",
                 this.shortOptions.stream()
                         .map(s -> SHORT_OPTION_PREFIX + s)
                         .collect(java.util.stream.Collectors.joining("|")),

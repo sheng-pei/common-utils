@@ -105,7 +105,7 @@ public abstract class BaseArgument<V> implements Argument<V> {
                 }
             } catch (Throwable t) {
                 throw new CommandLineException(StringUtils.format(
-                        "Invalid argument '{}' is specified.", this), t);
+                        "Invalid argument '{}'.", this), t);
             }
         }
         return res;

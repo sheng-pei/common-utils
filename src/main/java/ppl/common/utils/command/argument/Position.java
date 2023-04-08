@@ -56,7 +56,7 @@ public class Position<V> extends BaseArgument<V> {
     @Override
     public String toString() {
         return StringUtils.format(
-                "argument: (position->{}, name->{})",
+                "position->{}, name->{}",
                 getPosition(), getName());
     }
 
