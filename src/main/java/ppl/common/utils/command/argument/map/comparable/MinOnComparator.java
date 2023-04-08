@@ -1,10 +1,12 @@
 package ppl.common.utils.command.argument.map.comparable;
 
 import ppl.common.utils.StringUtils;
+import ppl.common.utils.command.argument.Mapper;
+import ppl.common.utils.command.argument.map.MapperException;
 
 import java.util.Comparator;
 
-public class MinOnComparator<V> implements ppl.common.utils.command.argument.Mapper<V, V> {
+public class MinOnComparator<V> implements Mapper<V, V> {
 
     private final V min;
     private final Comparator<V> comparator;
@@ -17,7 +19,7 @@ public class MinOnComparator<V> implements ppl.common.utils.command.argument.Map
     @Override
     public V map(V v) {
         if (comparator.compare(min, v) > 0) {
-            throw new IllegalArgumentException(StringUtils.format("is less than '{}'.", min));
+            throw new MapperException(StringUtils.format("The value is less than '{}'.", min));
         }
         return v;
     }

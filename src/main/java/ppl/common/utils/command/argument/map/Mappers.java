@@ -7,7 +7,6 @@ import ppl.common.utils.command.argument.map.comparable.Min;
 import ppl.common.utils.command.argument.map.comparable.MinOnComparator;
 
 import java.util.Comparator;
-import java.util.function.Predicate;
 
 public class Mappers {
 
@@ -34,13 +33,5 @@ public class Mappers {
         @SuppressWarnings("unchecked")
         Mapper<V, V> res = REQUIRED;
         return res;
-    }
-
-    public static <V> Mapper<V, V> defaultValue(V def) {
-        return new DefaultValue<>(def, null);
-    }
-
-    public static <V> Mapper<V, V> defaultValue(V def, Predicate<V> predicate) {
-        return new DefaultValue<>(def, predicate);
     }
 }

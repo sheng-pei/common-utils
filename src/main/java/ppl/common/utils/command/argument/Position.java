@@ -9,25 +9,18 @@ import java.util.*;
 public class Position<V> extends BaseArgument<V> {
 
     public static Position<String> requiredIdentity(String name) {
-        return new Builder<String>()
-                .withName(name)
+        return newBuilder(name)
                 .map(Mappers.required())
                 .collect(Collectors.one());
     }
 
     public static Position<String> optionalIdentity(String name) {
-        return optionalIdentity(name, null);
-    }
-
-    public static Position<String> optionalIdentity(String name, String defaultValue) {
-        return new Builder<String>()
-                .withName(name)
-                .map(Mappers.defaultValue(defaultValue))
+        return newBuilder(name)
                 .collect(Collectors.one());
     }
 
-    public static <V> Builder<V> newBuilder(String name) {
-        return new Builder<V>()
+    public static Builder<String> newBuilder(String name) {
+        return new Builder<String>()
                 .withName(name);
     }
 

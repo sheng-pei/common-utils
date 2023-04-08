@@ -2,7 +2,7 @@ package ppl.common.utils.command.argument;
 
 import ppl.common.utils.StringUtils;
 import ppl.common.utils.command.CommandLineException;
-import ppl.common.utils.command.argument.collector.DuplicateErrorCollector;
+import ppl.common.utils.command.argument.splitter.Splitters;
 import ppl.common.utils.exception.UnreachableCodeException;
 
 import java.lang.reflect.Method;
@@ -69,23 +69,45 @@ public abstract class BaseArgument<V> implements Argument<V> {
     }
 
     private <V> Optional<V> resolve(String originValue) {
-        Optional<Object> input = Optional.ofNullable(originValue);
+        Optional<String> input = Optional.ofNullable(originValue);
+        Optional<List<String>> splitted = input.map(splitter::split);
+        List<Optional<String>> optionalValues = Collections.singletonList(Optional.empty());
+        if (splitted.isPresent()) {
+            optionalValues = splitted.get().stream()
+                    .map(Optional::ofNullable)
+                    .collect(Collectors.toList());
+        }
+
         @SuppressWarnings("unchecked")
         List<Mapper<Object, Object>> mappers = this.mappers;
+        Optional<Object> output = Optional.empty();
+        for (Optional<String> optionalValue : optionalValues) {
+            Optional<Object> tmp = apply(optionalValue, mappers);
+            if (tmp.isPresent()) {
+                output = tmp;
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        Optional<V> res = (Optional<V>) output;
+        return res;
+    }
+
+    private Optional<Object> apply(Optional<String> input, List<Mapper<Object, Object>> mappers) {
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        Optional<Object> res = (Optional) input;
         for (Mapper<Object, Object> mapper : mappers) {
             try {
                 if (isNullableFunction(mapper.getClass())) {
-                    input = Optional.ofNullable(mapper.map(input.orElse(null)));
+                    res = Optional.ofNullable(mapper.map(res.orElse(null)));
                 } else {
-                    input = input.map(mapper::map);
+                    res = res.map(mapper::map);
                 }
-            } catch (Exception e) {
+            } catch (Throwable t) {
                 throw new CommandLineException(StringUtils.format(
-                        "Invalid argument '{}' is specified.", this), e);
+                        "Invalid argument '{}' is specified.", this), t);
             }
         }
-        @SuppressWarnings("unchecked")
-        Optional<V> res = (Optional<V>) input;
         return res;
     }
 
@@ -119,7 +141,7 @@ public abstract class BaseArgument<V> implements Argument<V> {
 
     public static abstract class Builder<V, A extends BaseArgument<V>, T extends Builder<V, A, T>> implements Argument.Builder<V> {
         private String name;
-        private Splitter splitter;
+        private Splitter splitter = Splitters.NOT_SPLIT;
         private List<Mapper<?, ?>> mappers;
         private Collector<?, ?> collector;
 

@@ -30,13 +30,10 @@ public class Option<V> extends BaseArgument<V> {
     }
 
     public static Option<Boolean> toggle(String name, Set<String> longOptions, Set<Character> shortOptions) {
-        return new Builder<Boolean>()
-                .withName(name)
-                .withLongOptions(longOptions)
-                .withShortOptions(shortOptions)
-                .withMax(0)
-                .map(Mappers.defaultValue(true))
-                .collect(Collectors.one());
+        return newBuilder(name, longOptions, shortOptions)
+                .withToggle()
+                .map(Boolean::parseBoolean)
+                .collect(Collectors.first());
     }
 
     public static Option<String> requiredIdentity(String longOption) {
@@ -54,7 +51,7 @@ public class Option<V> extends BaseArgument<V> {
     }
 
     public static Option<String> optionalIdentity(String longOption) {
-        return optionalIdentity(longOption, (Character) null);
+        return optionalIdentity(longOption, null);
     }
 
     public static Option<String> optionalIdentity(Character shortOption) {
@@ -62,30 +59,16 @@ public class Option<V> extends BaseArgument<V> {
     }
 
     public static Option<String> optionalIdentity(String longOption, Character shortOption) {
-        return optionalIdentity(longOption, shortOption, null);
-    }
-
-    public static Option<String> optionalIdentity(String longOption, String defaultValue) {
-        return optionalIdentity(longOption, null, defaultValue);
-    }
-
-    public static Option<String> optionalIdentity(Character shortOption, String defaultValue) {
-        return optionalIdentity(null, shortOption, defaultValue);
-    }
-
-    public static Option<String> optionalIdentity(String longOption, Character shortOption, String defaultValue) {
-        return optionalIdentity(name(longOption, shortOption),
+        return optionalIdentity(
+                name(longOption, shortOption),
                 Collections.singleton(longOption),
-                Collections.singleton(shortOption),
-                defaultValue);
+                Collections.singleton(shortOption));
     }
 
     public static Option<String> optionalIdentity(String name,
                                           Set<String> longOptions,
-                                          Set<Character> shortOptions,
-                                          String defaultValue) {
+                                          Set<Character> shortOptions) {
         return newBuilder(name, longOptions, shortOptions)
-                .map(Mappers.defaultValue(defaultValue))
                 .collect(Collectors.one());
     }
 
@@ -104,14 +87,14 @@ public class Option<V> extends BaseArgument<V> {
                 .withShortOptions(shortOptions);
     }
 
-    private final int max;
     private final Set<String> longOptions;
     private final Set<Character> shortOptions;
+    private final boolean toggle;
 
     private Option(String name,
                    Set<String> longOptions,
                    Set<Character> shortOptions,
-                   Integer max,
+                   boolean toggle,
                    Splitter splitter,
                    List<Mapper<?, ?>> mappers,
                    Collector<?, ?> collector) {
@@ -129,11 +112,7 @@ public class Option<V> extends BaseArgument<V> {
         if (this.longOptions.isEmpty() && this.shortOptions.isEmpty()) {
             throw new IllegalArgumentException("Long options or short options must not be empty.");
         }
-        max = max == null ? 1 : max;
-        if (max < 0) {
-            throw new IllegalArgumentException("Max value amount is non-negative.");
-        }
-        this.max = max;
+        this.toggle = toggle;
     }
 
     private static void checkLongOption(String longOption) {
@@ -169,6 +148,10 @@ public class Option<V> extends BaseArgument<V> {
         return this.shortOptions;
     }
 
+    public boolean isToggle() {
+        return toggle;
+    }
+
     @Override
     public String toString() {
         return StringUtils.format(
@@ -184,7 +167,7 @@ public class Option<V> extends BaseArgument<V> {
     public static class Builder<V> extends BaseArgument.Builder<V, Option<V>, Builder<V>> {
         private Set<String> longOptions;
         private Set<Character> shortOptions;
-        private Integer max;
+        private boolean toggle;
 
         private Builder() {}
 
@@ -204,8 +187,8 @@ public class Option<V> extends BaseArgument<V> {
             return this;
         }
 
-        public Builder<V> withMax(Integer max) {
-            this.max = max;
+        public Builder<V> withToggle() {
+            this.toggle = true;
             return this;
         }
 
@@ -230,8 +213,7 @@ public class Option<V> extends BaseArgument<V> {
         }
 
         protected Option<V> build() {
-            return new Option<>(getName(), longOptions, shortOptions,
-                    max, getSplitter(), getMappers(), getCollector());
+            return new Option<>(getName(), longOptions, shortOptions, toggle, getSplitter(), getMappers(), getCollector());
         }
 
     }

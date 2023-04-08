@@ -8,7 +8,7 @@ public class Required<V> implements Mapper<V, V> {
     @Override
     public V map(V v) {
         if (v == null) {
-            throw new IllegalArgumentException("is required.");
+            throw new MapperException("The value is required.");
         }
         return v;
     }

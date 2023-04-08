@@ -1,6 +1,5 @@
 package ppl.common.utils.command.argument.collector;
 
-import ppl.common.utils.command.CommandLineException;
 import ppl.common.utils.command.argument.Collector;
 
 import java.util.HashMap;
@@ -32,16 +31,16 @@ public class KVCollector implements Collector<String, Map<String, String>> {
             key = v.substring(0, equalIdx).trim();
         }
         if (key.isEmpty()) {
-            throw new CommandLineException("Invalid k-v-pair. No key provided.");
+            throw new CollectorException("Invalid k-v-pair. No key provided.");
         }
 
         String value = "";
         if (equalIdx >= 0) {
-            value = v.substring(equalIdx + 1).trim();
+            value = v.substring(equalIdx + 1);
         }
 
         if (map.containsKey(key)) {
-            throw new CommandLineException("Invalid k-v-pair. Duplicated key: " + key);
+            throw new CollectorException("Invalid k-v-pair. Duplicate key: " + key);
         }
         map.put(key, value);
     }

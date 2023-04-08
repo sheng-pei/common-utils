@@ -1,10 +1,12 @@
 package ppl.common.utils.command.argument.map.comparable;
 
 import ppl.common.utils.StringUtils;
+import ppl.common.utils.command.argument.Mapper;
+import ppl.common.utils.command.argument.map.MapperException;
 
 import java.util.Comparator;
 
-public class MaxOnComparator<V> implements ppl.common.utils.command.argument.Mapper<V, V> {
+public class MaxOnComparator<V> implements Mapper<V, V> {
 
     private final V max;
     private final Comparator<V> comparator;
@@ -17,7 +19,7 @@ public class MaxOnComparator<V> implements ppl.common.utils.command.argument.Map
     @Override
     public V map(V v) {
         if (comparator.compare(max, v) < 0) {
-            throw new IllegalArgumentException(StringUtils.format("is more than '{}'.", max));
+            throw new MapperException(StringUtils.format("The value is more than '{}'.", max));
         }
         return v;
     }
