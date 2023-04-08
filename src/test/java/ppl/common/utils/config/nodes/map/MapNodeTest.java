@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ppl.common.utils.config.ConvertException;
 import ppl.common.utils.config.Node;
+import ppl.common.utils.config.NodeException;
 
 import java.util.*;
 
@@ -80,7 +81,7 @@ class MapNodeTest {
 
     @Test
     void iteratorException() {
-        Assertions.assertThrows(IllegalStateException.class, () -> {
+        Assertions.assertThrows(NodeException.class, () -> {
             for (Node node : INVALID_MAP_NODE) {
                 node.textValue();
             }

@@ -2,7 +2,7 @@ package ppl.common.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ppl.common.utils.exception.StreamException;
+import ppl.common.utils.exception.IOStreamException;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public final class IOUtils {
         try {
             org.apache.commons.io.IOUtils.copy(is, os, bufferSize);
         } catch (IOException e) {
-            throw new StreamException("Error to copy", e);
+            throw new IOStreamException("Error to copy", e);
         }
 
     }

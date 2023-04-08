@@ -1,5 +1,7 @@
 package ppl.common.utils.enumerate;
 
+import ppl.common.utils.StringUtils;
+
 @SuppressWarnings("unused")
 public class UnknownEnumException extends RuntimeException {
 
@@ -26,7 +28,7 @@ public class UnknownEnumException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return String.format("Unknown enum: %s of %s", enumClass.getSimpleName(), key.toString());
+        return StringUtils.format("Unknown enum: '{}' of '{}'", enumClass.getSimpleName(), key.toString());
     }
 
 }

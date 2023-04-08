@@ -1,13 +1,16 @@
-package ppl.common.utils.command;
+package ppl.common.utils.command.argument;
 
 import ppl.common.utils.StringUtils;
+import ppl.common.utils.command.argument.collector.Collectors;
+import ppl.common.utils.command.argument.map.Mappers;
 
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-@SuppressWarnings("unused")
-public class Option<V> extends Argument<V> {
+public class Option<V> extends BaseArgument<V> {
+
+    public static final String LONG_OPTION_PREFIX = "--";
+    public static final String SHORT_OPTION_PREFIX = "-";
 
     private static final Pattern LONG_OPTION_PATTERN = Pattern.compile("[a-zA-Z][0-9a-zA-Z]*");
     private static final Pattern SHORT_OPTION_PATTERN = Pattern.compile("[a-zA-Z]");
@@ -27,15 +30,13 @@ public class Option<V> extends Argument<V> {
     }
 
     public static Option<Boolean> toggle(String name, Set<String> longOptions, Set<Character> shortOptions) {
-        return new Builder<Boolean>().withName(name)
+        return new Builder<Boolean>()
+                .withName(name)
                 .withLongOptions(longOptions)
                 .withShortOptions(shortOptions)
-                .withRequired(false)
-                .withToggle(true)
-                .withDefaultValue(false)
-                .withConverter(null)
-                .withValidator(null)
-                .build();
+                .withMax(0)
+                .map(Mappers.defaultValue(true))
+                .collect(Collectors.one());
     }
 
     public static Option<String> requiredIdentity(String longOption) {
@@ -47,7 +48,9 @@ public class Option<V> extends Argument<V> {
     }
 
     public static Option<String> requiredIdentity(String longOption, Character shortOption) {
-        return required(longOption, shortOption, Converter.IDENTITY, Validator.alwaysTrue());
+        return newBuilder(longOption, shortOption)
+                .map(Mappers.required())
+                .collect(Collectors.one());
     }
 
     public static Option<String> optionalIdentity(String longOption) {
@@ -81,103 +84,56 @@ public class Option<V> extends Argument<V> {
                                           Set<String> longOptions,
                                           Set<Character> shortOptions,
                                           String defaultValue) {
-        return optional(name,
-                longOptions, shortOptions,
-                defaultValue,
-                Converter.IDENTITY,
-                Validator.alwaysTrue());
+        return newBuilder(name, longOptions, shortOptions)
+                .map(Mappers.defaultValue(defaultValue))
+                .collect(Collectors.one());
     }
 
-    public static <V> Option<V> required(
-            String longOption, Character shortOption,
-            Converter<V> converter,
-            Validator<V> validator) {
-        Objects.requireNonNull(converter, "Converter is required.");
-        Objects.requireNonNull(validator, "Validator is required.");
-        return required(name(longOption, shortOption),
-                Collections.singleton(longOption),
-                Collections.singleton(shortOption),
-                converter, validator);
+    public static Builder<String> newBuilder(String longOption, Character shortOption) {
+        return newBuilder(name(longOption, shortOption), longOption, shortOption);
     }
 
-    public static <V> Option<V> required(String name,
-                                         Set<String> longOptions, Set<Character> shortOptions,
-                                         Converter<V> converter,
-                                         Validator<V> validator) {
-        Objects.requireNonNull(converter, "Converter is required.");
-        Objects.requireNonNull(validator, "Validator is required.");
-        return new Builder<V>()
+    public static Builder<String> newBuilder(String name, String longOption, Character shortOption) {
+        return newBuilder(name, Collections.singleton(longOption), Collections.singleton(shortOption));
+    }
+
+    public static Builder<String> newBuilder(String name, Set<String> longOptions, Set<Character> shortOptions) {
+        return new Builder<String>()
                 .withName(name)
                 .withLongOptions(longOptions)
-                .withShortOptions(shortOptions)
-                .withRequired(true)
-                .withToggle(false)
-                .withDefaultValue(null)
-                .withConverter(converter)
-                .withValidator(validator)
-                .build();
+                .withShortOptions(shortOptions);
     }
 
-    public static <V> Option<V> optional(
-            String longOption, Character shortOption,
-            V defaultValue,
-            Converter<V> converter,
-            Validator<V> validator) {
-        Objects.requireNonNull(converter, "Converter is required.");
-        Objects.requireNonNull(validator, "Validator is required.");
-        return optional(name(longOption, shortOption),
-                Collections.singleton(longOption),
-                Collections.singleton(shortOption),
-                defaultValue, converter, validator);
-    }
-
-    public static <V> Option<V> optional(
-            String name,
-            Set<String> longOptions, Set<Character> shortOptions,
-            V defaultValue,
-            Converter<V> converter,
-            Validator<V> validator) {
-        Objects.requireNonNull(converter, "Converter is required.");
-        Objects.requireNonNull(validator, "Validator is required.");
-        return new Builder<V>()
-                .withName(name)
-                .withLongOptions(longOptions)
-                .withShortOptions(shortOptions)
-                .withRequired(false)
-                .withToggle(false)
-                .withDefaultValue(defaultValue)
-                .withConverter(converter)
-                .withValidator(validator)
-                .build();
-    }
-
+    private final int max;
     private final Set<String> longOptions;
     private final Set<Character> shortOptions;
-    private final boolean toggle;
 
     private Option(String name,
                    Set<String> longOptions,
                    Set<Character> shortOptions,
-                   boolean required,
-                   boolean toggle,
-                   V defaultValue,
-                   Converter<V> converter,
-                   Validator<V> validator) {
-        super(name, required, defaultValue, converter, validator);
+                   Integer max,
+                   Splitter splitter,
+                   List<Mapper<?, ?>> mappers,
+                   Collector<?, ?> collector) {
+        super(name, splitter, mappers, collector);
         this.longOptions = Collections.unmodifiableSet(longOptions.stream()
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .filter(String::isEmpty)
                 .peek(Option::checkLongOption)
-                .collect(Collectors.toSet()));
+                .collect(java.util.stream.Collectors.toSet()));
         this.shortOptions = Collections.unmodifiableSet(shortOptions.stream()
                 .filter(Objects::nonNull)
                 .peek(Option::checkShortOption)
-                .collect(Collectors.toSet()));
+                .collect(java.util.stream.Collectors.toSet()));
         if (this.longOptions.isEmpty() && this.shortOptions.isEmpty()) {
             throw new IllegalArgumentException("Long options or short options must not be empty.");
         }
-        this.toggle = toggle;
+        max = max == null ? 1 : max;
+        if (max < 0) {
+            throw new IllegalArgumentException("Max value amount is non-negative.");
+        }
+        this.max = max;
     }
 
     private static void checkLongOption(String longOption) {
@@ -213,23 +169,27 @@ public class Option<V> extends Argument<V> {
         return this.shortOptions;
     }
 
-    public boolean isToggle() {
-        return toggle;
-    }
-
     @Override
     public String toString() {
-        return StringUtils.format("position argument '{}'", getName());
+        return StringUtils.format(
+                "argument: (short option->{}, long option->{}, name->{})",
+                this.shortOptions.stream()
+                        .map(s -> SHORT_OPTION_PREFIX + s)
+                        .collect(java.util.stream.Collectors.joining("|")),
+                this.longOptions.stream()
+                        .map(l -> LONG_OPTION_PREFIX + l)
+                        .collect(java.util.stream.Collectors.joining("|")), getName());
     }
 
-    public static class Builder<V> extends Argument.Builder<V, Builder<V>> {
+    public static class Builder<V> extends BaseArgument.Builder<V, Option<V>, Builder<V>> {
         private Set<String> longOptions;
         private Set<Character> shortOptions;
-        private boolean toggle;
+        private Integer max;
 
-        private Builder<V> with(Option<V> option) {
-            return new Builder<V>()
-                    .withSuper(option)
+        private Builder() {}
+
+        public Builder<V> with(Option<V> option) {
+            return super.with(option)
                     .withLongOptions(option.getLongOptions())
                     .withShortOptions(option.getShortOptions());
         }
@@ -244,16 +204,34 @@ public class Option<V> extends Argument<V> {
             return this;
         }
 
-        public Builder<V> withToggle(boolean toggle) {
-            this.toggle = toggle;
+        public Builder<V> withMax(Integer max) {
+            this.max = max;
             return this;
         }
 
-        public Option<V> build() {
-            return new Option<>(name,
-                    longOptions, shortOptions,
-                    required, toggle,
-                    defaultValue, converter, validator);
+        @Override
+        public Builder<V> split(Splitter splitter) {
+            return (Builder<V>) super.split(splitter);
+        }
+
+        @Override
+        public <R> Builder<R> map(Mapper<V, R> mapper) {
+            return (Builder<R>) super.map(mapper);
+        }
+
+        @Override
+        public Option<V> collect() {
+            return (Option<V>) super.collect();
+        }
+
+        @Override
+        public <R> Option<R> collect(Collector<V, R> collector) {
+            return (Option<R>) super.collect(collector);
+        }
+
+        protected Option<V> build() {
+            return new Option<>(getName(), longOptions, shortOptions,
+                    max, getSplitter(), getMappers(), getCollector());
         }
 
     }
