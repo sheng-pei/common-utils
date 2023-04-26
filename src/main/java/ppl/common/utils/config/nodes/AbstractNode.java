@@ -1,6 +1,6 @@
 package ppl.common.utils.config.nodes;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 import ppl.common.utils.config.Node;
 
 import java.util.regex.Matcher;
@@ -63,7 +63,7 @@ public abstract class AbstractNode implements Node {
             throw new IllegalArgumentException("FieldName do not allow for starting with '{' or '['.");
         }
 
-        return StringUtils.format("{}{}{}", this.path, pathSeparator(), pathKeyOnFieldName(fieldName));
+        return Strings.format("{}{}{}", this.path, pathSeparator(), pathKeyOnFieldName(fieldName));
     }
 
     private String pathKeyOnFieldName(String fieldName) {
@@ -75,7 +75,7 @@ public abstract class AbstractNode implements Node {
             throw new IllegalArgumentException("Index must be non-negative.");
         }
 
-        return StringUtils.format("{}{}{}", this.path, pathSeparator(), pathKeyOnIndex(index));
+        return Strings.format("{}{}{}", this.path, pathSeparator(), pathKeyOnIndex(index));
     }
 
     private String pathKeyOnIndex(Integer index) {

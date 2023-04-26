@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ppl.common.utils.Condition;
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 import ppl.common.utils.cache.ConcurrentCache;
-import ppl.common.utils.config.convert.cache.Cache;
+import ppl.common.utils.cache.Cache;
 import ppl.common.utils.enumerate.EnumEncoderNotSupportedException;
 import ppl.common.utils.enumerate.EnumUtils;
 
@@ -228,7 +228,7 @@ public final class Converters {
                 Enum<?> res = EnumUtils.enumOf(enumClass, o);
                 return res;
             } catch (EnumEncoderNotSupportedException e) {
-                logger.debug(StringUtils.format(
+                logger.debug(Strings.format(
                         "The enum class '{}' is not support enum encoder. " +
                         "Use named or ordinal instead.", enumClass.getName()
                 ), e);

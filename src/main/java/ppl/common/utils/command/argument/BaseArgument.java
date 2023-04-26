@@ -1,6 +1,6 @@
 package ppl.common.utils.command.argument;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 import ppl.common.utils.command.CommandLineException;
 import ppl.common.utils.command.argument.splitter.Splitters;
 import ppl.common.utils.exception.UnreachableCodeException;
@@ -104,7 +104,7 @@ public abstract class BaseArgument<V> implements Argument<V> {
                     res = res.map(mapper::map);
                 }
             } catch (Throwable t) {
-                throw new CommandLineException(StringUtils.format(
+                throw new CommandLineException(Strings.format(
                         "Invalid argument '{}'.", this), t);
             }
         }
@@ -119,7 +119,7 @@ public abstract class BaseArgument<V> implements Argument<V> {
         } catch (NoSuchMethodException e) {
             throw new UnreachableCodeException(e);
         } catch (SecurityException e) {
-            throw new IllegalStateException(StringUtils.format(
+            throw new IllegalStateException(Strings.format(
                     "The handle method of the Handler implementation class '{}' is not accessible.",
                     handler.getCanonicalName()), e);
         }

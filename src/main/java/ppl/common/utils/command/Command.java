@@ -1,6 +1,6 @@
 package ppl.common.utils.command;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 import ppl.common.utils.command.argument.Argument;
 import ppl.common.utils.command.argument.Option;
 import ppl.common.utils.command.argument.Position;
@@ -124,7 +124,7 @@ public class Command {
         private void parseToggleShortOption(char shortOption, String arg) {
             Option<?> option = resolverOfShortOption(shortOption, arg);
             if (!option.isToggle()) {
-                throw new CommandLineException(StringUtils.format(
+                throw new CommandLineException(Strings.format(
                         "Non-toggle short option '{}' must not be in '{}'",
                         shortOption, arg));
             }
@@ -134,7 +134,7 @@ public class Command {
         private Option<?> resolverOfShortOption(char shortOption, String arg) {
             Option<?> option = shortOptions.get(shortOption);
             if (option == null) {
-                throw new CommandLineException(StringUtils.format(
+                throw new CommandLineException(Strings.format(
                         "Unknown short option '{}' in '{}'.", shortOption, arg));
             }
             return option;
@@ -164,7 +164,7 @@ public class Command {
         private Option<?> resolverOfLongOption(String longOption) {
             Option<?> option = longOptions.get(longOption);
             if (option == null) {
-                throw new CommandLineException(StringUtils.format(
+                throw new CommandLineException(Strings.format(
                         "Unknown long option '{}'.", longOption));
             }
             return option;
@@ -262,7 +262,7 @@ public class Command {
             } else if (argument instanceof Position) {
                 addPosition((Position<?>) argument);
             } else {
-                throw new IllegalArgumentException(StringUtils.format(
+                throw new IllegalArgumentException(Strings.format(
                         "Unsupported argument type '{}' in command. Please use '{}'.",
                         argument.getClass().getCanonicalName(), SUPPORTED_ARGUMENT_TYPE));
             }
@@ -274,7 +274,7 @@ public class Command {
             }
 
             if (allArguments.contains(argument)) {
-                throw new IllegalArgumentException(StringUtils.format(
+                throw new IllegalArgumentException(Strings.format(
                         "Argument {} is already exists.",
                         argument.getName()));
             }
@@ -289,7 +289,7 @@ public class Command {
             Map<String, Option<?>> lOptions = longOptions;
             option.getLongOptions().forEach(name -> {
                 if (lOptions.containsKey(name)) {
-                    throw new IllegalArgumentException(StringUtils.format(
+                    throw new IllegalArgumentException(Strings.format(
                             "Long option '{}' in '{}' is already exists in '{}'.",
                             name, option, lOptions.get(name)));
                 }
@@ -305,7 +305,7 @@ public class Command {
             Map<Character, Option<?>> sOptions = shortOptions;
             option.getShortOptions().forEach(name -> {
                 if (sOptions.containsKey(name)) {
-                    throw new IllegalArgumentException(StringUtils.format(
+                    throw new IllegalArgumentException(Strings.format(
                             "Short option '{}' in '{}' is already exists in '{}'.",
                             name, option, sOptions.get(name)));
                 }

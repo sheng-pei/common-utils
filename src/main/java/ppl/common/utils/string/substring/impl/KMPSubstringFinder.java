@@ -1,6 +1,6 @@
 package ppl.common.utils.string.substring.impl;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 
 public class KMPSubstringFinder extends AbstractSimpleSubstringFinder {
 
@@ -8,7 +8,7 @@ public class KMPSubstringFinder extends AbstractSimpleSubstringFinder {
     private final int[] next;
 
     public KMPSubstringFinder(String pattern) {
-        if (StringUtils.isEmpty(pattern)) {
+        if (Strings.isEmpty(pattern)) {
             throw new IllegalArgumentException("Pattern is empty or null.");
         }
         this.pattern = pattern.toCharArray();

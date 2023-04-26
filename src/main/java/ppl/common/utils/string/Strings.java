@@ -1,4 +1,4 @@
-package ppl.common.utils;
+package ppl.common.utils.string;
 
 import ppl.common.utils.string.substring.PositionalArguments;
 import ppl.common.utils.string.substring.impl.ToStringArguments;
@@ -9,9 +9,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class StringUtils {
+public final class Strings {
 
-	private StringUtils() { }
+	private Strings() { }
 
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
@@ -204,11 +204,37 @@ public final class StringUtils {
 	}
 
 	public static boolean equalsOnContent(final String s1, final String s2) {
-		return StringUtils.equals(s1 == null ? "" : s1.trim(), s2 == null ? "" : s2.trim());
+		return Strings.equals(s1 == null ? "" : s1.trim(), s2 == null ? "" : s2.trim());
 	}
 
 	public static boolean equalsLiterally(final CharSequence cs1, final CharSequence cs2) {
-		return StringUtils.equals(cs1 == null ? "" : cs1, cs2 == null ? "" : cs2);
+		return Strings.equals(cs1 == null ? "" : cs1, cs2 == null ? "" : cs2);
+	}
+
+	public static String trim(String src, char c) {
+		return trim(src, c, TrimPosition.ALL);
+	}
+
+	public static String trim(String src, char c, TrimPosition pos) {
+		if (src == null || src.isEmpty()) {
+			return src;
+		}
+
+		pos = pos == null ? TrimPosition.NO : pos;
+		char[] chars = src.toCharArray();
+		int start = 0;
+		int end = chars.length;
+		if (pos == TrimPosition.ALL || pos == TrimPosition.END) {
+			int i;
+			for (i = end-1; i > start-1 && chars[i] == c; i--) ;
+			end = i + 1;
+		}
+		if (pos == TrimPosition.ALL || pos == TrimPosition.BEFORE) {
+			int i;
+			for (i = start; i < end && chars[i] == c; i++) ;
+			start = i;
+		}
+		return src.substring(start, end);
 	}
 
 }

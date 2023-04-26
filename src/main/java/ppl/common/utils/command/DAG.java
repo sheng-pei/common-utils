@@ -1,6 +1,6 @@
 package ppl.common.utils.command;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,7 +37,7 @@ public class DAG<K, E> {
         }
 
         if (hasPath(dstNode, srcNode)) {
-            throw new IllegalArgumentException(StringUtils.format(
+            throw new IllegalArgumentException(Strings.format(
                     "Will create circle, when add edge '{} -> {}'", source, destination));
         }
         return srcNode.addNext(dstNode);
@@ -90,7 +90,7 @@ public class DAG<K, E> {
         return Arrays.stream(keys)
                 .peek(k -> {
                     if (!this.all.containsKey(k)) {
-                        throw new IllegalArgumentException(StringUtils.format("No vertex of key '{}' exists.", k));
+                        throw new IllegalArgumentException(Strings.format("No vertex of key '{}' exists.", k));
                     }
                 }).map(this.all::get)
                 .collect(Collectors.toList());
@@ -101,7 +101,7 @@ public class DAG<K, E> {
         for (int i = 1; i < nodes.size(); i++) {
             Node<K, E> dst = nodes.get(i);
             if (!src.hasEdge(dst)) {
-                throw new IllegalArgumentException(StringUtils.format("No path '{}' exists.", Arrays.toString(keys)));
+                throw new IllegalArgumentException(Strings.format("No path '{}' exists.", Arrays.toString(keys)));
             }
             src = dst;
         }

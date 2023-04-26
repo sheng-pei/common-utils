@@ -1,7 +1,7 @@
 package ppl.common.utils.config.convert;
 
 import ppl.common.utils.config.ConvertException;
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -56,7 +56,7 @@ public class Converter<C> {
         try {
             return this.convertFunc.apply(obj, targetClass);
         } catch (Throwable t) {
-            throw new ConvertException(StringUtils.format(INCOMPATIBLE_TYPE_MESSAGE, targetClass.getName()), t);
+            throw new ConvertException(Strings.format(INCOMPATIBLE_TYPE_MESSAGE, targetClass.getName()), t);
         }
     }
 

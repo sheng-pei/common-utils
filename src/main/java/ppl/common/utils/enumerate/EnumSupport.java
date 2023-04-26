@@ -1,6 +1,6 @@
 package ppl.common.utils.enumerate;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,7 +25,7 @@ class EnumSupport {
         private final String cause;
 
         public String causeOf(Class<? extends Enum> enumClass) {
-            return StringUtils.format(this.cause, enumClass.getCanonicalName());
+            return Strings.format(this.cause, enumClass.getCanonicalName());
         }
 
     }

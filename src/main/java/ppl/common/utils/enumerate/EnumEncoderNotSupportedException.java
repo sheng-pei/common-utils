@@ -1,6 +1,6 @@
 package ppl.common.utils.enumerate;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 
 import static ppl.common.utils.enumerate.EnumSupport.ERROR;
 
@@ -24,7 +24,7 @@ public class EnumEncoderNotSupportedException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return StringUtils.format(this.error.causeOf(this.enumClass));
+        return Strings.format(this.error.causeOf(this.enumClass));
     }
 
 }

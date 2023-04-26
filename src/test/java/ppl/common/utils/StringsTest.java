@@ -5,17 +5,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import ppl.common.utils.string.Strings;
 
 import java.util.stream.Stream;
 
-public class StringUtilsTest {
+public class StringsTest {
 
     private static final String[] EMPTY_ARRAY = new String[0];
 
     @ParameterizedTest
     @MethodSource("emptySplitProvider")
     public void testSplitEmpty(String empty, String regex) {
-        String[] actual = StringUtils.split(empty, regex);
+        String[] actual = Strings.split(empty, regex);
         Assertions.assertArrayEquals(EMPTY_ARRAY, actual);
     }
 
@@ -33,7 +34,7 @@ public class StringUtilsTest {
     @ParameterizedTest
     @MethodSource({"noMatchingProvider"})
     public void testSplitWithNoMatching(String input, String regex, String[] expected) {
-        String[] actual = StringUtils.split(input, regex);
+        String[] actual = Strings.split(input, regex);
         Assertions.assertArrayEquals(expected, actual);
     }
 
@@ -47,7 +48,7 @@ public class StringUtilsTest {
     @ParameterizedTest
     @MethodSource({"matchingProvider"})
     public void testSplitWithMatching(String input, String regex, String[] expected) {
-        String[] actual = StringUtils.split(input, regex);
+        String[] actual = Strings.split(input, regex);
         Assertions.assertArrayEquals(expected, actual);
     }
 
@@ -62,13 +63,13 @@ public class StringUtilsTest {
 
     @Test
     public void testSplitByNull() {
-        Assertions.assertThrows(NullPointerException.class, () -> StringUtils.split("", null));
+        Assertions.assertThrows(NullPointerException.class, () -> Strings.split("", null));
     }
 
     @ParameterizedTest
     @MethodSource("uniqueProvider")
     public void testUniqueOfNull(String[] source, String[] expected) {
-        String[] actual = StringUtils.removeDuplicate(source);
+        String[] actual = Strings.removeDuplicate(source);
         Assertions.assertArrayEquals(expected, actual);
     }
 
@@ -82,7 +83,7 @@ public class StringUtilsTest {
     @ParameterizedTest
     @MethodSource("emptyProvider")
     public void testIsEmpty(String str, boolean expected) {
-        Assertions.assertEquals(expected, StringUtils.isEmpty(str));
+        Assertions.assertEquals(expected, Strings.isEmpty(str));
     }
 
     private static Stream<Arguments> emptyProvider() {
@@ -96,7 +97,7 @@ public class StringUtilsTest {
     @ParameterizedTest
     @MethodSource("notEmptyProvider")
     public void testIsNotEmptyOfNull(String str, boolean expected) {
-        Assertions.assertEquals(expected, StringUtils.isNotEmpty(str));
+        Assertions.assertEquals(expected, Strings.isNotEmpty(str));
     }
 
     private static Stream<Arguments> notEmptyProvider() {
@@ -110,7 +111,7 @@ public class StringUtilsTest {
     @ParameterizedTest
     @MethodSource("blankProvider")
     public void testIsBlank(String input, boolean expected) {
-        Assertions.assertEquals(expected, StringUtils.isBlank(input));
+        Assertions.assertEquals(expected, Strings.isBlank(input));
     }
 
     private static Stream<Arguments> blankProvider() {
@@ -126,7 +127,7 @@ public class StringUtilsTest {
     @ParameterizedTest
     @MethodSource("snakeCaseProvider")
     public void testToSnakeCase(String input, String expected) {
-        Assertions.assertEquals(expected, StringUtils.toSnakeCase(input));
+        Assertions.assertEquals(expected, Strings.toSnakeCase(input));
     }
 
     private static Stream<Arguments> snakeCaseProvider() {
@@ -140,7 +141,7 @@ public class StringUtilsTest {
     @ParameterizedTest
     @MethodSource("formatProvider")
     public void testFormatJustSingleReference(String reference, Object[] parameters, String expected) {
-        String replaced = StringUtils.format(reference, parameters);
+        String replaced = Strings.format(reference, parameters);
         Assertions.assertEquals(expected, replaced);
     }
 
@@ -157,7 +158,7 @@ public class StringUtilsTest {
     @ParameterizedTest
     @MethodSource({"literallyEqualityProvider", "nullEqualsEmptyProvider"})
     public void testEqualsLiterally(String str1, String str2, boolean expected) {
-        Assertions.assertEquals(expected, StringUtils.equalsLiterally(str1, str2));
+        Assertions.assertEquals(expected, Strings.equalsLiterally(str1, str2));
     }
 
     private static Stream<Arguments> literallyEqualityProvider() {
@@ -169,7 +170,7 @@ public class StringUtilsTest {
     @ParameterizedTest
     @MethodSource({"onContentEqualityProvider", "nullEqualsEmptyProvider"})
     public void testEqualsOnContentNullEmpty(String str1, String str2, boolean expected) {
-        Assertions.assertEquals(expected, StringUtils.equalsOnContent(str1, str2));
+        Assertions.assertEquals(expected, Strings.equalsOnContent(str1, str2));
     }
 
     private static Stream<Arguments> onContentEqualityProvider() {
@@ -190,7 +191,7 @@ public class StringUtilsTest {
     @ParameterizedTest
     @MethodSource("equalityProvider")
     public void testEquals(String str1, String str2, boolean expected) {
-        Assertions.assertEquals(expected, StringUtils.equals(str1, str2));
+        Assertions.assertEquals(expected, Strings.equals(str1, str2));
     }
 
     private static Stream<Arguments> equalityProvider() {

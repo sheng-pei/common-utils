@@ -1,6 +1,6 @@
 package ppl.common.utils.command.argument;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 import ppl.common.utils.command.argument.collector.Collectors;
 import ppl.common.utils.command.argument.map.Mappers;
 
@@ -55,7 +55,7 @@ public class Position<V> extends BaseArgument<V> {
 
     @Override
     public String toString() {
-        return StringUtils.format(
+        return Strings.format(
                 "position->{}, name->{}",
                 getPosition(), getName());
     }

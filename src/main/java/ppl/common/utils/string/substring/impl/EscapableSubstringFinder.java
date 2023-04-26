@@ -1,6 +1,6 @@
 package ppl.common.utils.string.substring.impl;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.SubstringFinder;
 
@@ -27,7 +27,7 @@ public class EscapableSubstringFinder extends AbstractSubstringFinder {
 
     public EscapableSubstringFinder(String pattern, char escape,
                                     Function<String, AbstractSimpleSubstringFinder> finderCreator) {
-        if (StringUtils.isEmpty(pattern)) {
+        if (Strings.isEmpty(pattern)) {
             throw new IllegalArgumentException("Pattern is empty or null.");
         }
         if (pattern.indexOf(escape) != -1) {
@@ -61,11 +61,11 @@ public class EscapableSubstringFinder extends AbstractSubstringFinder {
     public Substring findInternal(char[] input, int start, int end) {
         int firstEscape = start;
         while (firstEscape != -1) {
-            int firstUnescape = StringUtils.indexOfNot(this.escape, input, firstEscape, end);
+            int firstUnescape = Strings.indexOfNot(this.escape, input, firstEscape, end);
             if (firstUnescape == -1) {
                 return null;
             } else {
-                int nextFirstEscape = StringUtils.indexOf(this.escape, input, firstUnescape, end);
+                int nextFirstEscape = Strings.indexOf(this.escape, input, firstUnescape, end);
                 Substring substring = this.finder.find(input, firstUnescape, nextFirstEscape == -1 ? end : nextFirstEscape);
                 if (substring == null) {
                     firstEscape = nextFirstEscape;

@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class ConcurrentCache<K,V> {
+public final class ConcurrentCache<K,V> implements Cache<K, V> {
 
     private final int size;
     private final Map<K,V> eden;

@@ -1,6 +1,6 @@
 package ppl.common.utils.enumerate.hibernate;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 import ppl.common.utils.TypeUtils;
 import ppl.common.utils.enumerate.EnumUtils;
 
@@ -18,7 +18,7 @@ public abstract class EnumConverter<A extends Enum<A>, D> implements AttributeCo
     public EnumConverter(Class<A> enumClazz, Class<D> keyClazz) {
         if (!EnumUtils.isEncodeSupport(enumClazz)) {
             throw new IllegalArgumentException(
-                    StringUtils.format(
+                    Strings.format(
                             "The encode protocol is not implemented in the enum({}), so it does not support converter({})",
                             enumClazz.getCanonicalName(),
                             EnumConverter.class.getCanonicalName()
@@ -27,7 +27,7 @@ public abstract class EnumConverter<A extends Enum<A>, D> implements AttributeCo
         }
         if (!TypeUtils.box(EnumUtils.getKeyType(enumClazz)).equals(keyClazz)) {
             throw new IllegalArgumentException(
-                    StringUtils.format(
+                    Strings.format(
                             "The type of key of enum({}) is not {}",
                             enumClazz.getCanonicalName(),
                             keyClazz.getCanonicalName()

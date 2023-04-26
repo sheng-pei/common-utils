@@ -1,6 +1,6 @@
 package ppl.common.utils.command.argument;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 import ppl.common.utils.command.argument.collector.Collectors;
 import ppl.common.utils.command.argument.map.Mappers;
 
@@ -47,7 +47,7 @@ public class Option<V> extends BaseArgument<V> {
     public static Option<String> requiredIdentity(String longOption, Character shortOption) {
         return newBuilder(longOption, shortOption)
                 .map(Mappers.required())
-                .collect(Collectors.one());
+                .collect();
     }
 
     public static Option<String> optionalIdentity(String longOption) {
@@ -69,7 +69,7 @@ public class Option<V> extends BaseArgument<V> {
                                           Set<String> longOptions,
                                           Set<Character> shortOptions) {
         return newBuilder(name, longOptions, shortOptions)
-                .collect(Collectors.one());
+                .collect();
     }
 
     public static Builder<String> newBuilder(String longOption, Character shortOption) {
@@ -154,7 +154,7 @@ public class Option<V> extends BaseArgument<V> {
 
     @Override
     public String toString() {
-        return StringUtils.format(
+        return Strings.format(
                 "short option->{}, long option->{}, name->{}",
                 this.shortOptions.stream()
                         .map(s -> SHORT_OPTION_PREFIX + s)

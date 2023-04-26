@@ -1,6 +1,6 @@
 package ppl.common.utils.enumerate;
 
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -41,7 +41,7 @@ public class EnumUtils {
         try {
             return EnumKey.unwrap(enumToKeyCache.get(e), keyClazz);
         } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException(StringUtils.format(
+            throw new IllegalArgumentException(Strings.format(
                     "Could not encode enum({}) to {}",
                     e.getClass().getCanonicalName(),
                     keyClazz.getCanonicalName()), ex);

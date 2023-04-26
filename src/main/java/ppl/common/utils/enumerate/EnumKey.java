@@ -1,7 +1,7 @@
 package ppl.common.utils.enumerate;
 
 import ppl.common.utils.Condition;
-import ppl.common.utils.StringUtils;
+import ppl.common.utils.string.Strings;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -95,7 +95,7 @@ final class EnumKey {
             }
         }
 
-        throw new IllegalArgumentException(StringUtils.format(
+        throw new IllegalArgumentException(Strings.format(
                 "Could not convert to {}", clazz.getCanonicalName()));
     }
 
