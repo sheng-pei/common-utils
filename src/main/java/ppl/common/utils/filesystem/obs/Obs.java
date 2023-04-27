@@ -138,20 +138,12 @@ public class Obs implements FileSystem {
     private class ObsConnection implements Connection {
         private final ObsClient client;
         private final String bucket;
-        private final Path root;
-        private AtomicReference<Path> working;
+        private final AtomicReference<Path> working;
 
         public ObsConnection(String endpoint, String ak, String sk, String bucket) {
             this.client = new ObsClient(ak, sk, endpoint);
             this.bucket = bucket;
-            Path root = pathCreator.create(this, FileSystem.C_ROOT_DIR);
-            this.root = root;
-            this.working = new AtomicReference<>(root);
-        }
-
-        @Override
-        public Path root() {
-            return this.root;
+            this.working = new AtomicReference<>(pathCreator.create(FileSystem.C_ROOT_DIR));
         }
 
         @Override
@@ -160,14 +152,9 @@ public class Obs implements FileSystem {
         }
 
         @Override
-        public Path get(String first, String... more) {
-            return morePathCreator.create(this, first, more);
-        }
-
-        @Override
         public void cd(String pwd) {
             if (pwd.startsWith(FileSystem.C_ROOT_DIR)) {
-                this.working.set(pathCreator.create(this, pwd));
+                this.working.set(pathCreator.create(pwd));
             } else {
                 Path p = this.working.get();
                 while (!this.working.compareAndSet(p, p.resolve(pwd))) ;

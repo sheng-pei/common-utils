@@ -17,18 +17,8 @@ public class PoolableConnection<C extends Connection> implements Connection {
     }
 
     @Override
-    public Path root() {
-        return null;
-    }
-
-    @Override
     public Path pwd() {
-        return null;
-    }
-
-    @Override
-    public Path get(String first, String... more) {
-        return null;
+        return this.connection.pwd();
     }
 
     @Override

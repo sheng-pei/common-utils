@@ -15,6 +15,29 @@ public final class Strings {
 
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
+	public static String join(String delimiter, String... strings) {
+		return unsafeJoin(delimiter, strings, 0, strings.length);
+	}
+
+	public static String join(String delimiter, String[] strings, int offset, int length) {
+		if (offset < 0 || length < 0) {
+			throw new IllegalArgumentException("Offset and length must not be negative.");
+		}
+		if (offset + length > strings.length) {
+			throw new IllegalArgumentException(Strings.format(
+					"End position is beyond length: {}.", strings.length));
+		}
+		return unsafeJoin(delimiter, strings, offset, length);
+	}
+
+	private static String unsafeJoin(String delimiter, String[] strings, int offset, int length) {
+		StringJoiner joiner = new StringJoiner(delimiter);
+		for (int i = offset; i < offset + length; i++) {
+			joiner.add(strings[i]);
+		}
+		return joiner.toString();
+	}
+
 	public static String[] split(String string, String regex) {
 		Objects.requireNonNull(regex, "The specified regex is null");
 

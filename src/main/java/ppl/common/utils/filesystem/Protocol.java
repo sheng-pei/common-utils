@@ -11,7 +11,7 @@ public enum Protocol {
 
 //    FTP("ftp", Ftp::create, BasePath::new),
 //    SFTP("sftp", Sftp::create, BasePath::new),
-    OBS("obs", Obs::create, BasePath::new, BasePath::get);
+    OBS("obs", Obs::create, BasePath::get, BasePath::get);
 
     private final String name;
     private final Creator creator;
