@@ -145,6 +145,7 @@ public interface Path extends Comparable<Path>, Iterable<Path> {
      * <li>If the {@code other} parameter is an {@link #isAbsolute() absolute}
      * path then this method trivially returns {@code other}.</li>
      * <li>If {@code other} is an <i>empty path</i> then this method trivially returns this path.</li>
+     * <li>If this path is an <i>empty path</i> then this method trivially returns the {@code other} path.</li>
      * <li>Otherwise this method considers this path to be a directory and resolves
      * the given path against this path. This method <em>joins</em> the given path
      * to this path and returns a resulting path that {@link #endsWith ends} with the given path.</li>

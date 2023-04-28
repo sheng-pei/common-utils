@@ -314,6 +314,9 @@ public class BasePath implements Path {
                 res.push(name);
             }
         }
+        if (res.size() == 1 && res.peek().isEmpty()) {
+            return ROOT;
+        }
         return new BasePath(Strings.join(FileSystem.C_SEPARATOR.toString(), res.toArray(new String[0])));
     }
 
