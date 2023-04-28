@@ -8,10 +8,6 @@ import java.util.Iterator;
 
 public class Main {
     public static void main(String[] args) {
-        Iterator<Path> iterator = BasePath.get("/m/.././../a").iterator();
-        while (iterator.hasNext()) {
-            System.out.println(iterator.next());
-        }
     }
 
 }

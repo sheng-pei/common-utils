@@ -11,7 +11,7 @@ public class BasePath implements Path {
 
     public static BasePath get(String first, String... more) {
         List<String> list = new ArrayList<>();
-        if (!first.isEmpty()) {
+        if (first != null && !first.isEmpty()) {
             list.add(first);
         }
         for (String m : more) {

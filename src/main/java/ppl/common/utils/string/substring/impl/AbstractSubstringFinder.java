@@ -8,27 +8,51 @@ import java.util.Objects;
 abstract class AbstractSubstringFinder implements SubstringFinder {
 
     public Substring find(String input) {
-        return this.find(input, 0, input.length());
+        Objects.requireNonNull(input, "The input is null.");
+        return findInternal(input.toCharArray(), 0, input.length());
     }
 
     public Substring find(String input, int start) {
-        return this.find(input, start, input.length());
+        Objects.requireNonNull(input, "The input is null.");
+        if (start < 0 || start > input.length()) {
+            throw new StringIndexOutOfBoundsException(start);
+        }
+        return findInternal(input.toCharArray(), start, input.length());
     }
 
     public Substring find(String input, int start, int end) {
-        return this.find(input != null ? input.toCharArray() : null, start, end);
+        Objects.requireNonNull(input, "The input is null.");
+        if (start < 0 || start > input.length()) {
+            throw new StringIndexOutOfBoundsException(start);
+        }
+        if (end < 0 || end > input.length()) {
+            throw new StringIndexOutOfBoundsException(end);
+        }
+        return findInternal(input.toCharArray(), start, end);
+    }
+
+    @Override
+    public Substring find(char[] input) {
+        Objects.requireNonNull(input, "The input is null.");
+        return findInternal(input, 0, input.length);
+    }
+
+    @Override
+    public Substring find(char[] input, int start) {
+        Objects.requireNonNull(input, "The input is null.");
+        if (start < 0 || start > input.length) {
+            throw new ArrayIndexOutOfBoundsException(start);
+        }
+        return findInternal(input, start, input.length);
     }
 
     public Substring find(char[] input, int start, int end) {
         Objects.requireNonNull(input, "The input is null.");
-        if (start < 0) {
-            throw new StringIndexOutOfBoundsException(start);
+        if (start < 0 || start > input.length) {
+            throw new ArrayIndexOutOfBoundsException(start);
         }
-        if (end > input.length) {
-            throw new StringIndexOutOfBoundsException(end);
-        }
-        if (start > end) {
-            throw new StringIndexOutOfBoundsException(end - start);
+        if (end < 0 || end > input.length) {
+            throw new ArrayIndexOutOfBoundsException(end);
         }
         return findInternal(input, start, end);
     }

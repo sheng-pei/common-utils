@@ -1,8 +1,8 @@
 package ppl.common.utils.string;
 
 import ppl.common.utils.string.substring.PositionalArguments;
+import ppl.common.utils.string.substring.impl.SundaySubstringFinder;
 import ppl.common.utils.string.substring.impl.ToStringArguments;
-import ppl.common.utils.string.substring.impl.EscapableSubstringFinder;
 import ppl.common.utils.string.substring.Substring;
 
 import java.util.*;
@@ -158,8 +158,32 @@ public final class Strings {
 		return previous != null && Character.isLowerCase(previous) && Character.isUpperCase(current);
 	}
 
-	public static int indexOfNot(char c, char[] chars, int pos, int end) {
-		for (int idx = pos; idx < end; idx++) {
+	public static int lastIndexOfNot(char c, char[] chars, int begin, int end) {
+		if (begin < 0 || begin > chars.length) {
+			throw new ArrayIndexOutOfBoundsException(begin);
+		}
+		if (end < 0 || end > chars.length) {
+			throw new ArrayIndexOutOfBoundsException(end);
+		}
+		return unsafeLastIndexOfNot(c, chars, begin, end);
+	}
+
+	public static int lastIndexOfNot(char c, String string, int begin, int end) {
+		if (begin < 0 || begin > string.length()) {
+			throw new StringIndexOutOfBoundsException(begin);
+		}
+		if (end < 0 || end > string.length()) {
+			throw new StringIndexOutOfBoundsException(end);
+		}
+		return unsafeLastIndexOfNot(c, string.toCharArray(), begin, end);
+	}
+
+	public static int lastIndexOfNot(char c, String string) {
+		return unsafeLastIndexOfNot(c, string.toCharArray(), 0, string.length());
+	}
+
+	private static int unsafeLastIndexOfNot(char c, char[] chars, int begin, int end) {
+		for (int idx = end - 1; idx > begin - 1; idx--) {
 			if (chars[idx] != c) {
 				return idx;
 			}
@@ -167,20 +191,32 @@ public final class Strings {
 		return -1;
 	}
 
-	public static int indexOfNot(char c, String string, int pos, int end) {
-		return indexOfNot(c, string.toCharArray(), pos, end);
+	public static int lastIndexOf(char c, char[] chars, int begin, int end) {
+		if (begin < 0 || begin > chars.length) {
+			throw new ArrayIndexOutOfBoundsException(begin);
+		}
+		if (end < 0 || end > chars.length) {
+			throw new ArrayIndexOutOfBoundsException(end);
+		}
+		return unsafeLastIndexOf(c, chars, begin, end);
 	}
 
-	public static int indexOfNot(char c, String string) {
-		return indexOfNot(c, string, 0, string.length());
+	public static int lastIndexOf(char c, String string, int begin, int end) {
+		if (begin < 0 || begin > string.length()) {
+			throw new StringIndexOutOfBoundsException(begin);
+		}
+		if (end < 0 || end > string.length()) {
+			throw new StringIndexOutOfBoundsException(end);
+		}
+		return unsafeLastIndexOf(c, string.toCharArray(), begin, end);
 	}
 
-	public static int indexOf(char c, String string, int pos, int end) {
-		return indexOf(c, string.toCharArray(), pos, end);
+	public static int lastIndexOf(char c, String string) {
+		return unsafeLastIndexOf(c, string.toCharArray(), 0, string.length());
 	}
 
-	public static int indexOf(char c, char[] chars, int pos, int end) {
-		for (int idx = pos; idx < end; idx++) {
+	private static int unsafeLastIndexOf(char c, char[] chars, int begin, int end) {
+		for (int idx = end - 1; idx > begin - 1; idx--) {
 			if (chars[idx] == c) {
 				return idx;
 			}
@@ -188,7 +224,77 @@ public final class Strings {
 		return -1;
 	}
 
+	public static int indexOfNot(char c, char[] chars, int begin, int end) {
+		if (begin < 0 || begin > chars.length) {
+			throw new ArrayIndexOutOfBoundsException(begin);
+		}
+		if (end < 0 || end > chars.length) {
+			throw new ArrayIndexOutOfBoundsException(end);
+		}
+		return unsafeIndexOfNot(c, chars, begin, end);
+	}
+
+	public static int indexOfNot(char c, String string, int begin, int end) {
+		if (begin < 0 || begin > string.length()) {
+			throw new StringIndexOutOfBoundsException(begin);
+		}
+		if (end < 0 || end > string.length()) {
+			throw new StringIndexOutOfBoundsException(end);
+		}
+		return unsafeIndexOfNot(c, string.toCharArray(), begin, end);
+	}
+
+	public static int indexOfNot(char c, String string) {
+		return unsafeIndexOfNot(c, string.toCharArray(), 0, string.length());
+	}
+
+	private static int unsafeIndexOfNot(char c, char[] chars, int begin, int end) {
+		for (int idx = begin; idx < end; idx++) {
+			if (chars[idx] != c) {
+				return idx;
+			}
+		}
+		return -1;
+	}
+
+	public static int indexOf(char c, String string, int begin, int end) {
+		if (begin < 0 || begin > string.length()) {
+			throw new StringIndexOutOfBoundsException(begin);
+		}
+		if (end < 0 || end > string.length()) {
+			throw new StringIndexOutOfBoundsException(end);
+		}
+		return unsafeIndexOf(c, string.toCharArray(), begin, end);
+	}
+
+	public static int indexOf(char c, char[] chars, int begin, int end) {
+		if (begin < 0 || begin > chars.length) {
+			throw new ArrayIndexOutOfBoundsException(begin);
+		}
+		if (end < 0 || end > chars.length) {
+			throw new ArrayIndexOutOfBoundsException(end);
+		}
+		return unsafeIndexOf(c, chars, begin, end);
+	}
+
+	public static int indexOf(char c, String string) {
+		return unsafeIndexOf(c, string.toCharArray(), 0, string.length());
+	}
+
+	private static int unsafeIndexOf(char c, char[] chars, int begin, int end) {
+		for (int idx = begin; idx < end; idx++) {
+			if (chars[idx] == c) {
+				return idx;
+			}
+		}
+		return -1;
+	}
+
+	//Please ensure the string REFERENCE has no prefix which is also a suffix.
 	private static final String REFERENCE = "{}";
+
+	//Please ensure there is no character ESCAPE in the string REFERENCE.
+	private static final char ESCAPE = '\\';
 
 	public static String format(String formatString, Object... parameters) {
 		Objects.requireNonNull(formatString, "The specified formatString is null.");
@@ -203,27 +309,47 @@ public final class Strings {
 
 	private static String pFormat(String formatString, PositionalArguments arguments) {
 		char[] formatCharacters = formatString.toCharArray();
-		EscapableSubstringFinder finder = new EscapableSubstringFinder(REFERENCE);
+		SundaySubstringFinder finder = new SundaySubstringFinder(REFERENCE);
 
-		Substring substring = finder.find(formatCharacters, 0, formatCharacters.length);
+		int start = 0;
+		Substring substring = finder.find(formatCharacters, start);
 		if (substring == null) {
 			return formatString;
 		}
 
-		int nxt = 0;
 		StringBuilder res = new StringBuilder();
 		do {
-			res.append(formatCharacters, nxt, substring.start() - nxt);
-			if (arguments.available()) {
-				substring.append(res, arguments);
-			} else {
-				substring.append(res, REFERENCE);
+			int len = lengthOfTheLongestEscapeSuffix(formatString, start, substring.start());
+			if ((len & 1) == 0 && !arguments.available()) {
+				throw new IllegalArgumentException("Arguments are not enough.");
 			}
-			nxt = substring.end();
-			substring = arguments.available() ? finder.find(formatCharacters, nxt, formatCharacters.length) : null;
+
+			res.append(formatCharacters, start, substring.start() - start - len);
+			int maintainEscape = len >> 1;
+			if ((len & 1) == 1) {
+				res.append(formatCharacters, substring.start() - maintainEscape, substring.length() + maintainEscape);
+			} else {
+				res.append(formatCharacters, substring.start() - len, maintainEscape);
+				res.append(arguments.consume());
+			}
+			start = substring.end();
+			substring = finder.find(formatCharacters, start);
 		} while (substring != null);
-		res.append(formatCharacters, nxt, formatCharacters.length - nxt);
+		res.append(formatCharacters, start, formatCharacters.length - start);
 		return res.toString();
+	}
+
+	/*
+	 * Returns the length of the longest suffix of the given substring beginning at start
+	 * and extending to end in the given string. The suffix contains only escape character.
+	 */
+	private static int lengthOfTheLongestEscapeSuffix(String formatString, int start, int end) {
+		int lastIndexOfUnescape = lastIndexOfNot(ESCAPE, formatString, start, end);
+		int escapeStart = start;
+		if (lastIndexOfUnescape != -1) {
+			escapeStart = lastIndexOfUnescape + 1;
+		}
+		return end - escapeStart;
 	}
 
 	public static boolean equalsOnContent(final String s1, final String s2) {
@@ -248,14 +374,10 @@ public final class Strings {
 		int start = 0;
 		int end = chars.length;
 		if (pos == TrimPosition.ALL || pos == TrimPosition.END) {
-			int i;
-			for (i = end-1; i > start-1 && chars[i] == c; i--) ;
-			end = i + 1;
+			end = unsafeLastIndexOfNot(c, chars, start, end) + 1;
 		}
 		if (pos == TrimPosition.ALL || pos == TrimPosition.BEFORE) {
-			int i;
-			for (i = start; i < end && chars[i] == c; i++) ;
-			start = i;
+			start = unsafeIndexOfNot(c, chars, start, end);
 		}
 		return src.substring(start, end);
 	}

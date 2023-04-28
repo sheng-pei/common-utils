@@ -16,8 +16,6 @@ import java.util.function.BiFunction;
 
 public class Obs implements FileSystem {
 
-    private static final Logger log = LoggerFactory.getLogger(Obs.class);
-
     private static final Protocol protocol = Protocol.OBS;
 
     private final String endpoint;

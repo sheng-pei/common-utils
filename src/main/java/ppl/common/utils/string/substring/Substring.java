@@ -1,23 +1,17 @@
 package ppl.common.utils.string.substring;
 
 /**
- * This substring is subsequence of the source from start to end. Where
- * 1. Start and end are indices of the source.
- * 2. Start is not greater than end.
+ * An object that is a subsequence of a string.
  *
- * The length of this substring is the difference between end and start. Empty if length is zero.
- * Substring sub1 is equals to sub2 if sub1 and sub2 is from the same source and the start and
- * the end of sub1 are the same with them of b correspondingly.
+ * <p>This substring begins at {@link #start() startIndex}, inclusive, and extends to {@link #end() endIndex},
+ * exclusive, of the source string. The {@link #start() startIndex} must not be greater than the {@link #end()
+ * endIndex}.</p>
  *
- * You can replace this substring by calling replace method. The final result is defined by
- * concrete implements using the targets specified.
+ * <p>The {@link #length() length} of this substring is the number of the characters of the subsequence. If
+ * there is no character in this substring then this is empty.</p>
  *
- * Warn: Please don't implement Substring directly. Because the new implements may be incompatible with ours.
- * If you want to implement substring for yourself, the best way is to extend ConsistentSubstring.
  */
 public interface Substring {
-    void append(StringBuilder builder, PositionalArguments arguments);
-    void append(StringBuilder builder, String argument);
     boolean isEmpty();
     int start();
     int end();

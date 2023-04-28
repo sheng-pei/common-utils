@@ -1,6 +1,5 @@
 package ppl.common.utils.string.substring.impl;
 
-import ppl.common.utils.string.substring.PositionalArguments;
 import ppl.common.utils.string.substring.SubstringIndexOutOfBoundsException;
 
 import java.util.Arrays;
@@ -15,13 +14,14 @@ public class Substring implements ppl.common.utils.string.substring.Substring {
     Substring(char[] source, int start, int end) {
         Objects.requireNonNull(source, "Source is null");
         if (start < 0) {
-            throw new StringIndexOutOfBoundsException(start);
+            throw new ArrayIndexOutOfBoundsException(start);
         }
         if (end > source.length) {
-            throw new StringIndexOutOfBoundsException(end);
+            throw new ArrayIndexOutOfBoundsException(end);
         }
         if (start > end) {
-            throw new StringIndexOutOfBoundsException(end - start);
+            throw new ArrayIndexOutOfBoundsException(
+                    "It is not allowed to give a start that is greater than an end.");
         }
 
         this.source = source;
@@ -30,26 +30,8 @@ public class Substring implements ppl.common.utils.string.substring.Substring {
     }
 
     @Override
-    public void append(StringBuilder builder, PositionalArguments arguments) {
-        Objects.requireNonNull(builder, "Builder is null.");
-        Objects.requireNonNull(arguments, "Arguments is null.");
-        if (!arguments.available()) {
-            throw new IllegalArgumentException("Arguments is unavailable.");
-        }
-
-        append(builder, arguments.consume());
-    }
-
-    @Override
-    public void append(StringBuilder builder, String argument) {
-        Objects.requireNonNull(builder, "Builder is null.");
-        Objects.requireNonNull(argument, "Argument is null.");
-        builder.append(argument);
-    }
-
-    @Override
     public final String string() {
-        return new String(this.source, start(), length());
+        return unsafeString(0, length());
     }
 
     @Override
@@ -58,8 +40,7 @@ public class Substring implements ppl.common.utils.string.substring.Substring {
             throw new SubstringIndexOutOfBoundsException(offset);
         }
 
-        int start = this.start() + offset;
-        return new String(this.source, start, this.end() - start);
+        return unsafeString(offset, length() - offset);
     }
 
     @Override
@@ -69,11 +50,17 @@ public class Substring implements ppl.common.utils.string.substring.Substring {
         }
 
         if (length < 0 || offset + length > length()) {
-            throw new SubstringIndexOutOfBoundsException(length);
+            throw new SubstringIndexOutOfBoundsException(
+                    "It is not allowed to give a length that is greater than " +
+                            "the number of characters beginning at the given offset " +
+                            "and extending to the end.");
         }
 
-        int start = this.start() + offset;
-        return new String(this.source, start, length);
+        return unsafeString(offset, length);
+    }
+
+    private String unsafeString(int offset, int length) {
+        return new String(this.source, this.start + offset, length);
     }
 
     @Override
