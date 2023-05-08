@@ -1,5 +1,6 @@
 package ppl.common.utils.filesystem;
 
+import java.nio.file.InvalidPathException;
 import java.util.Iterator;
 
 public interface Path extends Comparable<Path>, Iterable<Path> {
@@ -301,10 +302,22 @@ public interface Path extends Comparable<Path>, Iterable<Path> {
     String toString();
 
     interface Creator {
-        Path create(String path);
-    }
-
-    interface MoreCreator {
+        /**
+         * Converts a path string, or a sequence of strings that when joined form a path string,
+         * to a {@code Path}. If {@code more} does not specify any
+         * elements then the value of the {@code first} parameter is the path string
+         * to convert. If {@code more} specifies one or more elements then each
+         * non-empty string, including {@code first}, is considered to be a sequence
+         * of name elements (see {@link Path}) and is joined to form a path string.
+         * @param first
+         *        the path string or initial part of the path string
+         * @param more
+         *        additional strings to be joined to form the path string
+         * @return the resulting {@code Path}
+         *
+         * @throws InvalidPathException
+         *         if the path string cannot be converted to a {@code Path}
+         */
         Path create(String first, String... more);
     }
 

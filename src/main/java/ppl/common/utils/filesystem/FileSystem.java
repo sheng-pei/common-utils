@@ -6,5 +6,5 @@ public interface FileSystem extends AutoCloseable {
     String C_PARENT_DIR = "..";
     Character C_SEPARATOR = '/';
 
-    Connection getConnection();
+    Connection getConnection() throws Exception;
 }

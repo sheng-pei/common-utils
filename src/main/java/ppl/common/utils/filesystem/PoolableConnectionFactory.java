@@ -18,18 +18,18 @@ public class PoolableConnectionFactory<C extends Connection> implements PooledOb
         this.pool = new SetOnce<>();
     }
 
-    public synchronized void setPool(ObjectPool<PoolableConnection<C>> pool) {
+    public void setPool(ObjectPool<PoolableConnection<C>> pool) {
         this.pool.set(pool);
     }
 
     @Override
     public void activateObject(PooledObject<PoolableConnection<C>> pooledObject) throws Exception {
-
+        pooledObject.getObject().activate();
     }
 
     @Override
     public void destroyObject(PooledObject<PoolableConnection<C>> pooledObject) throws Exception {
-
+        pooledObject.getObject().reallyClose();
     }
 
     @Override
@@ -39,11 +39,16 @@ public class PoolableConnectionFactory<C extends Connection> implements PooledOb
 
     @Override
     public void passivateObject(PooledObject<PoolableConnection<C>> pooledObject) throws Exception {
-
+        pooledObject.getObject().passivate();
     }
 
     @Override
     public boolean validateObject(PooledObject<PoolableConnection<C>> pooledObject) {
-        return false;
+        try {
+            pooledObject.getObject().validate();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

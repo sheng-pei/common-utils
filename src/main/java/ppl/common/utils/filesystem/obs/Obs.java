@@ -4,46 +4,36 @@ import com.obs.services.ObsClient;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ppl.common.utils.filesystem.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Obs implements FileSystem {
 
     private static final Protocol protocol = Protocol.OBS;
-
-    private final String endpoint;
-    private final String ak;
-    private final String sk;
     private final String bucket;
-
+    private final ObsClient obsClient;
     private final Path.Creator pathCreator;
-
-    private final Path.MoreCreator morePathCreator;
+    private final AtomicBoolean closed = new AtomicBoolean();
 
     private final ObjectPool<PoolableConnection<ObsConnection>> pool;
 
-    private Obs(ObsProperties obsProperties, Path.Creator pathCreator, Path.MoreCreator morePathCreator) {
-        this.endpoint = obsProperties.getEndpoint();
-        this.ak = obsProperties.getAk();
-        this.sk = obsProperties.getSk();
+    private Obs(ObsProperties obsProperties, Path.Creator pathCreator) {
         this.bucket = obsProperties.getBucket();
+        this.obsClient = new ObsClient(obsProperties.getAk(), obsProperties.getSk(), obsProperties.getEndpoint());
         this.pathCreator = pathCreator;
-        this.morePathCreator = morePathCreator;
-        PoolableConnectionFactory<ObsConnection> factory = createPooledObjectFactory(endpoint, ak, sk, bucket);
+        PoolableConnectionFactory<ObsConnection> factory = createPooledObjectFactory();
         ObjectPool<PoolableConnection<ObsConnection>> pool = createObjectPool(factory);
         factory.setPool(pool);
         this.pool = pool;
     }
 
-    private PoolableConnectionFactory<ObsConnection> createPooledObjectFactory(String endpoint, String ak, String sk, String bucket) {
-        return new PoolableConnectionFactory<>(() -> new ObsConnection(endpoint, ak, sk, bucket));
+    private PoolableConnectionFactory<ObsConnection> createPooledObjectFactory() {
+        return new PoolableConnectionFactory<>(ObsConnection::new);
     }
 
     private ObjectPool<PoolableConnection<ObsConnection>> createObjectPool(PooledObjectFactory<PoolableConnection<ObsConnection>> factory) {
@@ -51,18 +41,23 @@ public class Obs implements FileSystem {
     }
 
     @Override
-    public Connection getConnection() {
-//        return pool.borrowObject();
-        return null;
+    public Connection getConnection() throws Exception {
+        ensureOpen();
+        return pool.borrowObject();
     }
 
     @Override
-    public void close() {
-//        try {
-//            this.client.close();
-//        } catch (IOException e) {
-//            throw new ObsException("Failed to close obs client.", e);
-//        }
+    public void close() throws Exception {
+        if (this.closed.compareAndSet(false, true)) {
+            this.obsClient.close();
+            this.pool.close();
+        }
+    }
+
+    private void ensureOpen() throws Exception {
+        if (this.closed.get()) {
+            throw new IOException("Filesystem is already closed.");
+        }
     }
 
 //    @Override
@@ -124,59 +119,76 @@ public class Obs implements FileSystem {
 //    }
 
     public static Obs create(FileSystemProperties fileSystemProperties,
-                             Path.Creator pathCreator,
-                             Path.MoreCreator morePathCreator) {
+                             Path.Creator morePathCreator) {
         if (!(fileSystemProperties instanceof ObsProperties)) {
             throw new IllegalArgumentException("Invalid configuration for protocol: " + protocol.getName());
         }
 
-        return new Obs((ObsProperties) fileSystemProperties, pathCreator, morePathCreator);
+        return new Obs((ObsProperties) fileSystemProperties, morePathCreator);
     }
 
-    private class ObsConnection implements Connection {
-        private final ObsClient client;
-        private final String bucket;
-        private final AtomicReference<Path> working;
+    private class ObsConnection implements Connection, Session, Validator {
+        private volatile Path working;
+        private final AtomicBoolean closed = new AtomicBoolean();
 
-        public ObsConnection(String endpoint, String ak, String sk, String bucket) {
-            this.client = new ObsClient(ak, sk, endpoint);
-            this.bucket = bucket;
-            this.working = new AtomicReference<>(pathCreator.create(FileSystem.C_ROOT_DIR));
+        public ObsConnection() {
+            resetSession();
         }
 
         @Override
-        public Path pwd() {
-            return this.working.get();
+        public void resetSession() {
+            this.working = pathCreator.create(FileSystem.C_ROOT_DIR);
         }
 
         @Override
-        public void cd(String pwd) {
-            if (pwd.startsWith(FileSystem.C_ROOT_DIR)) {
-                this.working.set(pathCreator.create(pwd));
-            } else {
-                Path p = this.working.get();
-                while (!this.working.compareAndSet(p, p.resolve(pwd))) ;
+        public Path pwd() throws IOException {
+            ensureOpen();
+            return this.working;
+        }
+
+        @Override
+        public void cd(String pwd) throws IOException {
+            ensureOpen();
+            Path working = this.working;
+
+            Path to = pathCreator.create(pwd);
+            if (!to.isAbsolute()) {
+                to = working.resolve(to);
             }
+            this.working = to.normalize();
         }
 
         @Override
-        public void store(String remote, File local) {
-
+        public void store(String remote, File local) throws IOException {
+            ensureOpen();
         }
 
         @Override
-        public List<String> listFiles(Instant day, boolean isDirectory) {
+        public List<String> listFiles(Instant day, boolean isDirectory) throws IOException {
+            ensureOpen();
+            System.out.println("listFiles");
             return null;
         }
 
         @Override
-        public void download(String remote, File local) {
-
+        public void download(String remote, File local) throws IOException {
+            ensureOpen();
         }
 
         @Override
         public void close() throws Exception {
+            this.closed.compareAndSet(false, true);
+        }
 
+        @Override
+        public void validate() throws Exception {
+            ensureOpen();
+        }
+
+        private void ensureOpen() throws IOException {
+            if (Obs.this.closed.get() || this.closed.get()) {
+                throw new IOException("Already closed.");
+            }
         }
     }
 
