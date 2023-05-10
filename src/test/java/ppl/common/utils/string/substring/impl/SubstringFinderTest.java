@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.SubstringFinder;
 
 import java.util.HashMap;

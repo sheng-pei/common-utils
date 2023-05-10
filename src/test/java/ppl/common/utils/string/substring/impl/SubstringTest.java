@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ppl.common.utils.helper.EqualsTester;
+import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.SubstringIndexOutOfBoundsException;
 
 import java.util.stream.Stream;

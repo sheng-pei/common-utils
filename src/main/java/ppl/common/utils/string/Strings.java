@@ -1,11 +1,12 @@
 package ppl.common.utils.string;
 
 import ppl.common.utils.string.substring.PositionalArguments;
+import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.impl.SundaySubstringFinder;
 import ppl.common.utils.string.substring.impl.ToStringArguments;
-import ppl.common.utils.string.substring.Substring;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,8 @@ public final class Strings {
 	private Strings() { }
 
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+	public static final Predicate<Character> WHILTSPACE_PREDICATE = c -> c <= ' ';
 
 	public static String join(String delimiter, String... strings) {
 		return unsafeJoin(delimiter, strings, 0, strings.length);
@@ -159,65 +162,62 @@ public final class Strings {
 	}
 
 	public static int lastIndexOfNot(char c, char[] chars, int begin, int end) {
-		if (begin < 0 || begin > chars.length) {
-			throw new ArrayIndexOutOfBoundsException(begin);
-		}
-		if (end < 0 || end > chars.length) {
-			throw new ArrayIndexOutOfBoundsException(end);
-		}
-		return unsafeLastIndexOfNot(c, chars, begin, end);
+		Objects.requireNonNull(chars);
+		checkCharArrayBeginEnd(chars, begin, end);
+		return unsafeLastIndexOf(Predicate.<Character>isEqual(c).negate(), chars, begin, end);
 	}
 
 	public static int lastIndexOfNot(char c, String string, int begin, int end) {
-		if (begin < 0 || begin > string.length()) {
-			throw new StringIndexOutOfBoundsException(begin);
-		}
-		if (end < 0 || end > string.length()) {
-			throw new StringIndexOutOfBoundsException(end);
-		}
-		return unsafeLastIndexOfNot(c, string.toCharArray(), begin, end);
+		Objects.requireNonNull(string);
+		checkStringBeginEnd(string, begin, end);
+		return unsafeLastIndexOf(Predicate.<Character>isEqual(c).negate(), string.toCharArray(), begin, end);
 	}
 
 	public static int lastIndexOfNot(char c, String string) {
-		return unsafeLastIndexOfNot(c, string.toCharArray(), 0, string.length());
-	}
-
-	private static int unsafeLastIndexOfNot(char c, char[] chars, int begin, int end) {
-		for (int idx = end - 1; idx > begin - 1; idx--) {
-			if (chars[idx] != c) {
-				return idx;
-			}
-		}
-		return -1;
+		Objects.requireNonNull(string);
+		return unsafeLastIndexOf(Predicate.<Character>isEqual(c).negate(),
+				string.toCharArray(), 0, string.length());
 	}
 
 	public static int lastIndexOf(char c, char[] chars, int begin, int end) {
-		if (begin < 0 || begin > chars.length) {
-			throw new ArrayIndexOutOfBoundsException(begin);
-		}
-		if (end < 0 || end > chars.length) {
-			throw new ArrayIndexOutOfBoundsException(end);
-		}
-		return unsafeLastIndexOf(c, chars, begin, end);
+		Objects.requireNonNull(chars);
+		checkCharArrayBeginEnd(chars, begin, end);
+		return unsafeLastIndexOf(Predicate.isEqual(c), chars, begin, end);
 	}
 
 	public static int lastIndexOf(char c, String string, int begin, int end) {
-		if (begin < 0 || begin > string.length()) {
-			throw new StringIndexOutOfBoundsException(begin);
-		}
-		if (end < 0 || end > string.length()) {
-			throw new StringIndexOutOfBoundsException(end);
-		}
-		return unsafeLastIndexOf(c, string.toCharArray(), begin, end);
+		Objects.requireNonNull(string);
+		checkStringBeginEnd(string, begin, end);
+		return unsafeLastIndexOf(Predicate.isEqual(c), string.toCharArray(), begin, end);
 	}
 
 	public static int lastIndexOf(char c, String string) {
-		return unsafeLastIndexOf(c, string.toCharArray(), 0, string.length());
+		return unsafeLastIndexOf(Predicate.isEqual(c), string.toCharArray(), 0, string.length());
 	}
 
-	private static int unsafeLastIndexOf(char c, char[] chars, int begin, int end) {
+	public static int lastIndexOf(Predicate<Character> predicate, char[] chars, int begin, int end) {
+		Objects.requireNonNull(chars);
+		Objects.requireNonNull(predicate);
+		checkCharArrayBeginEnd(chars, begin, end);
+		return unsafeLastIndexOf(predicate, chars, begin, end);
+	}
+
+	public static int lastIndexOf(Predicate<Character> predicate, String string, int begin, int end) {
+		Objects.requireNonNull(string);
+		Objects.requireNonNull(predicate);
+		checkStringBeginEnd(string, begin, end);
+		return lastIndexOf(predicate, string.toCharArray(), begin, end);
+	}
+
+	public static int lastIndexOf(Predicate<Character> predicate, String string) {
+		Objects.requireNonNull(string);
+		Objects.requireNonNull(predicate);
+		return unsafeLastIndexOf(predicate, string.toCharArray(), 0, string.length());
+	}
+
+	private static int unsafeLastIndexOf(Predicate<Character> predicate, char[] chars, int begin, int end) {
 		for (int idx = end - 1; idx > begin - 1; idx--) {
-			if (chars[idx] == c) {
+			if (predicate.test(chars[idx])) {
 				return idx;
 			}
 		}
@@ -225,69 +225,81 @@ public final class Strings {
 	}
 
 	public static int indexOfNot(char c, char[] chars, int begin, int end) {
-		if (begin < 0 || begin > chars.length) {
-			throw new ArrayIndexOutOfBoundsException(begin);
-		}
-		if (end < 0 || end > chars.length) {
-			throw new ArrayIndexOutOfBoundsException(end);
-		}
-		return unsafeIndexOfNot(c, chars, begin, end);
+		Objects.requireNonNull(chars);
+		checkCharArrayBeginEnd(chars, begin, end);
+		return unsafeIndexOf(Predicate.<Character>isEqual(c).negate(), chars, begin, end);
 	}
 
 	public static int indexOfNot(char c, String string, int begin, int end) {
-		if (begin < 0 || begin > string.length()) {
-			throw new StringIndexOutOfBoundsException(begin);
-		}
-		if (end < 0 || end > string.length()) {
-			throw new StringIndexOutOfBoundsException(end);
-		}
-		return unsafeIndexOfNot(c, string.toCharArray(), begin, end);
+		Objects.requireNonNull(string);
+		checkStringBeginEnd(string, begin, end);
+		return unsafeIndexOf(Predicate.<Character>isEqual(c).negate(), string.toCharArray(), begin, end);
 	}
 
 	public static int indexOfNot(char c, String string) {
-		return unsafeIndexOfNot(c, string.toCharArray(), 0, string.length());
+		Objects.requireNonNull(string);
+		return unsafeIndexOf(Predicate.<Character>isEqual(c).negate(), string.toCharArray(), 0, string.length());
 	}
 
-	private static int unsafeIndexOfNot(char c, char[] chars, int begin, int end) {
+	public static int indexOf(char c, String string, int begin, int end) {
+		Objects.requireNonNull(string);
+		checkStringBeginEnd(string, begin, end);
+		return unsafeIndexOf(Predicate.isEqual(c), string.toCharArray(), begin, end);
+	}
+
+	public static int indexOf(char c, char[] chars, int begin, int end) {
+		Objects.requireNonNull(chars);
+		checkCharArrayBeginEnd(chars, begin, end);
+		return unsafeIndexOf(Predicate.isEqual(c), chars, begin, end);
+	}
+
+	public static int indexOf(char c, String string) {
+		Objects.requireNonNull(string);
+		return unsafeIndexOf(Predicate.isEqual(c), string.toCharArray(), 0, string.length());
+	}
+
+	public static int indexOf(Predicate<Character> predicate, String string, int begin, int end) {
+		Objects.requireNonNull(string);
+		checkStringBeginEnd(string, begin, end);
+		return unsafeIndexOf(predicate, string.toCharArray(), begin, end);
+	}
+
+	public static int indexOf(Predicate<Character> predicate, char[] chars, int begin, int end) {
+		Objects.requireNonNull(chars);
+		checkCharArrayBeginEnd(chars, begin, end);
+		return unsafeIndexOf(predicate, chars, begin, end);
+	}
+
+	public static int indexOf(Predicate<Character> predicate, String string) {
+		Objects.requireNonNull(string);
+		return unsafeIndexOf(predicate, string.toCharArray(), 0, string.length());
+	}
+
+	private static int unsafeIndexOf(Predicate<Character> predicate, char[] chars, int begin, int end) {
 		for (int idx = begin; idx < end; idx++) {
-			if (chars[idx] != c) {
+			if (predicate.test(chars[idx])) {
 				return idx;
 			}
 		}
 		return -1;
 	}
 
-	public static int indexOf(char c, String string, int begin, int end) {
+	private static void checkStringBeginEnd(String string, int begin, int end) {
 		if (begin < 0 || begin > string.length()) {
 			throw new StringIndexOutOfBoundsException(begin);
 		}
 		if (end < 0 || end > string.length()) {
 			throw new StringIndexOutOfBoundsException(end);
 		}
-		return unsafeIndexOf(c, string.toCharArray(), begin, end);
 	}
 
-	public static int indexOf(char c, char[] chars, int begin, int end) {
-		if (begin < 0 || begin > chars.length) {
+	private static void checkCharArrayBeginEnd(char[] array, int begin, int end) {
+		if (begin < 0 || begin > array.length) {
 			throw new ArrayIndexOutOfBoundsException(begin);
 		}
-		if (end < 0 || end > chars.length) {
+		if (end < 0 || end > array.length) {
 			throw new ArrayIndexOutOfBoundsException(end);
 		}
-		return unsafeIndexOf(c, chars, begin, end);
-	}
-
-	public static int indexOf(char c, String string) {
-		return unsafeIndexOf(c, string.toCharArray(), 0, string.length());
-	}
-
-	private static int unsafeIndexOf(char c, char[] chars, int begin, int end) {
-		for (int idx = begin; idx < end; idx++) {
-			if (chars[idx] == c) {
-				return idx;
-			}
-		}
-		return -1;
 	}
 
 	//Please ensure the string REFERENCE has no prefix which is also a suffix.
@@ -365,21 +377,31 @@ public final class Strings {
 	}
 
 	public static String trim(String src, char c, TrimPosition pos) {
-		if (src == null || src.isEmpty()) {
+		if (isEmpty(src)) {
 			return src;
 		}
 
+		Substring substring = unsafeTrim(src.toCharArray(), Predicate.isEqual(c), pos);
+		return substring.string();
+	}
+
+	public static Substring trim(char[] chars, Predicate<Character> predicate, TrimPosition pos) {
+		Objects.requireNonNull(chars);
+		Objects.requireNonNull(predicate);
+		return unsafeTrim(chars, predicate, pos);
+	}
+
+	private static Substring unsafeTrim(char[] chars, Predicate<Character> predicate, TrimPosition pos) {
 		pos = pos == null ? TrimPosition.NO : pos;
-		char[] chars = src.toCharArray();
 		int start = 0;
 		int end = chars.length;
 		if (pos == TrimPosition.ALL || pos == TrimPosition.END) {
-			end = unsafeLastIndexOfNot(c, chars, start, end) + 1;
+			end = unsafeLastIndexOf(predicate.negate(), chars, start, end) + 1;
 		}
 		if (pos == TrimPosition.ALL || pos == TrimPosition.BEFORE) {
-			start = unsafeIndexOfNot(c, chars, start, end);
+			start = unsafeIndexOf(predicate.negate(), chars, start, end);
 		}
-		return src.substring(start, end);
+		return new Substring(chars, start, end);
 	}
 
 }
