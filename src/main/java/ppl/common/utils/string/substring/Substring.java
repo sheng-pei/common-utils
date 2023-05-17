@@ -38,6 +38,14 @@ public class Substring {
         this.end = end;
     }
 
+    public final char charAt(int idx) {
+        if (idx < 0 || idx >= length()) {
+            throw new SubstringIndexOutOfBoundsException(idx);
+        }
+
+        return source[start + idx];
+    }
+
     public final String string() {
         return unsafeString(0, length());
     }

@@ -79,6 +79,10 @@ public final class Strings {
 		return string.substring(start, matcher.start());
 	}
 
+	public static String removeNull(String string) {
+		return string == null ? "" : string;
+	}
+
 	private static boolean empty(Matcher matcher) {
 		return matcher.end() == matcher.start();
 	}
@@ -115,6 +119,39 @@ public final class Strings {
 
 	public static boolean isNotBlank(String string) {
 		return !isBlank(string);
+	}
+
+	public static boolean equalsIgnoreCase(final CharSequence cs1, final CharSequence cs2) {
+		if (cs1 == cs2) {
+			return true;
+		}
+		if (cs1 == null || cs2 == null) {
+			return false;
+		}
+		if (cs1.length() != cs2.length()) {
+			return false;
+		}
+		if (cs1 instanceof String && cs2 instanceof String) {
+			return ((String) cs1).equalsIgnoreCase((String) cs2);
+		}
+
+		final int length = cs1.length();
+		for (int i = 0; i < length; i++) {
+			char c1 = cs1.charAt(i);
+			char c2 = cs2.charAt(i);
+			if (c1 != c2) {
+				c1 = Character.toUpperCase(c1);
+				c2 = Character.toUpperCase(c2);
+				if (c1 != c2) {
+					c1 = Character.toLowerCase(c1);
+					c2 = Character.toLowerCase(c2);
+					if (c1 != c2) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	public static boolean equals(final CharSequence cs1, final CharSequence cs2) {
@@ -364,8 +401,9 @@ public final class Strings {
 		return end - escapeStart;
 	}
 
-	public static boolean equalsOnContent(final String s1, final String s2) {
-		return Strings.equals(s1 == null ? "" : s1.trim(), s2 == null ? "" : s2.trim());
+	public static boolean equalsOnVisible(final String s1, final String s2) {
+		return Strings.equals(trim(removeNull(s1), WHILTSPACE_PREDICATE, TrimPosition.ALL),
+				trim(removeNull(s2), WHILTSPACE_PREDICATE, TrimPosition.ALL));
 	}
 
 	public static boolean equalsLiterally(final CharSequence cs1, final CharSequence cs2) {
@@ -383,6 +421,24 @@ public final class Strings {
 
 		Substring substring = unsafeTrim(src.toCharArray(), Predicate.isEqual(c), pos);
 		return substring.string();
+	}
+
+	public static String trim(String src, Predicate<Character> predicate, TrimPosition pos) {
+		if (isEmpty(src)) {
+			return src;
+		}
+
+		Substring substring = unsafeTrim(src.toCharArray(), predicate, pos);
+		return substring.string();
+	}
+
+	public static Substring trim(char[] chars, char c) {
+		Objects.requireNonNull(chars);
+		return unsafeTrim(chars, Predicate.isEqual(c), TrimPosition.ALL);
+	}
+
+	public static Substring trim(char[] chars, Predicate<Character> predicate) {
+		return trim(chars, predicate, TrimPosition.ALL);
 	}
 
 	public static Substring trim(char[] chars, Predicate<Character> predicate, TrimPosition pos) {
