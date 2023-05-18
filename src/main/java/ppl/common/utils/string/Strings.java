@@ -1,5 +1,6 @@
 package ppl.common.utils.string;
 
+import ppl.common.utils.string.kvpair.Pair;
 import ppl.common.utils.string.substring.PositionalArguments;
 import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.impl.SundaySubstringFinder;
@@ -41,6 +42,20 @@ public final class Strings {
 		return joiner.toString();
 	}
 
+	public static Pair kv(String string, char delimiter) {
+		string = emptyIfNull(string);
+		if (string.isEmpty() || string.charAt(0) == delimiter) {
+			throw new IllegalArgumentException("Invalid key value pair. Missing name.");
+		}
+
+		int idx = indexOf(delimiter, string);
+		if (idx < 0) {
+			return new Pair(string, "");
+		} else {
+			return new Pair(string.substring(0, idx), string.substring(idx+1));
+		}
+	}
+
 	public static String[] split(String string, String regex) {
 		Objects.requireNonNull(regex, "The specified regex is null");
 
@@ -79,7 +94,7 @@ public final class Strings {
 		return string.substring(start, matcher.start());
 	}
 
-	public static String removeNull(String string) {
+	public static String emptyIfNull(String string) {
 		return string == null ? "" : string;
 	}
 
@@ -401,13 +416,12 @@ public final class Strings {
 		return end - escapeStart;
 	}
 
-	public static boolean equalsOnVisible(final String s1, final String s2) {
-		return Strings.equals(trim(removeNull(s1), WHILTSPACE_PREDICATE, TrimPosition.ALL),
-				trim(removeNull(s2), WHILTSPACE_PREDICATE, TrimPosition.ALL));
+	public static boolean equalsContent(final String s1, final String s2) {
+		return Strings.equals(emptyIfNull(s1).trim(), emptyIfNull(s2).trim());
 	}
 
-	public static boolean equalsLiterally(final CharSequence cs1, final CharSequence cs2) {
-		return Strings.equals(cs1 == null ? "" : cs1, cs2 == null ? "" : cs2);
+	public static boolean equalsIgnoreNull(final String s1, final String s2) {
+		return Strings.equals(emptyIfNull(s1), emptyIfNull(s2));
 	}
 
 	public static String trim(String src, char c) {

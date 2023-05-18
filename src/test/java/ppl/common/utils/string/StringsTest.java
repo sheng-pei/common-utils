@@ -150,24 +150,24 @@ class StringsTest {
     }
 
     @ParameterizedTest
-    @MethodSource({"literallyEqualityProvider", "nullEqualsEmptyProvider"})
-    public void testEqualsLiterally(String str1, String str2, boolean expected) {
-        Assertions.assertEquals(expected, Strings.equalsLiterally(str1, str2));
+    @MethodSource({"ignoreNullEqualityProvider", "nullEqualsEmptyProvider"})
+    public void testEqualsIgnoreNull(String str1, String str2, boolean expected) {
+        Assertions.assertEquals(expected, Strings.equalsIgnoreNull(str1, str2));
     }
 
-    private static Stream<Arguments> literallyEqualityProvider() {
+    private static Stream<Arguments> ignoreNullEqualityProvider() {
         return Stream.of(
                 Arguments.of("\rakj ", "akj", false)
         );
     }
 
     @ParameterizedTest
-    @MethodSource({"onContentEqualityProvider", "nullEqualsEmptyProvider"})
+    @MethodSource({"contentEqualityProvider", "nullEqualsEmptyProvider"})
     public void testEqualsOnContentNullEmpty(String str1, String str2, boolean expected) {
-        Assertions.assertEquals(expected, Strings.equalsOnContent(str1, str2));
+        Assertions.assertEquals(expected, Strings.equalsContent(str1, str2));
     }
 
-    private static Stream<Arguments> onContentEqualityProvider() {
+    private static Stream<Arguments> contentEqualityProvider() {
         return Stream.of(
                 Arguments.of("\rakj ", "akj", true)
         );
