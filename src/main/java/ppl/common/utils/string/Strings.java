@@ -43,16 +43,12 @@ public final class Strings {
 	}
 
 	public static Pair kv(String string, char delimiter) {
-		string = emptyIfNull(string);
-		if (string.isEmpty() || string.charAt(0) == delimiter) {
-			throw new IllegalArgumentException("Invalid key value pair. Missing name.");
-		}
-
+		Objects.requireNonNull(string);
 		int idx = indexOf(delimiter, string);
 		if (idx < 0) {
-			return new Pair(string, "");
+			return Pair.create(string, "");
 		} else {
-			return new Pair(string.substring(0, idx), string.substring(idx+1));
+			return Pair.create(string.substring(0, idx), string.substring(idx+1));
 		}
 	}
 
