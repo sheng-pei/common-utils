@@ -20,7 +20,7 @@ public class URLEncoder {
     }
 
     public String parse(String string) {
-        return encode(string, StandardCharsets.UTF_8);
+        return parse(string, StandardCharsets.UTF_8);
     }
 
     public String parse(String string, Charset charset) {

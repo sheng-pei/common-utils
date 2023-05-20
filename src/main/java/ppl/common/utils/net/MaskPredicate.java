@@ -1,6 +1,7 @@
 package ppl.common.utils.net;
 
-public enum MaskPredicate implements First128Matcher.IMaskPredicate {
+public enum MaskPredicate implements IMaskPredicate {
+    ALWAYS_FALSE(""),
     RESERVED(":/?#[]@!$&’()*+,;="),
     UP_ALPHA('A', 'Z'),
     LOW_ALPHA('a', 'z'),
@@ -10,46 +11,32 @@ public enum MaskPredicate implements First128Matcher.IMaskPredicate {
     UNRESERVED(ALPHA_NUM.or("-_.~")),
     HEX(DIGIT.or('a', 'f').or('A', 'F'));
 
-    private final long lowMask;
-    private final long highMask;
+    private final Mask mask;
 
-    MaskPredicate(First128Matcher.Mask... predicates) {
-        long lowMask = 0L;
-        long highMask = 0L;
-        for (First128Matcher.Mask predicate : predicates) {
-            lowMask |= predicate.lowMask();
-            highMask |= predicate.highMask();
+    MaskPredicate(Mask... predicates) {
+        Mask mask = USAsciiMatcher.mask("");
+        for (Mask predicate : predicates) {
+            mask = mask.or(predicate);
         }
-        this.lowMask = lowMask;
-        this.highMask = highMask;
+        this.mask = mask;
     }
 
     MaskPredicate(String string) {
-        this.lowMask = First128Matcher.lowMask(string);
-        this.highMask = First128Matcher.highMask(string);
+        this.mask = USAsciiMatcher.mask(string);
     }
 
     MaskPredicate(char begin, char end) {
-        this.lowMask = First128Matcher.lowMask(begin, end);
-        this.highMask = First128Matcher.highMask(begin, end);
-    }
-
-    @Override
-    public boolean test(Character character) {
-        if (character == null) {
-            return false;
-        }
-        return First128Matcher.match(character, lowMask, highMask);
+        this.mask = USAsciiMatcher.mask(begin, end);
     }
 
     @Override
     public long lowMask() {
-        return lowMask;
+        return mask.lowMask();
     }
 
     @Override
     public long highMask() {
-        return highMask;
+        return mask.highMask();
     }
 
 }
