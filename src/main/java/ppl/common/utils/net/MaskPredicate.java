@@ -1,42 +1,98 @@
 package ppl.common.utils.net;
 
-public enum MaskPredicate implements IMaskPredicate {
-    ALWAYS_FALSE(""),
-    RESERVED(":/?#[]@!$&’()*+,;="),
-    UP_ALPHA('A', 'Z'),
-    LOW_ALPHA('a', 'z'),
-    DIGIT('0', '9'),
-    ALPHA(UP_ALPHA, LOW_ALPHA),
-    ALPHA_NUM(ALPHA, DIGIT),
-    UNRESERVED(ALPHA_NUM.or("-_.~")),
-    HEX(DIGIT.or('a', 'f').or('A', 'F'));
+import java.util.function.Predicate;
 
-    private final Mask mask;
+public interface MaskPredicate extends Predicate<Character>, Mask {
 
-    MaskPredicate(Mask... predicates) {
-        Mask mask = USAsciiMatcher.mask("");
-        for (Mask predicate : predicates) {
-            mask = mask.or(predicate);
+    @Override
+    default boolean test(Character character) {
+        if (character == null) {
+            return false;
         }
-        this.mask = mask;
-    }
-
-    MaskPredicate(String string) {
-        this.mask = USAsciiMatcher.mask(string);
-    }
-
-    MaskPredicate(char begin, char end) {
-        this.mask = USAsciiMatcher.mask(begin, end);
+        return USAsciiMatcher.match(character, lowMask(), highMask());
     }
 
     @Override
-    public long lowMask() {
-        return mask.lowMask();
+    default Predicate<Character> or(Predicate<? super Character> other) {
+        if (other instanceof Mask) {
+            Mask mask = or((Mask) other);
+            return new MaskPredicate() {
+                @Override
+                public long lowMask() {
+                    return mask.lowMask();
+                }
+
+                @Override
+                public long highMask() {
+                    return mask.highMask();
+                }
+            };
+        }
+        return Predicate.super.or(other);
+    }
+
+    default MaskPredicate or(String string) {
+        Mask mask = or(USAsciiMatcher.mask(string));
+        return new MaskPredicate() {
+            @Override
+            public long lowMask() {
+                return mask.lowMask();
+            }
+
+            @Override
+            public long highMask() {
+                return mask.highMask();
+            }
+        };
+    }
+
+    default MaskPredicate or(char first, char end) {
+        Mask mask = or(USAsciiMatcher.mask(first, end));
+        return new MaskPredicate() {
+            @Override
+            public long lowMask() {
+                return mask.lowMask();
+            }
+
+            @Override
+            public long highMask() {
+                return mask.highMask();
+            }
+        };
     }
 
     @Override
-    public long highMask() {
-        return mask.highMask();
+    default Predicate<Character> and(Predicate<? super Character> other) {
+        if (other instanceof Mask) {
+            Mask mask = and((Mask) other);
+            return new MaskPredicate() {
+                @Override
+                public long lowMask() {
+                    return mask.lowMask();
+                }
+
+                @Override
+                public long highMask() {
+                    return mask.highMask();
+                }
+            };
+        }
+        return Predicate.super.and(other);
     }
 
+    @Override
+    default Predicate<Character> negate() {
+        Mask mask = not();
+        return new MaskPredicate() {
+            @Override
+            public long lowMask() {
+                return mask.lowMask();
+            }
+
+            @Override
+            public long highMask() {
+                return mask.highMask();
+            }
+        };
+    }
 }

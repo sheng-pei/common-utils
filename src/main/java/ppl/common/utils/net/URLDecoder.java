@@ -20,7 +20,7 @@ public final class URLDecoder {
         char[] chars = string.toCharArray();
         for (int i = 0; i < chars.length; i++) {
             if (chars.length - i > 2 && '%' == chars[i] &&
-                    MaskPredicate.HEX.test(chars[i+1]) && MaskPredicate.HEX.test(chars[i+2])) {
+                    URICharacter.HEX.test(chars[i+1]) && URICharacter.HEX.test(chars[i+2])) {
                 escaped[pos++] = HexUtils.aByte(chars[i+1], chars[i+2]);
                 i += 2;
             } else {

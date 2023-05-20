@@ -33,8 +33,8 @@ public class URLEncoder {
         for (int i = 0; i < bytes.length; i++) {
             if ('%' == bytes[i] && percentEncodingReserved) {
                 if (bytes.length - i > 2 &&
-                        MaskPredicate.HEX.test((char) bytes[i+1]) &&
-                        MaskPredicate.HEX.test((char) bytes[i+2])) {
+                        URICharacter.HEX.test((char) bytes[i+1]) &&
+                        URICharacter.HEX.test((char) bytes[i+2])) {
                     builder.append((char) bytes[i])
                             .append((char) bytes[i + 1])
                             .append((char) bytes[i + 2]);
@@ -85,7 +85,7 @@ public class URLEncoder {
         }
 
         public URLEncoder build() {
-            dontNeedToEncode = dontNeedToEncode == null ? MaskPredicate.UNRESERVED : dontNeedToEncode;
+            dontNeedToEncode = dontNeedToEncode == null ? URICharacter.UNRESERVED : dontNeedToEncode;
             return new URLEncoder(dontNeedToEncode, this.percentEncodingReserved);
         }
     }

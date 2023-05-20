@@ -1,7 +1,5 @@
 package ppl.common.utils.filesystem;
 
-import com.sun.crypto.provider.HmacMD5;
-import ppl.common.utils.net.MaskPredicate;
 import ppl.common.utils.net.URLDecoder;
 import ppl.common.utils.net.URLEncoder;
 
