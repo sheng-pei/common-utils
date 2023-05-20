@@ -7,7 +7,7 @@ public class USAsciiMatcher {
         int l = Math.min(begin, 64);
         int e = Math.min(end, 64);
         for (int i = l; i <= e; i++) {
-            if (i != 0 && i < 64) {
+            if (i < 64) {
                 res |= 1L << i;
             }
         }
@@ -30,7 +30,7 @@ public class USAsciiMatcher {
         long res = 0L;
         char[] chars = string.toCharArray();
         for (char c : chars) {
-            if (c > 0 && c < 64) {
+            if (c < 64) {
                 res |= (1L << c);
             }
         }

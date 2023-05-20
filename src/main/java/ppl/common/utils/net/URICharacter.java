@@ -1,7 +1,7 @@
 package ppl.common.utils.net;
 
 public enum URICharacter implements MaskPredicate {
-    ALWAYS_FALSE(""),
+    EMPTY(""),
     RESERVED(":/?#[]@!$&’()*+,;="),
     UP_ALPHA('A', 'Z'),
     LOW_ALPHA('a', 'z'),
@@ -13,10 +13,10 @@ public enum URICharacter implements MaskPredicate {
 
     private final Mask mask;
 
-    URICharacter(Mask... predicates) {
+    URICharacter(Mask... masks) {
         Mask mask = USAsciiMatcher.mask("");
-        for (Mask predicate : predicates) {
-            mask = mask.or(predicate);
+        for (Mask m : masks) {
+            mask = mask.or(m);
         }
         this.mask = mask;
     }

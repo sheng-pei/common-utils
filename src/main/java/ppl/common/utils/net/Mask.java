@@ -52,4 +52,18 @@ public interface Mask {
             }
         };
     }
+
+    default MaskPredicate predicate() {
+        return new MaskPredicate() {
+            @Override
+            public long lowMask() {
+                return Mask.this.lowMask();
+            }
+
+            @Override
+            public long highMask() {
+                return Mask.this.highMask();
+            }
+        };
+    }
 }
