@@ -6,7 +6,7 @@ public interface Mask {
     long highMask();
 
     default Mask not() {
-        long lowMask = ~lowMask() & 0xfffffffffffffffeL;
+        long lowMask = ~lowMask();
         long highMask = ~highMask();
         return new Mask() {
             @Override
