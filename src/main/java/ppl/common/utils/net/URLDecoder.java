@@ -1,6 +1,7 @@
 package ppl.common.utils.net;
 
 import ppl.common.utils.HexUtils;
+import ppl.common.utils.character.ascii.AsciiPredicates;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -14,25 +15,31 @@ public final class URLDecoder {
     }
 
     public static String decode(String string, Charset charset) {
-        StringBuilder builder = new StringBuilder();
-        int pos = 0;
-        byte[] escaped = new byte[string.length() / 3];
+        StringBuilder builder = new StringBuilder(string.length());
+        ByteBuffer byteBuffer = ByteBuffer.allocate(string.length() / 3);
         char[] chars = string.toCharArray();
         for (int i = 0; i < chars.length; i++) {
-            if (chars.length - i > 2 && '%' == chars[i] &&
-                    URICharacter.HEX.test(chars[i+1]) && URICharacter.HEX.test(chars[i+2])) {
-                escaped[pos++] = HexUtils.aByte(chars[i+1], chars[i+2]);
-                i += 2;
-            } else {
-                if (pos > 0) {
-                    builder.append(charset.decode(ByteBuffer.wrap(escaped, 0, pos)));
-                    pos = 0;
+            while (i < chars.length && '%' == chars[i]) {
+                if (chars.length - i > 2 &&
+                        AsciiPredicates.HEX.test(chars[i+1]) &&
+                        AsciiPredicates.HEX.test(chars[i+2])) {
+                    byteBuffer.put(HexUtils.aByte(chars[i+1], chars[i+2]));
+                    i += 3;
+                } else {
+                    throw new IllegalArgumentException("Illegal escaped pattern.");
                 }
-                builder.append(chars[i]);
             }
-        }
-        if (pos > 0) {
-            builder.append(charset.decode(ByteBuffer.wrap(escaped, 0, pos)));
+            byteBuffer.flip();
+            builder.append(charset.decode(byteBuffer));
+            byteBuffer.clear();
+
+            if (i < chars.length) {
+                if ('+' == chars[i]) {
+                    builder.append(' ');
+                } else {
+                    builder.append(chars[i]);
+                }
+            }
         }
         return builder.toString();
     }

@@ -1,6 +1,7 @@
 package ppl.common.utils.net;
 
 import ppl.common.utils.HexUtils;
+import ppl.common.utils.character.ascii.AsciiPredicates;
 import ppl.common.utils.string.Strings;
 
 import java.nio.charset.Charset;
@@ -28,13 +29,13 @@ public class URLEncoder {
             return string;
         }
 
-        StringBuilder builder = new StringBuilder();
         byte[] bytes = string.getBytes(charset);
+        StringBuilder builder = new StringBuilder(string.length());
         for (int i = 0; i < bytes.length; i++) {
             if ('%' == bytes[i] && percentEncodingReserved) {
                 if (bytes.length - i > 2 &&
-                        URICharacter.HEX.test((char) bytes[i+1]) &&
-                        URICharacter.HEX.test((char) bytes[i+2])) {
+                        AsciiPredicates.HEX.test((char) bytes[i+1]) &&
+                        AsciiPredicates.HEX.test((char) bytes[i+2])) {
                     builder.append((char) bytes[i])
                             .append((char) bytes[i + 1])
                             .append((char) bytes[i + 2]);
@@ -65,7 +66,7 @@ public class URLEncoder {
     }
 
     public static class Builder {
-        private Predicate<Character> dontNeedToEncode;
+        private Predicate<Character> dontNeedToEncode = AsciiPredicates.EMPTY;
         private boolean percentEncodingReserved;
 
         public Builder() {}
@@ -76,17 +77,12 @@ public class URLEncoder {
         }
 
         public Builder or(Predicate<Character> dontNeedToEncode) {
-            if (this.dontNeedToEncode == null) {
-                this.dontNeedToEncode = dontNeedToEncode;
-            } else {
-                this.dontNeedToEncode = this.dontNeedToEncode.or(dontNeedToEncode);
-            }
+            this.dontNeedToEncode = this.dontNeedToEncode.or(dontNeedToEncode);
             return this;
         }
 
         public URLEncoder build() {
-            dontNeedToEncode = dontNeedToEncode == null ? URICharacter.UNRESERVED : dontNeedToEncode;
-            return new URLEncoder(dontNeedToEncode, this.percentEncodingReserved);
+            return new URLEncoder(dontNeedToEncode.or(URICharacter.UNRESERVED), this.percentEncodingReserved);
         }
     }
 }

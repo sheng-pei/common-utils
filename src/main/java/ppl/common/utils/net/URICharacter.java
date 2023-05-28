@@ -1,42 +1,33 @@
 package ppl.common.utils.net;
 
-public enum URICharacter implements MaskPredicate {
-    EMPTY(""),
+import ppl.common.utils.character.ascii.AsciiPredicates;
+import ppl.common.utils.character.ascii.Mask;
+import ppl.common.utils.character.ascii.MaskCharacterPredicate;
+
+public enum URICharacter implements MaskCharacterPredicate {
     RESERVED(":/?#[]@!$&’()*+,;="),
-    UP_ALPHA('A', 'Z'),
-    LOW_ALPHA('a', 'z'),
-    DIGIT('0', '9'),
-    ALPHA(UP_ALPHA, LOW_ALPHA),
-    ALPHA_NUM(ALPHA, DIGIT),
-    UNRESERVED(ALPHA_NUM.or("-_.~")),
-    HEX(DIGIT.or('a', 'f').or('A', 'F'));
+    UNRESERVED(AsciiPredicates.ALPHA_NUM, Mask.mask("-_.~").predicate());
 
     private final Mask mask;
 
-    URICharacter(Mask... masks) {
-        Mask mask = USAsciiMatcher.mask("");
-        for (Mask m : masks) {
-            mask = mask.or(m);
+    URICharacter(MaskCharacterPredicate... predicates) {
+        Mask mask = Mask.mask("");
+        for (MaskCharacterPredicate p : predicates) {
+            mask = mask.bitOr(p.mask());
         }
         this.mask = mask;
     }
 
     URICharacter(String string) {
-        this.mask = USAsciiMatcher.mask(string);
+        this.mask = Mask.mask(string);
     }
 
     URICharacter(char begin, char end) {
-        this.mask = USAsciiMatcher.mask(begin, end);
+        this.mask = Mask.mask(begin, end);
     }
 
     @Override
-    public long lowMask() {
-        return mask.lowMask();
+    public Mask mask() {
+        return mask;
     }
-
-    @Override
-    public long highMask() {
-        return mask.highMask();
-    }
-
 }
