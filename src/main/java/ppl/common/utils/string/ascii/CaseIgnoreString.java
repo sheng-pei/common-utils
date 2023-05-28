@@ -36,9 +36,9 @@ public final class CaseIgnoreString {
 
         char[] chars = string.toCharArray();
         for (char c : chars) {
-//            if (!AsciiPredicates.ALL.test(c)) {
-//
-//            }
+            if (AsciiPredicates.ASCII_EXCEPT_NUL.negate().test(c)) {
+                throw new IllegalArgumentException("Contains non-ascii or '\\000' character.");
+            }
         }
         return new CaseIgnoreString(string);
     }

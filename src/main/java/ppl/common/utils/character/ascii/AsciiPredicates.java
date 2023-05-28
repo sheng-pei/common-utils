@@ -11,7 +11,7 @@ public enum AsciiPredicates implements MaskCharacterPredicate {
     LOW_HEX(DIGIT, Mask.mask('a', 'f').predicate()),
     HEX(UP_HEX, LOW_HEX),
     ASCII_EXCEPT_NUL('\001', '\177'),
-    ALL(ASCII_EXCEPT_NUL, Mask.mask("\000").predicate());
+    ALL(ASCII_EXCEPT_NUL, Mask.CHARACTER_EXCEPT_NON_NUL_ASCII.predicate());
 
     private final Mask mask;
 
