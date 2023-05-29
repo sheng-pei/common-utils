@@ -1,7 +1,6 @@
 package ppl.common.utils.character.ascii;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -68,16 +67,11 @@ class MaskTest {
 
     private static Stream<Arguments> isSetProvider() {
         Object[][] arguments = new Object[][]{
-                {"\\000 ~ \\000", "\\000", false},
-                {"\\000 ~ \\000", " ", false},
-                {"\\000 ~ \\000", "\\100", false},
-                {"\\000 ~ \\000", "a", false},
-                {"\\000 ~ \\000", "中", false},
-                {"\\001 ~ \\077", "\\000", false},
-                {"\\001 ~ \\077", " ", true},
-                {"\\001 ~ \\077", "\\100", false},
-                {"\\001 ~ \\077", "a", false},
-                {"\\001 ~ \\077", "中", false},
+                {"\\000 ~ \\077", "\\000", true},
+                {"\\000 ~ \\077", " ", true},
+                {"\\000 ~ \\077", "\\100", false},
+                {"\\000 ~ \\077", "a", false},
+                {"\\000 ~ \\077", "中", false},
                 {"\\100 ~ \\177", "\\000", false},
                 {"\\100 ~ \\177", " ", false},
                 {"\\100 ~ \\177", "\\100", true},
@@ -88,50 +82,28 @@ class MaskTest {
                 {"\\200 ~ 中", "\\100", false},
                 {"\\200 ~ 中", "a", false},
                 {"\\200 ~ 中", "中", false},
-                {"\\000 ~ \\077", "\\000", false},
-                {"\\000 ~ \\077", " ", true},
-                {"\\000 ~ \\077", "\\100", false},
-                {"\\000 ~ \\077", "a", false},
-                {"\\000 ~ \\077", "中", false},
-                {"\\000 ~ \\177", "\\000", false},
+                {"\\000 ~ \\177", "\\000", true},
                 {"\\000 ~ \\177", " ", true},
                 {"\\000 ~ \\177", "\\100", true},
                 {"\\000 ~ \\177", "a", true},
                 {"\\000 ~ \\177", "中", false},
-                {"\\000 ~ 中", "\\000", false},
+                {"\\000 ~ 中", "\\000", true},
                 {"\\000 ~ 中", " ", true},
                 {"\\000 ~ 中", "\\100", true},
                 {"\\000 ~ 中", "a", true},
                 {"\\000 ~ 中", "中", false},
-                {"\\001 ~ \\177", "\\000", false},
-                {"\\001 ~ \\177", " ", true},
-                {"\\001 ~ \\177", "\\100", true},
-                {"\\001 ~ \\177", "a", true},
-                {"\\001 ~ \\177", "中", false},
-                {"\\001 ~ 中", "\\000", false},
-                {"\\001 ~ 中", " ", true},
-                {"\\001 ~ 中", "\\100", true},
-                {"\\001 ~ 中", "a", true},
-                {"\\001 ~ 中", "中", false},
                 {"\\100 ~ 中", "\\000", false},
                 {"\\100 ~ 中", " ", false},
                 {"\\100 ~ 中", "\\100", true},
                 {"\\100 ~ 中", "a", true},
                 {"\\100 ~ 中", "中", false},
-                {"\\000\\077\\177a 中", "\\000", false},
+                {"\\000\\077\\177a 中", "\\000", true},
                 {"\\000\\077\\177a 中", "\\077", true},
                 {"\\000\\077\\177a 中", "\\177", true},
                 {"\\000\\077\\177a 中", "a", true},
                 {"\\000\\077\\177a 中", " ", true},
                 {"\\000\\077\\177a 中", "A", false},
-                {"\\000\\077\\177a 中", "中", false},
-                {"CHARACTER_EXCEPT_NON_NUL_ASCII", "\\000", true},
-                {"CHARACTER_EXCEPT_NON_NUL_ASCII", "\\077", false},
-                {"CHARACTER_EXCEPT_NON_NUL_ASCII", "\\177", false},
-                {"CHARACTER_EXCEPT_NON_NUL_ASCII", "a", false},
-                {"CHARACTER_EXCEPT_NON_NUL_ASCII", " ", false},
-                {"CHARACTER_EXCEPT_NON_NUL_ASCII", "A", false},
-                {"CHARACTER_EXCEPT_NON_NUL_ASCII", "中", true},
+                {"\\000\\077\\177a 中", "中", false}
         };
         List<Arguments> list = new ArrayList<>();
         for (Object[] argument : arguments) {
@@ -142,20 +114,13 @@ class MaskTest {
                 char end = Characters.parse(s[1].trim()).charAt(0);
                 mask = Mask.mask(begin, end);
             } else {
-                if (s[0].equals("CHARACTER_EXCEPT_NON_NUL_ASCII")) {
-                    mask = Mask.CHARACTER_EXCEPT_NON_NUL_ASCII;
-                } else {
-                    mask = Mask.mask(Characters.parse(s[0]));
-                }
+                mask = Mask.mask(Characters.parse(s[0]));
             }
 
             char c = Characters.parse((String) argument[1]).charAt(0);
-            if (mask == Mask.CHARACTER_EXCEPT_NON_NUL_ASCII) {
-                list.add(Arguments.of(mask, c, argument[2], "The character '" + argument[1] + "' is " + ((boolean) argument[2] ? "" : "not ") + "a character except nonnull ascii"));
-            } else {
-                list.add(Arguments.of(mask, c, argument[2],
-                        "The character '" + argument[1] + "' is " + ((boolean) argument[2] ? "" : "not ") + "in " + argument[0]));
-            }
+            list.add(Arguments.of(mask, c, argument[2],
+                    "The character '" + argument[1] + "' is " +
+                            ((boolean) argument[2] ? "" : "not ") + "in " + argument[0]));
         }
 
         return Stream.of(list.toArray(new Arguments[0]));

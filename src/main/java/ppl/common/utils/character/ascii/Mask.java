@@ -3,35 +3,45 @@ package ppl.common.utils.character.ascii;
 import java.util.Objects;
 
 public final class Mask {
-    public static final Mask CHARACTER_EXCEPT_NON_NUL_ASCII = new Mask(1L, 0L);
+    public static final Mask NON_ASCII = new Mask(0L, 0L, true);
     private final long low;
     private final long high;
+    private final boolean nonAscii;
 
     private Mask(long low, long high) {
+        this(low, high, false);
+    }
+
+    private Mask(long low, long high, boolean nonAscii) {
         this.low = low;
         this.high = high;
+        this.nonAscii = nonAscii;
     }
 
     public Mask bitNot() {
-        return new Mask(~low, ~high);
+        return new Mask(~low, ~high, !nonAscii);
     }
 
     public Mask bitOr(Mask mask) {
-        return new Mask(low | mask.low, high | mask.high);
+        return new Mask(low | mask.low,
+                high | mask.high,
+                nonAscii || mask.nonAscii);
     }
 
     public Mask bitAnd(Mask mask) {
-        return new Mask(low & mask.low, high & mask.high);
+        return new Mask(low & mask.low,
+                high & mask.high,
+                nonAscii && mask.nonAscii);
     }
 
     public boolean isSet(char c) {
-        if (c == 0 || c >= 128) {
-            return (low & 1L) != 0;
-        }
         if (c < 64) {
             return ((1L << c) & low) != 0;
         }
-        return ((1L << (c - 64)) & high) != 0;
+        if (c < 128) {
+            return ((1L << (c - 64)) & high) != 0;
+        }
+        return nonAscii;
     }
 
     public MaskCharacterPredicate predicate() {
@@ -40,7 +50,7 @@ public final class Mask {
 
     @Override
     public int hashCode() {
-        return Objects.hash(low, high);
+        return Objects.hash(low, high, nonAscii);
     }
 
     @Override
@@ -53,7 +63,8 @@ public final class Mask {
         }
         Mask mask = (Mask) obj;
         return Objects.equals(low, mask.low) &&
-                Objects.equals(high, mask.high);
+                Objects.equals(high, mask.high) &&
+                Objects.equals(nonAscii, mask.nonAscii);
     }
 
     public static Mask mask(char begin, char end) {
@@ -73,7 +84,7 @@ public final class Mask {
         int l = Math.min(begin, 64);
         int e = Math.min(end, 64);
         for (int i = l; i <= e; i++) {
-            if (0 < i && i < 64) {
+            if (i < 64) {
                 res |= 1L << i;
             }
         }
@@ -104,7 +115,7 @@ public final class Mask {
         long res = 0L;
         char[] chars = string.toCharArray();
         for (char c : chars) {
-            if (0 < c && c < 64) {
+            if (c < 64) {
                 res |= (1L << c);
             }
         }

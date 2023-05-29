@@ -16,6 +16,6 @@ class CaseIgnoreStringTest {
 
     @Test
     void create() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> CaseIgnoreString.create("\000a"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> CaseIgnoreString.create("中a"));
     }
 }
