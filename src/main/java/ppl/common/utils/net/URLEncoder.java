@@ -1,7 +1,7 @@
 package ppl.common.utils.net;
 
 import ppl.common.utils.HexUtils;
-import ppl.common.utils.character.ascii.AsciiPredicates;
+import ppl.common.utils.character.ascii.AsciiGroup;
 import ppl.common.utils.string.Strings;
 
 import java.nio.charset.Charset;
@@ -34,8 +34,8 @@ public class URLEncoder {
         for (int i = 0; i < bytes.length; i++) {
             if ('%' == bytes[i] && percentEncodingReserved) {
                 if (bytes.length - i > 2 &&
-                        AsciiPredicates.HEX.test((char) bytes[i+1]) &&
-                        AsciiPredicates.HEX.test((char) bytes[i+2])) {
+                        AsciiGroup.HEX.test((char) bytes[i+1]) &&
+                        AsciiGroup.HEX.test((char) bytes[i+2])) {
                     builder.append((char) bytes[i])
                             .append((char) bytes[i + 1])
                             .append((char) bytes[i + 2]);
@@ -66,7 +66,7 @@ public class URLEncoder {
     }
 
     public static class Builder {
-        private Predicate<Character> dontNeedToEncode = AsciiPredicates.EMPTY;
+        private Predicate<Character> dontNeedToEncode = AsciiGroup.EMPTY;
         private boolean percentEncodingReserved;
 
         public Builder() {}
@@ -82,7 +82,7 @@ public class URLEncoder {
         }
 
         public URLEncoder build() {
-            return new URLEncoder(dontNeedToEncode.or(URICharacter.UNRESERVED), this.percentEncodingReserved);
+            return new URLEncoder(dontNeedToEncode.or(URICharGroup.UNRESERVED), this.percentEncodingReserved);
         }
     }
 }

@@ -1,6 +1,6 @@
 package ppl.common.utils.string.ascii;
 
-import ppl.common.utils.character.ascii.AsciiPredicates;
+import ppl.common.utils.character.ascii.AsciiGroup;
 
 public final class CaseIgnoreString {
     private transient final int hash;
@@ -36,7 +36,7 @@ public final class CaseIgnoreString {
 
         char[] chars = string.toCharArray();
         for (char c : chars) {
-            if (AsciiPredicates.ALL.negate().test(c)) {
+            if (AsciiGroup.ALL.negate().test(c)) {
                 throw new IllegalArgumentException("Contains non-ascii character.");
             }
         }

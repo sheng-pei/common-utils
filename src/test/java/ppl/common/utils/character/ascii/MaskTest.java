@@ -1,6 +1,7 @@
 package ppl.common.utils.character.ascii;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,7 +23,10 @@ class MaskTest {
         return Stream.of(
                 Arguments.of(Mask.mask('a', 'z'), '中', true, "The character '中' is in 'not a~z'"),
                 Arguments.of(Mask.mask('a', 'z'), 'a', false, "The character 'a' is not in 'not a~z'"),
-                Arguments.of(Mask.mask('a', 'z'), 'A', true, "The character 'A' is in 'not a~z'")
+                Arguments.of(Mask.mask('a', 'z'), 'A', true, "The character 'A' is in 'not a~z'"),
+                Arguments.of(Mask.OCTET, 'a', false, "The character 'a' is not in 'not OCTET'"),
+                Arguments.of(Mask.OCTET, '\277', false, "The character '\\277' is not in 'not OCTET'"),
+                Arguments.of(Mask.OCTET, '中', true, "The character '中' is in 'not OCTET'")
         );
     }
 
@@ -38,7 +42,9 @@ class MaskTest {
     private static Stream<Arguments> bitOrProvider() {
         return Stream.of(
                 Arguments.of(Mask.mask('A', 'Z'), Mask.mask('a', 'z'), '^', false, "The character '^' is not in 'A~Z | a~z'"),
-                Arguments.of(Mask.mask('A', 'b'), Mask.mask('a', 'z'), '^', true, "The character '^' is in 'A~Z | a~z'")
+                Arguments.of(Mask.mask('A', 'b'), Mask.mask('a', 'z'), '^', true, "The character '^' is in 'A~Z | a~z'"),
+                Arguments.of(Mask.OCTET, Mask.mask('a', 'z'), 'b', true, "The character 'b' is in 'OCTET | a~z'"),
+                Arguments.of(Mask.OCTET, Mask.mask('a', 'z'), '\277', true, "The character '\\277' is in 'OCTET | a~z'")
         );
     }
 
@@ -55,8 +61,30 @@ class MaskTest {
     private static Stream<Arguments> bitAndProvider() {
         return Stream.of(
                 Arguments.of(Mask.mask('A', 'Z'), Mask.mask('a', 'z'), 'b', false, "The character 'b' is not in 'A~Z & a~z'"),
-                Arguments.of(Mask.mask('A', 'b'), Mask.mask('a', 'z'), 'b', true, "The character 'b' is in 'A~b & a~z'")
+                Arguments.of(Mask.mask('A', 'b'), Mask.mask('a', 'z'), 'b', true, "The character 'b' is in 'A~b & a~z'"),
+                Arguments.of(Mask.OCTET, Mask.mask('a', 'z'), 'b', true, "The character 'b' is in 'OCTET & a~z'")
         );
+    }
+
+    @Test
+    void isNonOctet() {
+        Assertions.assertFalse(Mask.NON_OCTET.isSet('a'));
+        Assertions.assertFalse(Mask.NON_OCTET.isSet('\277'));
+        Assertions.assertTrue(Mask.NON_OCTET.isSet('中'));
+    }
+
+    @Test
+    void isNonAscii() {
+        Assertions.assertFalse(Mask.NON_ASCII.isSet('a'));
+        Assertions.assertTrue(Mask.NON_ASCII.isSet('\277'));
+        Assertions.assertTrue(Mask.NON_ASCII.isSet('中'));
+    }
+
+    @Test
+    void isOctet() {
+        Assertions.assertTrue(Mask.OCTET.isSet('a'));
+        Assertions.assertTrue(Mask.OCTET.isSet('\277'));
+        Assertions.assertFalse(Mask.OCTET.isSet('中'));
     }
 
     @ParameterizedTest(name = "[{index}] {3}.")

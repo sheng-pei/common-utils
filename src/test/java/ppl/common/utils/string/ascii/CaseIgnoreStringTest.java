@@ -4,8 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ppl.common.utils.helper.EqualsTester;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class CaseIgnoreStringTest {
     @Test
     void testEquals() {

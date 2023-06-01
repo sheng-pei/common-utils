@@ -3,35 +3,38 @@ package ppl.common.utils.character.ascii;
 import java.util.Objects;
 
 public final class Mask {
-    public static final Mask NON_ASCII = new Mask(0L, 0L, true);
+    private static final int NON_ASCII_MASK = 3;
+    public static final Mask NON_ASCII = new Mask(0L, 0L, (byte) 3);
+    public static final Mask NON_OCTET = new Mask(0L, 0L, (byte) 2);
+    public static final Mask OCTET = new Mask(~0L, ~0L, (byte) 1);
     private final long low;
     private final long high;
-    private final boolean nonAscii;
+    private final byte nonAscii;
 
     private Mask(long low, long high) {
-        this(low, high, false);
+        this(low, high, (byte) 0);
     }
 
-    private Mask(long low, long high, boolean nonAscii) {
+    private Mask(long low, long high, byte nonAscii) {
         this.low = low;
         this.high = high;
         this.nonAscii = nonAscii;
     }
 
     public Mask bitNot() {
-        return new Mask(~low, ~high, !nonAscii);
+        return new Mask(~low, ~high, (byte) (~nonAscii & NON_ASCII_MASK));
     }
 
     public Mask bitOr(Mask mask) {
         return new Mask(low | mask.low,
                 high | mask.high,
-                nonAscii || mask.nonAscii);
+                (byte) (nonAscii | mask.nonAscii));
     }
 
     public Mask bitAnd(Mask mask) {
         return new Mask(low & mask.low,
                 high & mask.high,
-                nonAscii && mask.nonAscii);
+                (byte) (nonAscii & mask.nonAscii));
     }
 
     public boolean isSet(char c) {
@@ -41,10 +44,13 @@ public final class Mask {
         if (c < 128) {
             return ((1L << (c - 64)) & high) != 0;
         }
-        return nonAscii;
+        if (c < 256) {
+            return (1 & nonAscii) != 0;
+        }
+        return (1 << 1 & nonAscii) != 0;
     }
 
-    public MaskCharacterPredicate predicate() {
+    public MaskCharPredicate predicate() {
         return () -> Mask.this;
     }
 

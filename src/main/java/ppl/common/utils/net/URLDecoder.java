@@ -1,7 +1,7 @@
 package ppl.common.utils.net;
 
 import ppl.common.utils.HexUtils;
-import ppl.common.utils.character.ascii.AsciiPredicates;
+import ppl.common.utils.character.ascii.AsciiGroup;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -21,8 +21,8 @@ public final class URLDecoder {
         for (int i = 0; i < chars.length; i++) {
             while (i < chars.length && '%' == chars[i]) {
                 if (chars.length - i > 2 &&
-                        AsciiPredicates.HEX.test(chars[i+1]) &&
-                        AsciiPredicates.HEX.test(chars[i+2])) {
+                        AsciiGroup.HEX.test(chars[i+1]) &&
+                        AsciiGroup.HEX.test(chars[i+2])) {
                     byteBuffer.put(HexUtils.aByte(chars[i+1], chars[i+2]));
                     i += 3;
                 } else {

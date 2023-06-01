@@ -2,7 +2,7 @@ package ppl.common.utils.character.ascii;
 
 import java.util.function.Predicate;
 
-public interface MaskCharacterPredicate extends Predicate<Character> {
+public interface MaskCharPredicate extends Predicate<Character> {
     Mask mask();
 
     @Override
@@ -16,20 +16,20 @@ public interface MaskCharacterPredicate extends Predicate<Character> {
 
     @Override
     default Predicate<Character> or(Predicate<? super Character> other) {
-        if (other instanceof MaskCharacterPredicate) {
-            MaskCharacterPredicate otherPredicate = (MaskCharacterPredicate) other;
+        if (other instanceof MaskCharPredicate) {
+            MaskCharPredicate otherPredicate = (MaskCharPredicate) other;
             Mask mask = mask().bitOr(otherPredicate.mask());
-            return (MaskCharacterPredicate) () -> mask;
+            return (MaskCharPredicate) () -> mask;
         }
         return Predicate.super.or(other);
     }
 
     @Override
     default Predicate<Character> and(Predicate<? super Character> other) {
-        if (other instanceof MaskCharacterPredicate) {
-            MaskCharacterPredicate otherPredicate = (MaskCharacterPredicate) other;
+        if (other instanceof MaskCharPredicate) {
+            MaskCharPredicate otherPredicate = (MaskCharPredicate) other;
             Mask mask = mask().bitAnd(otherPredicate.mask());
-            return (MaskCharacterPredicate) () -> mask;
+            return (MaskCharPredicate) () -> mask;
         }
         return Predicate.super.and(other);
     }
@@ -37,6 +37,6 @@ public interface MaskCharacterPredicate extends Predicate<Character> {
     @Override
     default Predicate<Character> negate() {
         Mask mask = mask().bitNot();
-        return (MaskCharacterPredicate) () -> mask;
+        return (MaskCharPredicate) () -> mask;
     }
 }

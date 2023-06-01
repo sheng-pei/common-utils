@@ -1,6 +1,6 @@
 package ppl.common.utils.character.ascii;
 
-public enum AsciiPredicates implements MaskCharacterPredicate {
+public enum AsciiGroup implements MaskCharPredicate {
     EMPTY(""),
     UP_ALPHA('A', 'Z'),
     LOW_ALPHA('a', 'z'),
@@ -14,19 +14,19 @@ public enum AsciiPredicates implements MaskCharacterPredicate {
 
     private final Mask mask;
 
-    AsciiPredicates(MaskCharacterPredicate... predicates) {
+    AsciiGroup(MaskCharPredicate... predicates) {
         Mask mask = Mask.mask("");
-        for (MaskCharacterPredicate p : predicates) {
+        for (MaskCharPredicate p : predicates) {
             mask = mask.bitOr(p.mask());
         }
         this.mask = mask;
     }
 
-    AsciiPredicates(String string) {
+    AsciiGroup(String string) {
         this.mask = Mask.mask(string);
     }
 
-    AsciiPredicates(char begin, char end) {
+    AsciiGroup(char begin, char end) {
         this.mask = Mask.mask(begin, end);
     }
 
