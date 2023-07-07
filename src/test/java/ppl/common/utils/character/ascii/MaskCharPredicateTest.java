@@ -26,13 +26,13 @@ class MaskCharPredicateTest {
 
     @Test
     void or() {
-        Assertions.assertTrue(AsciiGroup.ALPHA.or(AsciiGroup.HEX).test('9'));
+        Assertions.assertTrue(AsciiGroup.ALPHA.or(AsciiGroup.HEX_DIGIT).test('9'));
         Assertions.assertTrue(AsciiGroup.ALPHA.or(c -> c == '9').test('9'));
     }
 
     @Test
     void and() {
-        Assertions.assertTrue(AsciiGroup.ALPHA.and(AsciiGroup.HEX).test('a'));
+        Assertions.assertTrue(AsciiGroup.ALPHA.and(AsciiGroup.HEX_DIGIT).test('a'));
         Assertions.assertFalse(AsciiGroup.ALPHA.and(c -> c == '9').test('a'));
     }
 

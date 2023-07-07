@@ -1,59 +1,72 @@
 package ppl.common.utils.string.kvpair;
 
-import ppl.common.utils.string.Strings;
-
 import java.util.Objects;
+import java.util.function.BiPredicate;
 
-public class Pair {
-    private static final Pair INVALID = new Pair();
-
-    private final String key;
-    private final String value;
-
-    private Pair() {
-        this.key = "";
-        this.value = "";
-    }
-
-    private Pair(String key, String value) {
-        if (Strings.isBlank(key)) {
-            throw new IllegalArgumentException("Key is required.");
+public class Pair<F, S> {
+    @SuppressWarnings("rawtypes")
+    private static final Pair INVALID = new Pair() {
+        @Override
+        public Object getFirst() {
+            throw new UnsupportedOperationException();
         }
 
-        this.key = key.trim();
-        this.value = value.trim();
+        @Override
+        public Object getSecond() {
+            throw new UnsupportedOperationException();
+        }
+    };
+
+    private final F first;
+    private final S second;
+
+    private Pair() {
+        this.first = null;
+        this.second = null;
+    }
+
+    private Pair(F first, S second) {
+        this.first = first;
+        this.second = second;
     }
 
     public boolean isValid() {
-        return !key.isEmpty();
+        return this != INVALID;
     }
 
-    public String getKey() {
-        return key;
+    public F getFirst() {
+        return first;
     }
 
-    public String getValue() {
-        return value;
+    public S getSecond() {
+        return second;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        @SuppressWarnings("rawtypes")
         Pair pair = (Pair) o;
-        return Objects.equals(key, pair.key) && Objects.equals(value, pair.value);
+        return Objects.equals(first, pair.first) && Objects.equals(second, pair.second);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, value);
+        return Objects.hash(first, second);
     }
 
-    public static Pair create(String key, String value) {
-        if (Strings.isBlank(key)) {
-            return INVALID;
+    public static <F, S> Pair<F, S> create(F first, S second) {
+        return create(first, second, (f, s) -> true);
+    }
+
+    public static <F, S> Pair<F, S> create(F first, S second, BiPredicate<F, S> checker) {
+        if (!checker.test(first, second)) {
+            @SuppressWarnings("unchecked")
+            Pair<F, S> res = (Pair<F, S>) INVALID;
+            return res;
         }
-        return new Pair(key, value);
+        return new Pair<>(first, second);
     }
 
 }

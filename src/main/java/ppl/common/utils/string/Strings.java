@@ -5,6 +5,7 @@ import ppl.common.utils.string.substring.PositionalArguments;
 import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.impl.SundaySubstringFinder;
 import ppl.common.utils.string.substring.impl.ToStringArguments;
+import ppl.common.utils.string.trim.TrimPosition;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -15,9 +16,9 @@ public final class Strings {
 
 	private Strings() { }
 
-	public static final String[] EMPTY_STRING_ARRAY = new String[0];
+	private static final Predicate<Character> WHITESPACE = c -> c <= ' ';
 
-	public static final Predicate<Character> WHILTSPACE_PREDICATE = c -> c <= ' ';
+	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	public static String join(String delimiter, String... strings) {
 		return unsafeJoin(delimiter, strings, 0, strings.length);
@@ -42,14 +43,22 @@ public final class Strings {
 		return joiner.toString();
 	}
 
-	public static Pair kv(String string, char delimiter) {
+	public static Pair<String, String> kv(String string, char separator) {
+		return kv(string, 0, string.length(), separator);
+	}
+
+	public static Pair<String, String> kv(String string, int begin, int end, char separator) {
 		Objects.requireNonNull(string);
-		int idx = indexOf(delimiter, string);
-		if (idx < 0) {
-			return Pair.create(string, "");
-		} else {
-			return Pair.create(string.substring(0, idx), string.substring(idx+1));
+		char[] chars = string.toCharArray();
+		checkCharArrayBeginEnd(chars, begin, end);
+		String key = string;
+		String value = null;
+		int idx = indexOf(separator, chars, begin, end);
+		if (idx >= 0) {
+			key = string.substring(begin, idx);
+			value = string.substring(idx+1, end);
 		}
+		return Pair.create(key, value);
 	}
 
 	public static String[] split(String string, String regex) {
@@ -120,12 +129,9 @@ public final class Strings {
 		if (isEmpty(string)) {
 			return true;
 		}
-		for (int i = 0; i < string.length(); i++) {
-			if (!Character.isWhitespace(string.charAt(i))) {
-				return false;
-			}
-		}
-		return true;
+
+		int idx = indexOf(WHITESPACE.negate(), string);
+		return idx < 0;
 	}
 
 	public static boolean isNotBlank(String string) {
@@ -207,6 +213,24 @@ public final class Strings {
 
 	private static boolean needUnderscore(Character previous, Character current) {
 		return previous != null && Character.isLowerCase(previous) && Character.isUpperCase(current);
+	}
+
+	public static boolean startsWith(String prefix, char[] chars, int begin, int end) {
+		Objects.requireNonNull(prefix);
+		Objects.requireNonNull(chars);
+		checkCharArrayBeginEnd(chars, begin, end);
+
+		if (prefix.length() > chars.length - begin) {
+			return false;
+		}
+
+		char[] p = prefix.toCharArray();
+		for (int i = 0, j = begin; i < p.length; i++, j++) {
+			if (p[i] != chars[j]) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static int lastIndexOfNot(char c, char[] chars, int begin, int end) {
@@ -413,23 +437,31 @@ public final class Strings {
 	}
 
 	public static boolean equalsContent(final String s1, final String s2) {
-		return Strings.equals(emptyIfNull(s1).trim(), emptyIfNull(s2).trim());
+		return Strings.equals(trim(emptyIfNull(s1)), trim(emptyIfNull(s2)));
 	}
 
 	public static boolean equalsIgnoreNull(final String s1, final String s2) {
 		return Strings.equals(emptyIfNull(s1), emptyIfNull(s2));
 	}
 
-	public static String trim(String src, char c) {
-		return trim(src, c, TrimPosition.ALL);
+	public static String trim(String src) {
+		return trim(src, WHITESPACE);
 	}
 
-	public static String trim(String src, char c, TrimPosition pos) {
+	public static String trim(String src, TrimPosition position) {
+		return trim(src, WHITESPACE, position);
+	}
+
+	public static String trim(String src, char c) {
+		return trim(src, Predicate.isEqual(c), TrimPosition.ALL);
+	}
+
+	public static String trim(String src, Predicate<Character> predicate) {
 		if (isEmpty(src)) {
 			return src;
 		}
 
-		Substring substring = unsafeTrim(src.toCharArray(), Predicate.isEqual(c), pos);
+		Substring substring = unsafeTrim(src.toCharArray(), predicate, TrimPosition.ALL);
 		return substring.string();
 	}
 
@@ -461,8 +493,12 @@ public final class Strings {
 		pos = pos == null ? TrimPosition.NO : pos;
 		int start = 0;
 		int end = chars.length;
-		if (pos == TrimPosition.ALL || pos == TrimPosition.END) {
-			end = unsafeLastIndexOf(predicate.negate(), chars, start, end) + 1;
+		if (pos == TrimPosition.ALL || pos == TrimPosition.AFTER) {
+			int l = unsafeLastIndexOf(predicate.negate(), chars, start, end);
+			if (l < 0) {
+				return new Substring(chars, chars.length, chars.length);
+			}
+			end = l + 1;
 		}
 		if (pos == TrimPosition.ALL || pos == TrimPosition.BEFORE) {
 			start = unsafeIndexOf(predicate.negate(), chars, start, end);

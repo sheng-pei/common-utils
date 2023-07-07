@@ -86,13 +86,13 @@ public final class Mask {
             throw new IllegalArgumentException("Illegal range.");
         }
 
+        if (begin > 63) {
+            return 0L;
+        }
+
         long res = 0L;
-        int l = Math.min(begin, 64);
-        int e = Math.min(end, 64);
-        for (int i = l; i <= e; i++) {
-            if (i < 64) {
-                res |= 1L << i;
-            }
+        for (int i = begin; i <= Math.min(end, 63); i++) {
+            res |= 1L << i;
         }
         return res;
     }
@@ -102,17 +102,15 @@ public final class Mask {
             throw new IllegalArgumentException("Illegal range.");
         }
 
-        if (end < 64) {
+        if (end < 64 || begin > 127) {
             return 0L;
         }
 
         long res = 0L;
-        int l = Math.min(Math.max(begin, 64), 128) - 64;
-        int e = Math.min(end, 128) - 64;
+        int l = Math.max(begin, 64) - 64;
+        int e = Math.min(end, 127) - 64;
         for (int i = l; i <= e; i++) {
-            if (i < 64) {
-                res |= 1L << i;
-            }
+            res |= 1L << i;
         }
         return res;
     }

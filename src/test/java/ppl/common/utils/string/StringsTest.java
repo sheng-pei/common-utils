@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import ppl.common.utils.string.trim.TrimPosition;
 
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 class StringsTest {
@@ -207,6 +209,7 @@ class StringsTest {
         return Stream.of(
                 Arguments.of(null, '_', null),
                 Arguments.of("", '_', ""),
+                Arguments.of("____", '_', ""),
                 Arguments.of("__aa__", '_', "aa")
         );
     }
@@ -214,7 +217,7 @@ class StringsTest {
     @ParameterizedTest
     @MethodSource("trimProvider")
     void testTrim(String source, char c, TrimPosition position, String expected) {
-        Assertions.assertEquals(expected, Strings.trim(source, c, position));
+        Assertions.assertEquals(expected, Strings.trim(source, Predicate.isEqual(c), position));
     }
 
     private static Stream<Arguments> trimProvider() {
@@ -224,7 +227,7 @@ class StringsTest {
                 Arguments.of("__aa__", '_', TrimPosition.ALL, "aa"),
                 Arguments.of("__aa__", "_", TrimPosition.NO, "__aa__"),
                 Arguments.of("__aa__", "_", TrimPosition.BEFORE, "aa__"),
-                Arguments.of("__aa__", "_", TrimPosition.END, "__aa")
+                Arguments.of("__aa__", "_", TrimPosition.AFTER, "__aa")
         );
     }
 

@@ -21,8 +21,8 @@ public final class URLDecoder {
         for (int i = 0; i < chars.length; i++) {
             while (i < chars.length && '%' == chars[i]) {
                 if (chars.length - i > 2 &&
-                        AsciiGroup.HEX.test(chars[i+1]) &&
-                        AsciiGroup.HEX.test(chars[i+2])) {
+                        AsciiGroup.HEX_DIGIT.test(chars[i+1]) &&
+                        AsciiGroup.HEX_DIGIT.test(chars[i+2])) {
                     byteBuffer.put(HexUtils.aByte(chars[i+1], chars[i+2]));
                     i += 3;
                 } else {

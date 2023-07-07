@@ -2,14 +2,15 @@ package ppl.common.utils.character.ascii;
 
 public enum AsciiGroup implements MaskCharPredicate {
     EMPTY(""),
+    VCHAR('\041', '\176'),
     UP_ALPHA('A', 'Z'),
     LOW_ALPHA('a', 'z'),
     DIGIT('0', '9'),
     ALPHA(UP_ALPHA, LOW_ALPHA),
     ALPHA_NUM(ALPHA, DIGIT),
-    UP_HEX(DIGIT, Mask.mask('A', 'F').predicate()),
-    LOW_HEX(DIGIT, Mask.mask('a', 'f').predicate()),
-    HEX(UP_HEX, LOW_HEX),
+    UP_HEX_DIGIT(DIGIT, Mask.mask('A', 'F').predicate()),
+    LOW_HEX_DIGIT(DIGIT, Mask.mask('a', 'f').predicate()),
+    HEX_DIGIT(UP_HEX_DIGIT, LOW_HEX_DIGIT),
     ALL('\000', '\177');
 
     private final Mask mask;

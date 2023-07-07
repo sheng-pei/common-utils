@@ -34,8 +34,8 @@ public class URLEncoder {
         for (int i = 0; i < bytes.length; i++) {
             if ('%' == bytes[i] && percentEncodingReserved) {
                 if (bytes.length - i > 2 &&
-                        AsciiGroup.HEX.test((char) bytes[i+1]) &&
-                        AsciiGroup.HEX.test((char) bytes[i+2])) {
+                        AsciiGroup.HEX_DIGIT.test((char) bytes[i+1]) &&
+                        AsciiGroup.HEX_DIGIT.test((char) bytes[i+2])) {
                     builder.append((char) bytes[i])
                             .append((char) bytes[i + 1])
                             .append((char) bytes[i + 2]);
