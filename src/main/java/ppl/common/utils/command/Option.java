@@ -10,6 +10,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Option<V> extends AbstractArgument<String, V> {
@@ -40,6 +41,14 @@ public class Option<V> extends AbstractArgument<String, V> {
                         .matches();
     }
 
+    private static final BiFunction<Option<Void>, Void, String> TOGGLE_TO_CANONICAL_STRING = (o, v) -> {
+        if (!o.shortOptions.isEmpty()) {
+            return o.shortOptions.get(0);
+        } else {
+            return o.longOptions.get(0);
+        }
+    };
+
     public static Option<Void> toggle(String longOption) {
         return toggle(longOption, null);
     }
@@ -50,14 +59,14 @@ public class Option<V> extends AbstractArgument<String, V> {
 
     public static Option<Void> toggle(String longOption, Character shortOption) {
         return toggle(name(longOption, shortOption),
-                Collections.singleton(longOption),
-                Collections.singleton(shortOption));
+                Collections.singletonList(longOption),
+                Collections.singletonList(shortOption));
     }
 
-    public static Option<Void> toggle(String name, Set<String> longOptions, Set<Character> shortOptions) {
+    public static Option<Void> toggle(String name, List<String> longOptions, List<Character> shortOptions) {
         return Option.<Void>pNewBuilder(name, longOptions, shortOptions)
                 .withToggle()
-                .build();
+                .build(TOGGLE_TO_CANONICAL_STRING);
     }
 
     public static Builder<String> newBuilder(String longOption, Character shortOption) {
@@ -65,44 +74,44 @@ public class Option<V> extends AbstractArgument<String, V> {
     }
 
     public static Builder<String> newBuilder(String name, String longOption, Character shortOption) {
-        return newBuilder(name, Collections.singleton(longOption), Collections.singleton(shortOption));
+        return newBuilder(name, Collections.singletonList(longOption), Collections.singletonList(shortOption));
     }
 
-    public static Builder<String> newBuilder(String name, Set<String> longOptions, Set<Character> shortOptions) {
+    public static Builder<String> newBuilder(String name, List<String> longOptions, List<Character> shortOptions) {
         return pNewBuilder(name, longOptions, shortOptions);
     }
 
-    private static <V> Builder<V> pNewBuilder(String name, Set<String> longOptions, Set<Character> shortOptions) {
+    private static <V> Builder<V> pNewBuilder(String name, List<String> longOptions, List<Character> shortOptions) {
         return new Builder<V>(name)
                 .withLongOptions(longOptions)
                 .withShortOptions(shortOptions);
     }
 
-    private final Set<String> longOptions;
-    private final Set<String> shortOptions;
+    private final List<String> longOptions;
+    private final List<String> shortOptions;
     private final boolean toggle;
 
     private Option(String name,
-                   Set<String> longOptions,
-                   Set<Character> shortOptions,
+                   List<String> longOptions,
+                   List<Character> shortOptions,
                    boolean toggle,
                    Function<String, Stream<String>> splitter,
                    @SuppressWarnings("rawtypes") List mappers,
                    @SuppressWarnings("rawtypes") Collector collector,
                    BiFunction<Option<V>, V, String> toCanonicalString) {
         super(name, splitter, mappers, collector, toCanonicalString);
-        this.longOptions = Collections.unmodifiableSet(longOptions.stream()
+        this.longOptions = Collections.unmodifiableList(longOptions.stream()
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .peek(Option::checkLongOption)
                 .map(l -> LONG_OPTION_PREFIX + l)
-                .collect(java.util.stream.Collectors.toSet()));
-        this.shortOptions = Collections.unmodifiableSet(shortOptions.stream()
+                .collect(java.util.stream.Collectors.toList()));
+        this.shortOptions = Collections.unmodifiableList(shortOptions.stream()
                 .filter(Objects::nonNull)
                 .peek(Option::checkShortOption)
                 .map(c -> SHORT_OPTION_PREFIX + c)
-                .collect(java.util.stream.Collectors.toSet()));
+                .collect(java.util.stream.Collectors.toList()));
         if (this.longOptions.isEmpty() && this.shortOptions.isEmpty()) {
             throw new IllegalArgumentException("Long options or short options must not be empty.");
         }
@@ -129,11 +138,11 @@ public class Option<V> extends AbstractArgument<String, V> {
         return name;
     }
 
-    public Set<String> getLongOptions() {
+    public List<String> getLongOptions() {
         return this.longOptions;
     }
 
-    public Set<String> getShortOptions() {
+    public List<String> getShortOptions() {
         return this.shortOptions;
     }
 
@@ -152,21 +161,23 @@ public class Option<V> extends AbstractArgument<String, V> {
     }
 
     public static class Builder<V> extends AbstractBuilder<String, V, Option<V>> {
-        private Set<String> longOptions;
-        private Set<Character> shortOptions;
+        private List<String> longOptions;
+        private List<Character> shortOptions;
         private boolean toggle;
 
         private Builder(String name) {
             super(name);
         }
 
-        public Builder<V> withLongOptions(Set<String> longOptions) {
-            this.longOptions = longOptions;
+        public Builder<V> withLongOptions(List<String> longOptions) {
+            this.longOptions = longOptions.stream()
+                    .distinct().collect(Collectors.toList());
             return this;
         }
 
-        public Builder<V> withShortOptions(Set<Character> shortOptions) {
-            this.shortOptions = shortOptions;
+        public Builder<V> withShortOptions(List<Character> shortOptions) {
+            this.shortOptions = shortOptions.stream()
+                    .distinct().collect(Collectors.toList());
             return this;
         }
 

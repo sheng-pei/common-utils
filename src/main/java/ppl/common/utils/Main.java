@@ -8,7 +8,6 @@ import ppl.common.utils.command.Position;
 import ppl.common.utils.string.Strings;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
 
 public class Main {
@@ -18,17 +17,10 @@ public class Main {
                 .addArgument(Option.toggle('t'))
                 .addArgument(Option.toggle('w'))
                 .addArgument(Option.toggle('z'))
-                .addArgument(Option.newBuilder("world", new HashSet<String>() {
-                    {
-                        add("world1");
-                        add("world2");
-                    }
-                }, new HashSet<Character>() {
-                    {
-                        add('o');
-                        add('r');
-                    }
-                })
+                .addArgument(Option.toggle("toggle", 'm'))
+                .addArgument(Option.newBuilder("world",
+                                Arrays.asList("world1", "world2"),
+                                Arrays.asList('o', 'r'))
                         .split(s -> Arrays.stream(Strings.split(s, ",")))
                         .map(Integer::parseInt, Option.ref())
                         .collect(Collectors.list(), Option.ref())
