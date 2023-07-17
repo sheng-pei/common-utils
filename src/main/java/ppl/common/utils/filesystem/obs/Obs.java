@@ -5,6 +5,7 @@ import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import ppl.common.utils.filesystem.*;
+import ppl.common.utils.filesystem.Path;
 
 import java.io.File;
 import java.io.IOException;
@@ -137,7 +138,7 @@ public class Obs implements FileSystem {
 
         @Override
         public void resetSession() {
-            this.working = pathCreator.create(FileSystem.C_ROOT_DIR);
+            this.working = pathCreator.create(Path.C_ROOT_DIR);
         }
 
         @Override

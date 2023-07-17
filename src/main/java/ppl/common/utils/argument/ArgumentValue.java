@@ -1,17 +1,14 @@
 package ppl.common.utils.argument;
 
-import java.util.Objects;
-
 public class ArgumentValue<K, V> {
-    private final Argument<K, V> argument;
+    private final AbstractArgument<K, V> argument;
     private final V value;
 
-    public static <K, V> ArgumentValue<K, V> create(Argument<K, V> argument, V value) {
-        Objects.requireNonNull(argument, "Argument is required.");
+    public static <K, V> ArgumentValue<K, V> create(AbstractArgument<K, V> argument, V value) {
         return new ArgumentValue<>(argument, value);
     }
 
-    ArgumentValue(Argument<K, V> argument, V value) {
+    ArgumentValue(AbstractArgument<K, V> argument, V value) {
         this.argument = argument;
         this.value = value;
     }

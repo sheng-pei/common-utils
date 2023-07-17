@@ -1,5 +1,6 @@
-package ppl.common.utils.argument;
+package ppl.common.utils.argument.parser;
 
+import ppl.common.utils.argument.Fragment;
 import ppl.common.utils.string.Strings;
 import ppl.common.utils.string.kvpair.Pair;
 import ppl.common.utils.string.trim.TrimPosition;
@@ -12,7 +13,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class DelimiterSeparatorParser implements Parser {
+public class DelimiterSeparatorParser implements StringParser<String, String> {
     private static final char DEFAULT_DELIMITER = ';';
     private static final char DEFAULT_SEPARATOR = '=';
 
@@ -40,20 +41,14 @@ public class DelimiterSeparatorParser implements Parser {
     }
 
     @Override
-    public Stream<Fragment> parse(Reader reader) {
+    public Stream<Fragment<String, String>> parse(Reader reader) {
         Iterator<String> iter = new ReaderIter(reader);
         Stream<String> stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                 iter, Spliterator.ORDERED | Spliterator.NONNULL), false);
         return map(stream);
     }
 
-    @Override
-    public Stream<Fragment> parse(String name, String value) {
-        Objects.requireNonNull(name, "Name is required.");
-        return Stream.of(checkAndNewFragment(Pair.create(name, value)));
-    }
-
-    private Stream<Fragment> map(Stream<String> stream) {
+    private Stream<Fragment<String, String>> map(Stream<String> stream) {
         return stream
                 .map(s -> ignoreIWhitespace ? Strings.trim(s) : s)
                 .map(s -> Strings.kv(s, separator))
@@ -64,10 +59,6 @@ public class DelimiterSeparatorParser implements Parser {
 
     private boolean isEmpty(Pair<String, String> pair) {
         return pair.getFirst().isEmpty() && pair.getSecond() == null;
-    }
-
-    private Fragment checkAndNewFragment(Pair<String, String> pair) {
-        return newFragment(postProcess(pair));
     }
 
     private Pair<String, String> postProcess(Pair<String, String> pair) {
@@ -112,8 +103,8 @@ public class DelimiterSeparatorParser implements Parser {
         }
     }
 
-    private Fragment newFragment(Pair<String, String> pair) {
-        return new Fragment(pair) {
+    private Fragment<String, String> newFragment(Pair<String, String> pair) {
+        return new Fragment<String, String>(pair) {
             @Override
             protected String merge(String key, String value) {
                 if (value != null) {

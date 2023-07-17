@@ -4,10 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ppl.common.utils.exception.IOStreamException;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 public final class IOUtils {
 
@@ -37,7 +34,12 @@ public final class IOUtils {
         }
 
         try {
-            org.apache.commons.io.IOUtils.copy(is, os, bufferSize);
+            byte[] bytes = new byte[4096];
+            int cnt = is.read(bytes);
+            while (cnt >= 0) {
+                os.write(bytes, 0, cnt);
+                cnt = is.read(bytes);
+            }
         } catch (IOException e) {
             throw new IOStreamException("Error to copy", e);
         }

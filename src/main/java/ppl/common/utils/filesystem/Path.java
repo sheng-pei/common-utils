@@ -1,9 +1,18 @@
 package ppl.common.utils.filesystem;
 
+import ppl.common.utils.filesystem.path.BasePath;
+
 import java.nio.file.InvalidPathException;
 import java.util.Iterator;
 
 public interface Path extends Comparable<Path>, Iterable<Path> {
+
+    String C_ROOT_DIR = "/";
+    String C_CURRENT_DIR = ".";
+    String C_PARENT_DIR = "..";
+    Character C_SEPARATOR = '/';
+
+    Path ROOT = BasePath.get(Path.C_ROOT_DIR);
 
     /**
      * Tells whether this path is absolute.
@@ -227,11 +236,11 @@ public interface Path extends Comparable<Path>, Iterable<Path> {
     /**
      * Returns a path that is this path with redundant name elements eliminated.
      *
-     * <p> The "{@link FileSystem#C_CURRENT_DIR}" and "{@link FileSystem#C_PARENT_DIR}"
+     * <p> The "{@link #C_CURRENT_DIR}" and "{@link #C_PARENT_DIR}"
      * are special names used to indicate the current directory and parent directory.
-     * All occurrences of "{@link FileSystem#C_CURRENT_DIR}" are considered redundant.
-     * If a "{@link FileSystem#C_PARENT_DIR}" is preceded by a non-"{@link
-     * FileSystem#C_PARENT_DIR}" name then both names are considered redundant
+     * All occurrences of "{@link #C_CURRENT_DIR}" are considered redundant.
+     * If a "{@link #C_PARENT_DIR}" is preceded by a non-"{@link
+     * #C_PARENT_DIR}" name then both names are considered redundant
      * (the process to identify such names is repeated until it is no longer applicable).
      *
      * @return  the resulting path or this path if it does not contain
@@ -293,7 +302,7 @@ public interface Path extends Comparable<Path>, Iterable<Path> {
      * <p> the path string returned by this method may differ from the original String
      * used to create the path.
      *
-     * <p> The returned path string uses the default name {@link FileSystem#C_SEPARATOR
+     * <p> The returned path string uses the default name {@link #C_SEPARATOR
      * separator} to separate names in the path.
      *
      * @return  the string representation of this path

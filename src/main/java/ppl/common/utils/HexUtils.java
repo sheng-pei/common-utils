@@ -2,9 +2,6 @@ package ppl.common.utils;
 
 import ppl.common.utils.string.Strings;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class HexUtils {
     private static final byte[] HEX;
 

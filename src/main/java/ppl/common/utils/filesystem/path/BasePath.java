@@ -1,11 +1,14 @@
-package ppl.common.utils.filesystem;
+package ppl.common.utils.filesystem.path;
 
+import ppl.common.utils.character.ascii.AsciiGroup;
+import ppl.common.utils.filesystem.Path;
 import ppl.common.utils.string.Strings;
 
+import java.nio.file.InvalidPathException;
 import java.util.*;
 
 public class BasePath implements Path {
-    private static final BasePath ROOT = new BasePath(FileSystem.C_ROOT_DIR);
+    private static final BasePath ROOT = new BasePath(Path.C_ROOT_DIR);
     private final String path;
     private volatile String[] names;
 
@@ -22,13 +25,13 @@ public class BasePath implements Path {
         if (list.isEmpty()) {
             return BasePath.get("");
         } else {
-            return BasePath.get(String.join(FileSystem.C_SEPARATOR.toString(), list));
+            return BasePath.get(String.join(Path.C_SEPARATOR.toString(), list));
         }
     }
 
     public static BasePath get(String path) {
         path = normalizeAndCheck(path);
-        if (FileSystem.C_ROOT_DIR.equals(path)) {
+        if (Path.C_ROOT_DIR.equals(path)) {
             return ROOT;
         }
         return new BasePath(path);
@@ -43,16 +46,15 @@ public class BasePath implements Path {
         char[] chars = path.toCharArray();
         char b = 0;
         for (char c : chars) {
-            if (c == 0) {
-                throw new InvalidPathException(Strings.format(
-                        "Nul character is not allowed: {}", path));
+            if (AsciiGroup.NUL.test(c)) {
+                throw new InvalidPathException(path, "Nul character is not allowed.");
             }
-            if (c != FileSystem.C_SEPARATOR || b != FileSystem.C_SEPARATOR) {
+            if (c != Path.C_SEPARATOR || b != Path.C_SEPARATOR) {
                 b = c;
                 builder.append(c);
             }
         }
-        if (builder.length() > 1 && builder.charAt(builder.length() - 1) == FileSystem.C_SEPARATOR) {
+        if (builder.length() > 1 && builder.charAt(builder.length() - 1) == Path.C_SEPARATOR) {
             builder.setLength(builder.length() - 1);
         }
         return builder.toString();
@@ -60,7 +62,7 @@ public class BasePath implements Path {
 
     @Override
     public boolean isAbsolute() {
-        return path.startsWith(FileSystem.C_ROOT_DIR);
+        return path.startsWith(Path.C_ROOT_DIR);
     }
 
     @Override
@@ -89,7 +91,7 @@ public class BasePath implements Path {
         if (!isAbsolute()) {
             count--;
         }
-        return new BasePath(Strings.join(FileSystem.C_SEPARATOR.toString(),
+        return new BasePath(Strings.join(Path.C_SEPARATOR.toString(),
                 this.names, 0, count));
     }
 
@@ -130,7 +132,7 @@ public class BasePath implements Path {
             endIndex++;
         }
         try {
-            return new BasePath(Strings.join(FileSystem.C_SEPARATOR.toString(),
+            return new BasePath(Strings.join(Path.C_SEPARATOR.toString(),
                     this.names, beginIndex, endIndex - beginIndex));
         } catch (Exception e) {
             throw new IllegalArgumentException("Begin or end index is out of range.");
@@ -288,10 +290,10 @@ public class BasePath implements Path {
 
         StringBuilder builder = new StringBuilder();
         for (int j = 0; j < thisLength - i; j++) {
-            builder.append(FileSystem.C_PARENT_DIR).append(FileSystem.C_SEPARATOR);
+            builder.append(Path.C_PARENT_DIR).append(Path.C_SEPARATOR);
         }
         for (int j = i; j < otherLength; j++) {
-            builder.append(o.names[j]).append(FileSystem.C_SEPARATOR);
+            builder.append(o.names[j]).append(Path.C_SEPARATOR);
         }
         if (builder.length() > 0) {
             builder.setLength(builder.length() - 1);
@@ -304,20 +306,20 @@ public class BasePath implements Path {
         initNames();
         Stack<String> res = new Stack<>();
         for (String name : names) {
-            if (name.equals(FileSystem.C_PARENT_DIR)) {
-                if (res.isEmpty() || res.peek().equals(FileSystem.C_PARENT_DIR)) {
-                    res.push(FileSystem.C_PARENT_DIR);
-                } else if (!res.peek().equals(FileSystem.C_PARENT_DIR) && !res.peek().isEmpty()) {
+            if (name.equals(Path.C_PARENT_DIR)) {
+                if (res.isEmpty() || res.peek().equals(Path.C_PARENT_DIR)) {
+                    res.push(Path.C_PARENT_DIR);
+                } else if (!res.peek().equals(Path.C_PARENT_DIR) && !res.peek().isEmpty()) {
                     res.pop();
                 }
-            } else if (!name.equals(FileSystem.C_CURRENT_DIR)) {
+            } else if (!name.equals(Path.C_CURRENT_DIR)) {
                 res.push(name);
             }
         }
         if (res.size() == 1 && res.peek().isEmpty()) {
             return ROOT;
         }
-        return new BasePath(Strings.join(FileSystem.C_SEPARATOR.toString(), res.toArray(new String[0])));
+        return new BasePath(Strings.join(Path.C_SEPARATOR.toString(), res.toArray(new String[0])));
     }
 
     private void initNames() {

@@ -2,6 +2,7 @@ package ppl.common.utils.character.ascii;
 
 public enum AsciiGroup implements MaskCharPredicate {
     EMPTY(""),
+    NUL("\0"),
     VCHAR('\041', '\176'),
     UP_ALPHA('A', 'Z'),
     LOW_ALPHA('a', 'z'),
