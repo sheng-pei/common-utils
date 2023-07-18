@@ -2,6 +2,7 @@ package ppl.common.utils.command;
 
 import ppl.common.utils.argument.AbstractArgument;
 import ppl.common.utils.argument.AbstractBuilder;
+import ppl.common.utils.argument.ToCanonicalString;
 import ppl.common.utils.argument.TypeReference;
 import ppl.common.utils.string.Strings;
 
@@ -41,13 +42,55 @@ public class Option<V> extends AbstractArgument<String, V> {
                         .matches();
     }
 
-    private static final BiFunction<Option<Void>, Void, String> TOGGLE_TO_CANONICAL_STRING = (o, v) -> {
-        if (!o.shortOptions.isEmpty()) {
-            return o.shortOptions.get(0);
-        } else {
-            return o.longOptions.get(0);
+    private static class OptionId<V> implements Function<Option<V>, String> {
+        @Override
+        public String apply(Option<V> vOption) {
+            List<String> first = vOption.longOptions;
+            List<String> second = vOption.shortOptions;
+            if (vOption.isToggle()) {
+                first = vOption.shortOptions;
+                second = vOption.longOptions;
+            }
+            if (!first.isEmpty()) {
+                return first.get(0);
+            } else {
+                return second.get(0);
+            }
         }
-    };
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final OptionId OPTION_ID = new OptionId();
+
+    private static <V> OptionId<V> optionId() {
+        @SuppressWarnings("unchecked")
+        OptionId<V> optionId = (OptionId<V>) OPTION_ID;
+        return optionId;
+    }
+
+    private static final BiFunction<Option<Void>, Void, String> TOGGLE_TO_CANONICAL_STRING =
+            (o, v) -> Option.<Void>optionId().apply(o);
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static final BiFunction DEFAULT_TO_CANONICAL_STRING =
+            ToCanonicalString.newBuilder(Command.SEPARATOR, true)
+            .withKey(OPTION_ID)
+            .build()
+            .create();
+
+    public static <V> BiFunction<Option<V>, V, String> newToCanonical(Function<V, String> value) {
+        return ToCanonicalString.<String, V, Option<V>>newBuilder(Command.SEPARATOR, true)
+                .withKey(optionId())
+                .withValue(value)
+                .build()
+                .create();
+    }
+
+    public static <V> BiFunction<Option<V>, V, String> defToCanonical() {
+        @SuppressWarnings("unchecked")
+        BiFunction<Option<V>, V, String> res = DEFAULT_TO_CANONICAL_STRING;
+        return res;
+    }
 
     public static Option<Void> toggle(String longOption) {
         return toggle(longOption, null);
@@ -106,12 +149,12 @@ public class Option<V> extends AbstractArgument<String, V> {
                 .filter(s -> !s.isEmpty())
                 .peek(Option::checkLongOption)
                 .map(l -> LONG_OPTION_PREFIX + l)
-                .collect(java.util.stream.Collectors.toList()));
+                .collect(Collectors.toList()));
         this.shortOptions = Collections.unmodifiableList(shortOptions.stream()
                 .filter(Objects::nonNull)
                 .peek(Option::checkShortOption)
                 .map(c -> SHORT_OPTION_PREFIX + c)
-                .collect(java.util.stream.Collectors.toList()));
+                .collect(Collectors.toList()));
         if (this.longOptions.isEmpty() && this.shortOptions.isEmpty()) {
             throw new IllegalArgumentException("Long options or short options must not be empty.");
         }
@@ -156,7 +199,7 @@ public class Option<V> extends AbstractArgument<String, V> {
                 "short option->{}, long option->{}, name->{}",
                 this.shortOptions.stream()
                         .map(Object::toString)
-                        .collect(java.util.stream.Collectors.joining("|")),
+                        .collect(Collectors.joining("|")),
                 String.join("|", this.longOptions), getName());
     }
 
@@ -196,7 +239,7 @@ public class Option<V> extends AbstractArgument<String, V> {
             return new Option<>(name,
                     longOptions, shortOptions, toggle,
                     splitter, mappers,
-                    collector, toCanonicalString);
+                    collector, toCanonicalString == null ? defToCanonical() : toCanonicalString);
         }
     }
 }

@@ -4,8 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
-public class Collectors {
+public class ExCollectors {
     public static <V> Collector<V, ?, V> one() {
         return new OneCollector<>();
     }
@@ -19,11 +20,11 @@ public class Collectors {
     }
 
     public static <V> Collector<V, ?, List<V>> list() {
-        return java.util.stream.Collectors.toList();
+        return Collectors.toList();
     }
 
     public static <V> Collector<V, ?, Set<V>> set() {
-        return java.util.stream.Collectors.toSet();
+        return Collectors.toSet();
     }
 
     public static Collector<String, ?, Map<String, String>> kv() {

@@ -1,6 +1,6 @@
 package ppl.common.utils.argument;
 
-import ppl.common.utils.argument.collector.Collectors;
+import ppl.common.utils.argument.collector.ExCollectors;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +47,7 @@ public abstract class AbstractBuilder<K, V, A extends AbstractArgument<K, V>> {
     }
 
     public AbstractBuilder<K, V, A> collect() {
-        this.collector = Collectors.one();
+        this.collector = ExCollectors.one();
         return self();
     }
 
@@ -72,7 +72,7 @@ public abstract class AbstractBuilder<K, V, A extends AbstractArgument<K, V>> {
         Collector<?, ?, ?> collector = this.collector;
         return create(name, splitter,
                 mappers == null ? null : Collections.unmodifiableList(mappers),
-                collector == null ? Collectors.one() : collector,
+                collector == null ? ExCollectors.one() : collector,
                 toCanonicalString);
     }
 

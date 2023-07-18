@@ -11,9 +11,30 @@ import java.util.stream.Stream;
 
 public class Position<V> extends AbstractArgument<String, V> {
 
+    @SuppressWarnings({"rawtypes"})
+    private static final BiFunction DEFAULT_TO_CANONICAL_STRING =
+            ToCanonicalString.newBuilder("", true)
+                    .withKey(p -> "")
+                    .build()
+                    .create();
+
     public static <V> TypeReference<Position<V>> ref() {
         @SuppressWarnings("unchecked")
         TypeReference<Position<V>> res = (TypeReference<Position<V>>) TypeReference.TYPE_REFERENCE;
+        return res;
+    }
+
+    public static <V> BiFunction<Position<V>, V, String> newToCanonical(Function<V, String> value) {
+        return ToCanonicalString.<String, V, Position<V>>newBuilder("", true)
+                .withKey(p -> "")
+                .withValue(value)
+                .build()
+                .create();
+    }
+
+    public static <V> BiFunction<Position<V>, V, String> defToCanonical() {
+        @SuppressWarnings("unchecked")
+        BiFunction<Position<V>, V, String> res = DEFAULT_TO_CANONICAL_STRING;
         return res;
     }
 
@@ -67,7 +88,7 @@ public class Position<V> extends AbstractArgument<String, V> {
                 BiFunction<Position<V>, V, String> toCanonicalString) {
             return new Position<>(name,
                     splitter, mappers,
-                    collector, toCanonicalString);
+                    collector, toCanonicalString == null ? defToCanonical() : toCanonicalString);
         }
     }
 }

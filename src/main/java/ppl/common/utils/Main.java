@@ -1,6 +1,6 @@
 package ppl.common.utils;
 
-import ppl.common.utils.argument.collector.Collectors;
+import ppl.common.utils.argument.collector.ExCollectors;
 import ppl.common.utils.command.Command;
 import ppl.common.utils.command.CommandArguments;
 import ppl.common.utils.command.Option;
@@ -8,12 +8,16 @@ import ppl.common.utils.command.Position;
 import ppl.common.utils.string.Strings;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 public class Main {
     public static void main(String[] args) {
         CommandArguments arguments = CommandArguments.newBuilder()
-                .addArgument(Option.newBuilder("hello", 'h').map(s -> s, Option.ref()).build())
+                .addArgument(Option.newBuilder("hello", 'h')
+                        .map(s -> s, Option.ref())
+                        .build())
                 .addArgument(Option.toggle('t'))
                 .addArgument(Option.toggle('w'))
                 .addArgument(Option.toggle('z'))
@@ -23,9 +27,12 @@ public class Main {
                                 Arrays.asList('o', 'r'))
                         .split(s -> Arrays.stream(Strings.split(s, ",")))
                         .map(Integer::parseInt, Option.ref())
-                        .collect(Collectors.list(), Option.ref())
+                        .collect(ExCollectors.list(), Option.ref())
+                        .build(Option.newToCanonical(l -> l.stream().map(Objects::toString).collect(Collectors.joining(",")))))
+                .addArgument(Position
+                        .newBuilder("position")
+                        .collect()
                         .build())
-                .addArgument(Position.newBuilder("position").collect().build())
                 .build();
         Command command = new Command(arguments);
         command.init(args);

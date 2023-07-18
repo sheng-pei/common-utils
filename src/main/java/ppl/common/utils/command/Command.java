@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 public class Command {
 
     static final Pattern NAME_PATTERN = Pattern.compile("[a-zA-Z][a-zA-Z0-9]*");
+    static final String SEPARATOR = " ";
 
     static boolean isName(String string) {
         return NAME_PATTERN.matcher(string).matches();

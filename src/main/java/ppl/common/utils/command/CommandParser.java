@@ -130,7 +130,7 @@ public class CommandParser implements StringArrayParser<Object, String> {
 
         @Override
         protected String merge(String key, String value) {
-            return key + (value == null ? "" : " " + value);
+            return key + (value == null ? "" : Command.SEPARATOR + value);
         }
     }
 
