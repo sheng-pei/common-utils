@@ -15,8 +15,7 @@ public class Position<V> extends AbstractArgument<String, V> {
     private static final BiFunction DEFAULT_TO_CANONICAL_STRING =
             ToCanonicalString.newBuilder("", true)
                     .withKey(p -> "")
-                    .build()
-                    .create();
+                    .build();
 
     public static <V> TypeReference<Position<V>> ref() {
         @SuppressWarnings("unchecked")
@@ -28,8 +27,7 @@ public class Position<V> extends AbstractArgument<String, V> {
         return ToCanonicalString.<String, V, Position<V>>newBuilder("", true)
                 .withKey(p -> "")
                 .withValue(value)
-                .build()
-                .create();
+                .build();
     }
 
     public static <V> BiFunction<Position<V>, V, String> defToCanonical() {

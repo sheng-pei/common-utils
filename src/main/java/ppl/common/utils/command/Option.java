@@ -76,15 +76,13 @@ public class Option<V> extends AbstractArgument<String, V> {
     private static final BiFunction DEFAULT_TO_CANONICAL_STRING =
             ToCanonicalString.newBuilder(Command.SEPARATOR, true)
             .withKey(OPTION_ID)
-            .build()
-            .create();
+            .build();
 
     public static <V> BiFunction<Option<V>, V, String> newToCanonical(Function<V, String> value) {
         return ToCanonicalString.<String, V, Option<V>>newBuilder(Command.SEPARATOR, true)
                 .withKey(optionId())
                 .withValue(value)
-                .build()
-                .create();
+                .build();
     }
 
     public static <V> BiFunction<Option<V>, V, String> defToCanonical() {

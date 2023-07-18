@@ -45,13 +45,13 @@ public class ToCanonicalString<K, V, A extends AbstractArgument<K, V>> {
             return this;
         }
 
-        public ToCanonicalString<K, V, A> build() {
-            return new ToCanonicalString<>(key, value, separator, ignoreSeparatorIfNullValue);
+        public BiFunction<A, V, String> build() {
+            return new ToCanonicalString<>(key, value, separator, ignoreSeparatorIfNullValue).create();
         }
 
     }
 
-    public BiFunction<A, V, String> create() {
+    private BiFunction<A, V, String> create() {
         return (a, v) -> {
             StringBuilder builder = new StringBuilder();
             builder.append(key.apply(a));
