@@ -212,13 +212,13 @@ public class Option<V> extends AbstractArgument<String, V> {
             super(name);
         }
 
-        public Builder<V> withLongOptions(List<String> longOptions) {
+        private Builder<V> withLongOptions(List<String> longOptions) {
             this.longOptions = longOptions.stream()
                     .distinct().collect(Collectors.toList());
             return this;
         }
 
-        public Builder<V> withShortOptions(List<Character> shortOptions) {
+        private Builder<V> withShortOptions(List<Character> shortOptions) {
             this.shortOptions = shortOptions.stream()
                     .distinct().collect(Collectors.toList());
             return this;
