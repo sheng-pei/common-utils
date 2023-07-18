@@ -4,6 +4,7 @@ import ppl.common.utils.argument.AbstractArgument;
 import ppl.common.utils.argument.AbstractBuilder;
 import ppl.common.utils.argument.ToCanonicalString;
 import ppl.common.utils.argument.TypeReference;
+import ppl.common.utils.argument.collector.ExCollectors;
 import ppl.common.utils.string.Strings;
 
 import java.util.*;
@@ -110,6 +111,43 @@ public class Option<V> extends AbstractArgument<String, V> {
         return Option.<Void>pNewBuilder(name, longOptions, shortOptions)
                 .withToggle()
                 .build(TOGGLE_TO_CANONICAL_STRING);
+    }
+
+    public static Option<String> requiredIdentity(String longOption) {
+        return requiredIdentity(longOption, null);
+    }
+
+    public static Option<String> requiredIdentity(Character shortOption) {
+        return requiredIdentity(null, shortOption);
+    }
+
+    public static Option<String> requiredIdentity(String longOption, Character shortOption) {
+        return newBuilder(longOption, shortOption)
+                .collect(ExCollectors.required(), Option.ref())
+                .build();
+    }
+
+    public static Option<String> optionalIdentity(String longOption) {
+        return optionalIdentity(longOption, null);
+    }
+
+    public static Option<String> optionalIdentity(Character shortOption) {
+        return optionalIdentity(null, shortOption);
+    }
+
+    public static Option<String> optionalIdentity(String longOption, Character shortOption) {
+        return optionalIdentity(
+                name(longOption, shortOption),
+                Collections.singletonList(longOption),
+                Collections.singletonList(shortOption));
+    }
+
+    public static Option<String> optionalIdentity(String name,
+                                                  List<String> longOptions,
+                                                  List<Character> shortOptions) {
+        return newBuilder(name, longOptions, shortOptions)
+                .collect(ExCollectors.one(), Option.ref())
+                .build();
     }
 
     public static Builder<String> newBuilder(String longOption, Character shortOption) {

@@ -7,6 +7,9 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class ExCollectors {
+    public static <V> Collector<V, ?, V> required() {
+        return new OneCollector<>(OneCollector.Type.ONLY_ONE, true);
+    }
     public static <V> Collector<V, ?, V> one() {
         return new OneCollector<>();
     }

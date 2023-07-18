@@ -11,21 +11,27 @@ import java.util.stream.Collector;
 
 public class OneCollector<T> implements Collector<T, OneCollector.One<T>, T> {
     private final Type type;
+    private final boolean required;
 
     OneCollector() {
-        this(null);
+        this(null, false);
     }
 
     OneCollector(Type type) {
+        this(type, false);
+    }
+
+    OneCollector(Type type, boolean required) {
         if (type == null) {
             type = Type.ONLY_ONE;
         }
         this.type = type;
+        this.required = required;
     }
 
     @Override
     public Supplier<One<T>> supplier() {
-        return () -> new One<>(type);
+        return () -> new One<>(type, required);
     }
 
     @Override
@@ -51,13 +57,18 @@ public class OneCollector<T> implements Collector<T, OneCollector.One<T>, T> {
     static class One<T> {
 
         private final Type type;
+        private final boolean required;
         private T t;
 
-        public One(Type type) {
+        public One(Type type, boolean required) {
             this.type = type;
+            this.required = required;
         }
 
         public T get() {
+            if (required && t == null) {
+                throw new CollectorException("No data provided.");
+            }
             return t;
         }
 
@@ -89,6 +100,6 @@ public class OneCollector<T> implements Collector<T, OneCollector.One<T>, T> {
     }
 
     public enum Type {
-        FIRST_SEEN, LAST_SEEN, ONLY_ONE;
+        FIRST_SEEN, LAST_SEEN, ONLY_ONE, REQUIRED
     }
 }
