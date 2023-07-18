@@ -37,6 +37,11 @@ public class CommandArguments implements Arguments<String, Object> {
     }
 
     @Override
+    public List<AbstractArgument<String, Object>> getArguments() {
+        return new ArrayList<>(allArguments.values());
+    }
+
+    @Override
     public AbstractArgument<String, Object> get(Object s) {
         if (s instanceof String && Option.isLongOption((String) s)) {
             return longOptions.get(s);
