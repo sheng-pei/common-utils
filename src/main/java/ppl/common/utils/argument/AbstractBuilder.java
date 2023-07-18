@@ -30,6 +30,10 @@ public abstract class AbstractBuilder<K, V, A extends AbstractArgument<K, V>> {
         return self();
     }
 
+    public AbstractBuilder<K, V, A> map(Function<V, V> mapper) {
+        return map(mapper, null);
+    }
+
     public <R, A extends AbstractArgument<K, R>> AbstractBuilder<K, R, A> map(Function<V, R> mapper, TypeReference<A> ref) {
         Objects.requireNonNull(mapper);
         if (collector != null) {
@@ -49,6 +53,10 @@ public abstract class AbstractBuilder<K, V, A extends AbstractArgument<K, V>> {
     public AbstractBuilder<K, V, A> collect() {
         this.collector = ExCollectors.one();
         return self();
+    }
+
+    public AbstractBuilder<K, V, A> collect(Collector<V, ?, V> collector) {
+        return collect(collector, null);
     }
 
     public <R, A extends AbstractArgument<K, R>> AbstractBuilder<K, R, A> collect(Collector<V, ?, R> collector, TypeReference<A> ref) {
