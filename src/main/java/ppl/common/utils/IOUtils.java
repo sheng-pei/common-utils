@@ -34,7 +34,7 @@ public final class IOUtils {
         }
 
         try {
-            byte[] bytes = new byte[4096];
+            byte[] bytes = new byte[bufferSize];
             int cnt = is.read(bytes);
             while (cnt >= 0) {
                 os.write(bytes, 0, cnt);

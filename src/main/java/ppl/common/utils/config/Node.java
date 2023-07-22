@@ -6,10 +6,10 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**
- * Node interface for node instances which form the basis of tree config model. The following characters
- * '[', ']', '{' and '}' are disallowed from being used as a field name of a field of an object node. We
- * use a path to address to a node from the specified root node. Path is made up of keys which are separated
- * by letter '.'.
+ * Node interface for node instances which form the basis of tree config model. Every node could have
+ * one base type value and/or any number of child node. The following characters '[', ']', '{' and '}'
+ * are disallowed from being used as a field name of an object node. We use a path to address to a node
+ * from the specified root node. Path is made up of keys which are separated by letter '.'.
  *
  * <p>
  * Given a tree config as an example:
