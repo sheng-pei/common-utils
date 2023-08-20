@@ -1,7 +1,5 @@
 package ppl.common.utils.filesystem;
 
-import ppl.common.utils.filesystem.path.BasePath;
-
 import java.nio.file.InvalidPathException;
 import java.util.Iterator;
 
@@ -11,8 +9,6 @@ public interface Path extends Comparable<Path>, Iterable<Path> {
     String C_CURRENT_DIR = ".";
     String C_PARENT_DIR = "..";
     Character C_SEPARATOR = '/';
-
-    Path ROOT = BasePath.get(Path.C_ROOT_DIR);
 
     /**
      * Tells whether this path is absolute.

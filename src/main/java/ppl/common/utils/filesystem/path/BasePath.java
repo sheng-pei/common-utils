@@ -12,6 +12,10 @@ public class BasePath implements Path {
     private final String path;
     private volatile String[] names;
 
+    public static BasePath root() {
+        return ROOT;
+    }
+
     public static BasePath get(String first, String... more) {
         List<String> list = new ArrayList<>();
         if (first != null && !first.isEmpty()) {
