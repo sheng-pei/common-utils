@@ -3,7 +3,7 @@ package ppl.common.utils.enumerate;
 import ppl.common.utils.string.Strings;
 
 @SuppressWarnings("unused")
-public class UnknownEnumException extends RuntimeException {
+public class UnknownEnumException extends IllegalArgumentException {
 
     @SuppressWarnings("rawtypes")
     private Class<? extends Enum> enumClass;

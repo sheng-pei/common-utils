@@ -10,15 +10,12 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-import ppl.common.utils.config.convert.Converters;
 import ppl.common.utils.exception.UnreachableCodeException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Properties;
 
 @ExtendWith(MockitoExtension.class)
 public class IOUtilsTest {
@@ -478,14 +475,4 @@ public class IOUtilsTest {
         Assertions.assertArrayEquals(DATA, os.toByteArray());
     }
 
-    @Test
-    public void test() throws Exception {
-        String string = "=9\n" +
-                "a.b=u\n" +
-                "=o";
-        Properties properties = new Properties();
-        properties.load(new StringReader(string));
-//        properties.keySet().forEach(k -> System.out.println("\"" + k + "\""));
-        System.out.println(Converters.intValue("1"));
-    }
 }

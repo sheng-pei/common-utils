@@ -5,7 +5,7 @@ import ppl.common.utils.string.Strings;
 import static ppl.common.utils.enumerate.EnumSupport.ERROR;
 
 @SuppressWarnings("rawtypes")
-public class EnumEncoderNotSupportedException extends RuntimeException {
+public class EnumEncoderNotSupportedException extends IllegalArgumentException {
 
     private final ERROR error;
     private final Class<? extends Enum> enumClass;
