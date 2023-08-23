@@ -9,4 +9,8 @@ public final class UUIDUtils {
     public static String uuid() {
         return UUID.randomUUID().toString().replace("-", "");
     }
+
+    public static String rawUuid() {
+        return UUID.randomUUID().toString();
+    }
 }

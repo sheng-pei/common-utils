@@ -1,6 +1,6 @@
 package ppl.common.utils.command;
 
-import ppl.common.utils.argument.AbstractArgument;
+import ppl.common.utils.argument.Argument;
 import ppl.common.utils.argument.Arguments;
 import ppl.common.utils.string.Strings;
 
@@ -11,25 +11,31 @@ public class CommandArguments implements Arguments<String, Object> {
     private static final Pattern NAME_PATTERN = Pattern.compile("[a-zA-Z][a-zA-Z0-9]*");
 
     @SuppressWarnings("rawtypes")
-    private static final Set<Class<? extends AbstractArgument>> SUPPORTED_ARGUMENT_TYPE;
+    private static final Set<Class<? extends Argument>> SUPPORTED_ARGUMENT_TYPE;
 
     static {
         @SuppressWarnings("rawtypes")
-        Set<Class<? extends AbstractArgument>> supported = new HashSet<>();
-        supported.add(Position.class);
-        supported.add(Option.class);
+        Set<Class<? extends Argument>> supported = new HashSet<>();
+        supported.add(PositionArgument.class);
+        supported.add(ValueOptionArgument.class);
+        supported.add(ToggleOptionArgument.class);
         SUPPORTED_ARGUMENT_TYPE = Collections.unmodifiableSet(supported);
     }
 
-    private final Map<String, AbstractArgument<String, Object>> allArguments;
-    private final Map<String, Option<Object>> longOptions;
-    private final Map<String, Option<Object>> shortOptions;
-    private final List<Position<Object>> positions;
+    @SuppressWarnings("rawtypes")
+    private final Map allArguments;
+    @SuppressWarnings("rawtypes")
+    private final Map longOptions;
+    @SuppressWarnings("rawtypes")
+    private final Map shortOptions;
+    @SuppressWarnings("rawtypes")
+    private final List positions;
 
-    private CommandArguments(Map<String, AbstractArgument<String, Object>> allArguments,
-                    Map<String, Option<Object>> longOptions,
-                    Map<String, Option<Object>> shortOptions,
-                    List<Position<Object>> positions) {
+    private CommandArguments(
+            @SuppressWarnings("rawtypes") Map allArguments,
+            @SuppressWarnings("rawtypes") Map longOptions,
+            @SuppressWarnings("rawtypes") Map shortOptions,
+            @SuppressWarnings("rawtypes") List positions) {
         this.allArguments = allArguments;
         this.longOptions = longOptions;
         this.shortOptions = shortOptions;
@@ -37,30 +43,65 @@ public class CommandArguments implements Arguments<String, Object> {
     }
 
     @Override
-    public List<AbstractArgument<String, Object>> getArguments() {
-        return new ArrayList<>(allArguments.values());
+    public List<Argument<String, Object>> getArguments() {
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        List<Argument<String, Object>> res = new ArrayList<>(allArguments.values());
+        return res;
     }
 
     @Override
-    public AbstractArgument<String, Object> get(Object s) {
-        if (s instanceof String && Option.isLongOption((String) s)) {
-            return longOptions.get(s);
-        } else if (s instanceof String && Option.isShortOption((String) s)) {
-            return shortOptions.get(s);
-        } else if (s instanceof Integer && (Integer) s >= 0) {
-            int pos = (Integer) s;
-            return pos < positions.size() ? positions.get(pos) : null;
+    public Argument<String, Object> get(Object s) {
+        if (s instanceof String) {
+            String option = (String) s;
+            if (BaseOption.isLongOption(option)) {
+                return getLongOption(option);
+            } else if (BaseOption.isShortOption(option)) {
+                return getShortOption(option);
+            }
+        } else if (s instanceof Integer) {
+            int index = (Integer) s;
+            if (index >= 0) {
+                return getPosition(index);
+            }
         }
         throw new IllegalArgumentException("Please ensure '" + s + "' is a long option or " +
-                "a short option or an index of position.");
+                "a short option or a non-negative index.");
+    }
+
+    private Argument<String, Object> getLongOption(String option) {
+        @SuppressWarnings("unchecked")
+        Argument<String, Object> argument = (Argument<String, Object>) longOptions.get(option);
+        return argument;
+    }
+
+    private Argument<String, Object> getShortOption(String option) {
+        @SuppressWarnings("unchecked")
+        Argument<String, Object> argument = (Argument<String, Object>) shortOptions.get(option);
+        return argument;
+    }
+
+    private Argument<String, Object> getPosition(int index) {
+        if (index >= positions.size()) {
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        Argument<String, Object> argument = (Argument<String, Object>) positions.get(index);
+        return argument;
     }
 
     @Override
-    public AbstractArgument<String, Object> getByName(String name) {
-        if (Command.isName(name)) {
-            return allArguments.get(name);
+    public Argument<String, Object> getByName(String name) {
+        checkName(name);
+        @SuppressWarnings("unchecked")
+        Argument<String, Object> res = (Argument<String, Object>) allArguments.get(name);
+        return res;
+    }
+
+    private static void checkName(String name) {
+        if (!NAME_PATTERN.matcher(name).matches()) {
+            throw new IllegalArgumentException("Invalid argument name: " + name);
         }
-        throw new IllegalArgumentException("Please ensure '" + name + "' is a command argument name.");
     }
 
     public static Builder newBuilder() {
@@ -68,113 +109,190 @@ public class CommandArguments implements Arguments<String, Object> {
     }
 
     public static class Builder {
-        private Map<String, AbstractArgument<String, ?>> allArguments;
-        private Map<String, Option<?>> longOptions;
-        private Map<String, Option<?>> shortOptions;
-        private List<Position<?>> positions;
+        @SuppressWarnings("rawtypes")
+        private Map allArguments;
+        @SuppressWarnings("rawtypes")
+        private Map longOptions;
+        @SuppressWarnings("rawtypes")
+        private Map shortOptions;
+        @SuppressWarnings("rawtypes")
+        private List positions;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public CommandArguments build() {
             @SuppressWarnings({"rawtypes", "unchecked"})
-            Map<String, AbstractArgument<String, Object>> allArguments = (Map) this.allArguments;
+            Map<String, Argument<String, Object>> allArguments = (Map) this.allArguments;
             allArguments = allArguments == null ? Collections.emptyMap() : Collections.unmodifiableMap(allArguments);
             @SuppressWarnings({"rawtypes", "unchecked"})
-            Map<String, Option<Object>> longOptions = (Map) this.longOptions;
+            Map<String, ValueOptionArgument<Object>> longOptions = (Map) this.longOptions;
             longOptions = longOptions == null ? Collections.emptyMap() : Collections.unmodifiableMap(longOptions);
             @SuppressWarnings({"rawtypes", "unchecked"})
-            Map<String, Option<Object>> shortOptions = (Map) this.shortOptions;
+            Map<String, ValueOptionArgument<Object>> shortOptions = (Map) this.shortOptions;
             shortOptions = shortOptions == null ? Collections.emptyMap() : Collections.unmodifiableMap(shortOptions);
             @SuppressWarnings({"rawtypes", "unchecked"})
-            List<Position<Object>> positions = (List) this.positions;
+            List<PositionArgument<Object>> positions = (List) this.positions;
             positions = positions == null ? Collections.emptyList() : Collections.unmodifiableList(positions);
             return new CommandArguments(allArguments,
                     longOptions, shortOptions, positions);
         }
 
-        public Builder addArguments(List<AbstractArgument<String, ?>> arguments) {
-            for (AbstractArgument<String, ?> argument : arguments) {
-                addArgument(argument);
-            }
+
+        public Builder addArgument(Argument<String, ?> argument) {
+            checkArgument(argument);
+            addAllArgument(argument);
+            _addArgument(argument);
             return this;
         }
 
-        public Builder addArgument(AbstractArgument<String, ?> argument) {
-            _addArgument(argument);
-            if (argument instanceof Option) {
-                addLongOption((Option<?>) argument);
-                addShortOption((Option<?>) argument);
-            } else if (argument instanceof Position) {
-                addPosition((Position<?>) argument);
+        public Builder addArgument(ToggleOptionArgument argument) {
+            checkArgument(argument);
+            addAllArgument(argument);
+            _addToggleOptionArgument(argument);
+            return this;
+        }
+
+        public Builder addArgument(ValueOptionArgument<?> argument) {
+            checkArgument(argument);
+            addAllArgument(argument);
+            _addValueOptionArgument(argument);
+            return this;
+        }
+
+        public Builder addArgument(PositionArgument<?> argument) {
+            checkArgument(argument);
+            addAllArgument(argument);
+            _addPositionArgument(argument);
+            return this;
+        }
+
+        private void addAllArgument(Argument<String, ?> argument) {
+            String name = argument.getName();
+            @SuppressWarnings("unchecked")
+            Map<String, Argument<String, ?>> allArguments = ensureAllArguments();
+            if (allArguments.containsKey(name)) {
+                throw new IllegalArgumentException(Strings.format(
+                        "The arguments '{}' and '{}' has same name: '{}'.",
+                        argument, allArguments.get(name), name));
+            }
+            allArguments.put(name, argument);
+        }
+
+        private void _addArgument(Argument<String, ?> argument) {
+            if (argument instanceof ValueOptionArgument) {
+                _addValueOptionArgument((ValueOptionArgument<?>) argument);
+            } else if (argument instanceof ToggleOptionArgument) {
+                _addToggleOptionArgument((ToggleOptionArgument) argument);
+            } else if (argument instanceof PositionArgument) {
+                _addPositionArgument((PositionArgument<?>) argument);
             } else {
                 throw new IllegalArgumentException(Strings.format(
                         "Unsupported argument type '{}' in command. Please use '{}'.",
                         argument.getClass().getCanonicalName(), SUPPORTED_ARGUMENT_TYPE));
             }
-            return this;
         }
 
-        private void _addArgument(AbstractArgument<String, ?> argument) {
-            checkArgument(argument);
-
-            if (allArguments == null) {
-                allArguments = new HashMap<>();
-            }
-
-            if (allArguments.containsKey(argument.getName())) {
-                throw new IllegalArgumentException(Strings.format(
-                        "Argument {} is already exists.",
-                        argument.getName()));
-            }
-            allArguments.put(argument.getName(), argument);
+        private void _addPositionArgument(PositionArgument<?> argument) {
+            addPosition(argument);
         }
 
-        private void addLongOption(Option<?> option) {
-            if (longOptions == null) {
-                longOptions = new HashMap<>();
-            }
+        public void _addToggleOptionArgument(ToggleOptionArgument argument) {
+            addLongOption(argument);
+            addShortOption(argument);
+        }
 
-            Map<String, Option<?>> lOptions = longOptions;
-            option.getLongOptions().forEach(name -> {
-                if (lOptions.containsKey(name)) {
+        public void _addValueOptionArgument(ValueOptionArgument<?> argument) {
+            addLongOption(argument);
+            addShortOption(argument);
+        }
+
+        private void addShortOption(ToggleOptionArgument argument) {
+            addShortOption(argument, argument);
+        }
+
+        private void addShortOption(ValueOptionArgument<?> argument) {
+            addShortOption(argument, argument);
+        }
+
+        private void addShortOption(Option option, Argument<String, ?> argument) {
+            @SuppressWarnings("unchecked")
+            Map<String, Argument<String, ?>> optionArguments = ensureShortOptions();
+            addOption(optionArguments, option.getShortOptions(), argument);
+        }
+
+        private void addLongOption(ToggleOptionArgument argument) {
+            addLongOption(argument, argument);
+        }
+
+        private void addLongOption(ValueOptionArgument<?> argument) {
+            addLongOption(argument, argument);
+        }
+
+        private void addLongOption(Option option, Argument<String, ?> argument) {
+            @SuppressWarnings("unchecked")
+            Map<String, Argument<String, ?>> optionArguments = ensureLongOptions();
+            addOption(optionArguments, option.getLongOptions(), argument);
+        }
+
+        private void addOption(Map<String, Argument<String, ?>> optionArguments,
+                               List<String> options,
+                               Argument<String, ?> argument) {
+            options.forEach(o -> {
+                if (optionArguments.containsKey(o)) {
                     throw new IllegalArgumentException(Strings.format(
-                            "Long option '{}' in '{}' is already exists in '{}'.",
-                            name, option, lOptions.get(name)));
+                            "The arguments '{}' and '{}' has same option: '{}'.",
+                            argument, optionArguments.get(o), o));
                 }
-                lOptions.put(name, option);
+                optionArguments.put(o, argument);
             });
         }
 
-        private void addShortOption(Option<?> option) {
-            if (shortOptions == null) {
-                shortOptions = new HashMap<>();
-            }
-
-            Map<String, Option<?>> sOptions = shortOptions;
-            option.getShortOptions().forEach(name -> {
-                if (sOptions.containsKey(name)) {
-                    throw new IllegalArgumentException(Strings.format(
-                            "Short option '{}' in '{}' is already exists in '{}'.",
-                            name, option, sOptions.get(name)));
-                }
-                sOptions.put(name, option);
-            });
+        private void addPosition(PositionArgument<?> argument) {
+            @SuppressWarnings("unchecked")
+            List<PositionArgument<?>> positions = ensurePositions();
+            argument.init(positions.size());
+            positions.add(argument);
         }
 
-        private void addPosition(Position<?> position) {
-            if (positions == null) {
-                positions = new ArrayList<>();
+        @SuppressWarnings("rawtypes")
+        private Map ensureAllArguments() {
+            Map res = allArguments;
+            if (res == null) {
+                res = new HashMap<>();
             }
-
-            position.init(positions.size());
-            positions.add(position);
+            return allArguments = res;
         }
 
-        private void checkArgument(AbstractArgument<String, ?> argument) {
-            String name = argument.getName();
-            if (!NAME_PATTERN.matcher(name).matches()) {
-                throw new IllegalArgumentException("");
+        @SuppressWarnings("rawtypes")
+        private Map ensureLongOptions() {
+            Map res = longOptions;
+            if (res == null) {
+                res = new HashMap<>();
             }
+            return longOptions = res;
+        }
+
+        @SuppressWarnings("rawtypes")
+        private Map ensureShortOptions() {
+            Map res = shortOptions;
+            if (res == null) {
+                res = new HashMap<>();
+            }
+            return shortOptions = res;
+        }
+
+        @SuppressWarnings("rawtypes")
+        private List ensurePositions() {
+            List res = positions;
+            if (res == null) {
+                res = new ArrayList<>();
+            }
+            return positions = res;
+        }
+
+        private void checkArgument(Argument<String, ?> argument) {
+            checkName(argument.getName());
         }
 
     }

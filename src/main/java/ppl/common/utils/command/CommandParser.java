@@ -1,14 +1,33 @@
 package ppl.common.utils.command;
 
+import ppl.common.utils.argument.Argument;
 import ppl.common.utils.argument.Fragment;
 import ppl.common.utils.argument.parser.StringArrayParser;
 import ppl.common.utils.string.Strings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class CommandParser implements StringArrayParser<Object, String> {
+
+    private static final Pattern LONG_OPTION_PATTERN = Pattern.compile("^[a-zA-Z][0-9a-zA-Z]*$");
+    private static final Pattern SHORT_OPTION_PATTERN = Pattern.compile("^[a-zA-Z].*$");
+
+    private static boolean isLongOption(String string) {
+        return string.startsWith(BaseOption.LONG_OPTION_PREFIX) &&
+                LONG_OPTION_PATTERN
+                        .matcher(string.substring(BaseOption.LONG_OPTION_PREFIX.length()))
+                        .matches();
+    }
+
+    private static boolean isShortOption(String string) {
+        return string.startsWith(BaseOption.SHORT_OPTION_PREFIX) &&
+                SHORT_OPTION_PATTERN
+                        .matcher(string.substring(BaseOption.SHORT_OPTION_PREFIX.length()))
+                        .matches();
+    }
 
     private final CommandArguments arguments;
 
@@ -16,37 +35,41 @@ public class CommandParser implements StringArrayParser<Object, String> {
         this.arguments = arguments;
     }
 
+    private String unfinishedArgument = null;
+
     @Override
     public Stream<Fragment<Object, String>> parse(String[] args) {
         List<Fragment<?, String>> res = new ArrayList<>();
-        int pos = 0;
-        boolean isEnd = false;
-        String needValue = null;
-        for (String arg : args) {
-            if (isEnd) {
-                res.add(new PositionFragment(pos++, arg));
-            } else if (isShortOption(arg)) {
-                eatValue(res, needValue, null);
-                needValue = null;
-                if (parseShortOption(res, arg.substring(Option.SHORT_OPTION_PREFIX.length()))) {
-                    needValue = arg;
+        PositionFragment.Creator creator = PositionFragment.creator();
+
+        int idx = 0;
+        while (idx < args.length) {
+            String arg = args[idx++];
+            if (BaseOption.optionStart(arg)) {
+                processUnfinishedArgument(res);
+                try {
+                    if (isShortOption(arg)) {
+                        parseShortOption(res, arg);
+                    } else if (isLongOption(arg)) {
+                        parseLongOption(res, arg);
+                    } else if (BaseOption.isEndOptionFlag(arg)) {
+                        break;
+                    } else {
+                        throw new CommandLineException("Invalid option: " + arg);
+                    }
+                } catch (IllegalArgumentException e) {
+                    throw new CommandLineException("Invalid command argument fragment: " + arg, e);
                 }
-            } else if (isLongOption(arg)) {
-                eatValue(res, needValue, null);
-                needValue = null;
-                if (parseLongOption(res, arg.substring(Option.LONG_OPTION_PREFIX.length()))) {
-                    needValue = arg;
-                }
-            } else if (isEndOptionFlag(arg)) {
-                eatValue(res, needValue, null);
-                needValue = null;
-                isEnd = true;
             } else {
-                if (!eatValue(res, needValue, arg)) {
-                    res.add(new PositionFragment(pos++, arg));
+                if (!processUnfinishedArgument(res, arg)) {
+                    res.add(creator.create(arg));
                 }
-                needValue = null;
             }
+        }
+
+        processUnfinishedArgument(res);
+        for (; idx < args.length; idx++) {
+            res.add(creator.create(args[idx]));
         }
 
         @SuppressWarnings({"rawtypes", "unchecked"})
@@ -54,71 +77,85 @@ public class CommandParser implements StringArrayParser<Object, String> {
         return r;
     }
 
-    private boolean isShortOption(String arg) {
-        return arg.length() >= 2 &&
-                arg.startsWith(Option.SHORT_OPTION_PREFIX) &&
-                !arg.startsWith(Option.LONG_OPTION_PREFIX);
+    private void processUnfinishedArgument(List<Fragment<?, String>> fragments) {
+        processUnfinishedArgument(fragments, null);
     }
 
-    private boolean isLongOption(String arg) {
-        return arg.length() >= 3 &&
-                arg.startsWith(Option.LONG_OPTION_PREFIX);
-    }
-
-    private boolean isEndOptionFlag(String arg) {
-        return arg.equals(Option.END_OPTION_FLAG);
-    }
-
-    private boolean parseShortOption(List<Fragment<?, String>> fragments, String argument) {
-        String option = Option.SHORT_OPTION_PREFIX + argument.charAt(0);
-        Option<?> op = option(option);
-        if (op.isToggle()) {
-            fragments.add(new OptionFragment(option, null));
-            parseToggleShortOptions(fragments, argument);
-            return false;
-        } else {
-            return parseNonToggleShortOption(fragments, argument);
-        }
-    }
-
-    private void parseToggleShortOptions(List<Fragment<?, String>> fragments, String argument) {
-        for (int j = 1; j < argument.length(); j++) {
-            fragments.add(new OptionFragment(Option.SHORT_OPTION_PREFIX + argument.charAt(j), null));
-        }
-    }
-
-    private boolean parseNonToggleShortOption(List<Fragment<?, String>> fragments, String argument) {
-        if (argument.length() == 1) {
-            return true;
-        } else {
-            fragments.add(new OptionFragment(Option.SHORT_OPTION_PREFIX + argument.charAt(0), argument.substring(1)));
-            return false;
-        }
-    }
-
-    private boolean parseLongOption(List<Fragment<?, String>> fragments, String name) {
-        String option = Option.LONG_OPTION_PREFIX + name;
-        Option<?> op = option(option);
-        if (op.isToggle()) {
-            fragments.add(new OptionFragment(option, null));
-            return false;
-        }
-        return true;
-    }
-
-    private boolean eatValue(List<Fragment<?, String>> fragments, String needValue, String argument) {
-        if (needValue != null) {
-            fragments.add(new OptionFragment(needValue, argument));
+    private boolean processUnfinishedArgument(
+            List<Fragment<?, String>> fragments, String value) {
+        String unfinishedArgument = this.unfinishedArgument;
+        if (unfinishedArgument != null) {
+            fragments.add(new OptionFragment(unfinishedArgument, value));
+            this.unfinishedArgument = null;
             return true;
         }
         return false;
     }
 
-    private Option<?> option(String option) {
-        Option<?> op = (Option<?>) arguments.get(option);
+    private void parseShortOption(List<Fragment<?, String>> fragments, String argument) {
+        int sLen = BaseOption.SHORT_OPTION_PREFIX.length();
+        String option = sOption(argument.charAt(sLen));
+        String remain = argument.substring(sLen + 1);
+
+        try {
+            Argument<String, ?> op = option(option);
+            if (op instanceof ToggleOptionArgument) {
+                fragments.add(new OptionFragment(option, null));
+                parseBriefToggleShortOptions(fragments, remain);
+            } else {
+                parseNonToggleShortOption(fragments, option, remain);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid short option argument: " + argument + ".", e);
+        }
+    }
+
+    private void parseBriefToggleShortOptions(List<Fragment<?, String>> fragments, String toggleShortOptions) {
+        char[] chars = toggleShortOptions.toCharArray();
+        for (char c : chars) {
+            String option = sOption(c);
+            Argument<String, ?> op;
+            try {
+                op = option(option);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid brief toggle short options", e);
+            }
+
+            if (op instanceof ToggleOptionArgument) {
+                fragments.add(new OptionFragment(option, null));
+            } else {
+                throw new IllegalArgumentException("Invalid brief toggle short options. " +
+                        "Because some non-toggle short option are mixed in.");
+            }
+        }
+    }
+
+    private void parseNonToggleShortOption(List<Fragment<?, String>> fragments, String option, String remain) {
+        if (!remain.isEmpty()) {
+            fragments.add(new OptionFragment(option, remain));
+        } else {
+            unfinishedArgument = option;
+        }
+    }
+
+    private void parseLongOption(List<Fragment<?, String>> fragments, String option) {
+        Argument<String, ?> op = option(option);
+        if (op instanceof ToggleOptionArgument) {
+            fragments.add(new OptionFragment(option, null));
+        } else {
+            unfinishedArgument = option;
+        }
+    }
+
+    private String sOption(char c) {
+        return BaseOption.SHORT_OPTION_PREFIX + c;
+    }
+
+    private Argument<String, Object> option(String option) {
+        Argument<String, Object> op = arguments.get(option);
         if (op == null) {
-            throw new CommandLineException(Strings.format(
-                    "Unknown short option '{}'.", option));
+            throw new IllegalArgumentException(Strings.format(
+                    "Unknown option '{}'.", option));
         }
         return op;
     }
@@ -129,7 +166,7 @@ public class CommandParser implements StringArrayParser<Object, String> {
         }
 
         @Override
-        protected String merge(String key, String value) {
+        protected String join(String key, String value) {
             return key + (value == null ? "" : Command.SEPARATOR + value);
         }
     }
@@ -140,8 +177,20 @@ public class CommandParser implements StringArrayParser<Object, String> {
         }
 
         @Override
-        protected String merge(Integer key, String value) {
+        protected String join(Integer key, String value) {
             return value;
+        }
+
+        private static class Creator {
+            private int pos = 0;
+
+            public PositionFragment create(String value) {
+                return new PositionFragment(pos++, value);
+            }
+        }
+
+        public static Creator creator() {
+            return new Creator();
         }
     }
 }

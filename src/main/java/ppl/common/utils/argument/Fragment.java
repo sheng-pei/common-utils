@@ -27,7 +27,7 @@ public abstract class Fragment<K, V> {
     }
 
     public String toString() {
-        return merge(key, value);
+        return join(key, value);
     }
 
     /**
@@ -37,7 +37,7 @@ public abstract class Fragment<K, V> {
      *
      * @return Canonical string.
      */
-    protected abstract String merge(K key, V value);
+    protected abstract String join(K key, V value);
 
     @Override
     public final boolean equals(Object o) {

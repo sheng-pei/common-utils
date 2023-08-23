@@ -1,5 +1,9 @@
 package ppl.common.utils.argument;
 
+import ppl.common.utils.argument.value.ArgumentValue;
+import ppl.common.utils.argument.value.FeedingStream;
+import ppl.common.utils.argument.value.ValueArgument;
+
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -10,22 +14,30 @@ public class Analyzer<K, S> {
         this.arguments = arguments;
     }
 
-    public List<ArgumentValue<K, Object>> analyse(Stream<Fragment<S, String>> entryStream) {
-        List<ArgumentValue<K, Object>> res = new ArrayList<>();
+    public List<Object> analyse(Stream<Fragment<S, String>> entryStream) {
+        List<Object> res = new ArrayList<>();
         Map<K, FeedingStream<Object>> feedingStreams = new HashMap<>();
-        entryStream.forEach(e -> {
-            AbstractArgument<K, Object> argument = arguments.get(e.getKey());
+        entryStream.forEach(f -> {
+            Argument<K, Object> argument = arguments.get(f.getKey());
             if (argument == null) {
-                res.add(ArgumentValue.create(null, e));
-            } else {
+                res.add(f);
+            } else if (argument instanceof ValueArgument) {
+                ValueArgument<K, Object> valueArgument = (ValueArgument<K, Object>) argument;
                 feedingStreams
-                        .computeIfAbsent(argument.getName(), k -> argument.stream())
-                        .feed(e.getValue());
+                        .computeIfAbsent(argument.getName(), k -> valueArgument.stream())
+                        .feed(f.getValue());
+            } else {
+                if (f.getValue() != null) {
+                    throw new ArgumentException(String.format(
+                            "The argument: '%s' is a no value argument and cannot receive value: '%s'.",
+                            argument, f.getValue()));
+                }
+                res.add(argument);
             }
         });
 
         feedingStreams.forEach((key, value) ->
-                res.add(ArgumentValue.create(arguments.getByName(key), value.produce())));
+                res.add(ArgumentValue.create((ValueArgument<K, Object>) arguments.getByName(key), value.produce())));
         return res;
     }
 

@@ -106,7 +106,7 @@ public class DelimiterSeparatorParser implements StringParser<String, String> {
     private Fragment<String, String> newFragment(Pair<String, String> pair) {
         return new Fragment<String, String>(pair) {
             @Override
-            protected String merge(String key, String value) {
+            protected String join(String key, String value) {
                 if (value != null) {
                     return key + separator + value;
                 } else {

@@ -1,27 +1,26 @@
 package ppl.common.utils.command;
 
 import ppl.common.utils.argument.*;
+import ppl.common.utils.argument.value.ArgumentValue;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public class Command {
 
-    static final Pattern NAME_PATTERN = Pattern.compile("[a-zA-Z][a-zA-Z0-9]*");
     static final String SEPARATOR = " ";
-
-    static boolean isName(String string) {
-        return NAME_PATTERN.matcher(string).matches();
-    }
 
     private final CommandArguments arguments;
     private final CommandParser parser;
     private final Analyzer<String, Object> analyzer;
-    private Map<String, ArgumentValue<String, Object>> values;
+
+    @SuppressWarnings("rawtypes")
+    private Map toggles;
+    @SuppressWarnings("rawtypes")
+    private Map values;
     private List<String> remains;
 
     public Command(CommandArguments arguments) {
@@ -32,34 +31,51 @@ public class Command {
 
     public void init(String[] args) throws CommandLineException {
         Stream<Fragment<Object, String>> stream = parser.parse(args);
-        List<ArgumentValue<String, Object>> values = analyzer.analyse(stream);
-        this.values = values.stream()
-                .filter(ArgumentValue::isKnown)
+        List<Object> analyzedCommand = analyse(stream);
+        this.values = analyzedCommand.stream()
+                .filter(v -> v instanceof ArgumentValue)
+                .map(v -> (ArgumentValue<?, ?>) v)
                 .collect(Collectors.toMap(ArgumentValue::key, Function.identity()));
-        this.remains = values.stream()
-                .filter(av -> !av.isKnown())
+        this.toggles = analyzedCommand.stream()
+                .filter(v -> v instanceof Argument)
+                .map(v -> (Argument<?, ?>) v)
+                .collect(Collectors.toMap(Argument::getName, Function.identity()));
+        this.remains = analyzedCommand.stream()
+                .filter(av -> av instanceof Fragment)
                 .map(Object::toString)
                 .collect(Collectors.toList());
     }
 
+    private List<Object> analyse(Stream<Fragment<Object, String>> stream) {
+        try {
+            return analyzer.analyse(stream);
+        } catch (ArgumentException e) {
+            throw new CommandLineException(e.getMessage(), e);
+        }
+    }
+
     public Object get(String argument, Object defaultValue) {
-        AbstractArgument<String, Object> a = this.arguments.getByName(argument);
+        Argument<String, ?> a = this.arguments.getByName(argument);
         if (a == null) {
             throw new IllegalArgumentException("Unknown argument: " + argument);
         }
 
-        ArgumentValue<String, Object> av = this.values.get(argument);
-        if (a instanceof Option) {
-            Option<?> option = (Option<?>) a;
-            if (option.isToggle()) {
-                if (defaultValue != null) {
-                    throw new IllegalArgumentException(
-                            "Toggle option certainly has value, no default value is needed.");
-                }
-                return av != null;
+        if (a instanceof ToggleOptionArgument) {
+            if (defaultValue != null) {
+                throw new IllegalArgumentException(
+                        "Toggle option certainly has value, no default value is needed.");
             }
+            defaultValue = false;
         }
-        return av == null || av.value() == null ? defaultValue : av.value();
+
+        @SuppressWarnings("unchecked")
+        ArgumentValue<String, Object> av = (ArgumentValue<String, Object>) this.values.get(argument);
+        if (av != null) {
+            return av.value();
+        } else if (toggles.containsKey(argument)) {
+            return true;
+        }
+        return defaultValue;
     }
 
     public Object get(String argument) {
