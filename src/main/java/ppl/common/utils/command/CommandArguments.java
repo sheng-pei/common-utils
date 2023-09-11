@@ -7,7 +7,7 @@ import ppl.common.utils.string.Strings;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class CommandArguments implements Arguments<String, Object> {
+public class CommandArguments implements Arguments<String, Object, Argument<String, Object>> {
     private static final Pattern NAME_PATTERN = Pattern.compile("[a-zA-Z][a-zA-Z0-9]*");
 
     @SuppressWarnings("rawtypes")

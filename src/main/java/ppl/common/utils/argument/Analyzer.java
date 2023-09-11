@@ -1,22 +1,24 @@
 package ppl.common.utils.argument;
 
-import ppl.common.utils.argument.value.ArgumentValue;
 import ppl.common.utils.argument.value.FeedingStream;
 import ppl.common.utils.argument.value.ValueArgument;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class Analyzer<K, S> {
-    private final Arguments<K, S> arguments;
+    private final Arguments<K, S, ?> arguments;
 
-    public Analyzer(Arguments<K, S> arguments) {
+    public Analyzer(Arguments<K, S, ?> arguments) {
         this.arguments = arguments;
     }
 
     public List<Object> analyse(Stream<Fragment<S, String>> entryStream) {
         List<Object> res = new ArrayList<>();
-        Map<K, FeedingStream<Object>> feedingStreams = new HashMap<>();
+        Map<K, FeedingStream<K, Object>> feedingStreams = new HashMap<>();
         entryStream.forEach(f -> {
             Argument<K, Object> argument = arguments.get(f.getKey());
             if (argument == null) {
@@ -36,8 +38,7 @@ public class Analyzer<K, S> {
             }
         });
 
-        feedingStreams.forEach((key, value) ->
-                res.add(ArgumentValue.create((ValueArgument<K, Object>) arguments.getByName(key), value.produce())));
+        feedingStreams.forEach((key, value) -> res.add(value.produce()));
         return res;
     }
 

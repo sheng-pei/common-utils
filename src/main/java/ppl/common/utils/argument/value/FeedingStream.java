@@ -1,6 +1,6 @@
 package ppl.common.utils.argument.value;
 
-public interface FeedingStream<V> {
+public interface FeedingStream<K, V> {
     void feed(String source);
-    V produce();
+    ArgumentValue<K, V> produce();
 }

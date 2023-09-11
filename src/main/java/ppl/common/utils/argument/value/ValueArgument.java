@@ -28,8 +28,8 @@ public class ValueArgument<K, V> extends Argument<K, V> {
         this.collector = collector;
     }
 
-    public FeedingStream<V> stream() {
-        return new FeedingStream<V>() {
+    public FeedingStream<K, V> stream() {
+        return new FeedingStream<K, V>() {
 
             private Object container;
 
@@ -56,14 +56,14 @@ public class ValueArgument<K, V> extends Argument<K, V> {
             }
 
             @Override
-            public V produce() {
+            public ArgumentValue<K, V> produce() {
                 if (container == null) {
                     return null;
                 }
 
                 @SuppressWarnings("unchecked")
                 Function<Object, V> func = (Function<Object, V>) collector.finisher();
-                return func.apply(container);
+                return ArgumentValue.create(ValueArgument.this, func.apply(container));
             }
         };
     }

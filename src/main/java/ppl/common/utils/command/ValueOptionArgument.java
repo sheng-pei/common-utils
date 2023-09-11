@@ -68,7 +68,7 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
     public static ValueOptionArgument<String> requiredIdentity(String longOption, Character shortOption) {
         return newBuilder(longOption, shortOption)
                 .collect(ExCollectors.required(), ValueOptionArgument.ref())
-                .build();
+                .build(defToCanonical());
     }
 
     public static ValueOptionArgument<String> optionalIdentity(String longOption) {
@@ -91,7 +91,7 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
                                                                List<Character> shortOptions) {
         return newBuilder(name, longOptions, shortOptions)
                 .collect(ExCollectors.one(), ValueOptionArgument.ref())
-                .build();
+                .build(defToCanonical());
     }
 
     public static Builder<String> newBuilder(String longOption, Character shortOption) {

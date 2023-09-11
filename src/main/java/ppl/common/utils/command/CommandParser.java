@@ -45,8 +45,8 @@ public class CommandParser implements StringArrayParser<Object, String> {
         int idx = 0;
         while (idx < args.length) {
             String arg = args[idx++];
+            boolean used = processUnfinishedArgument(res, BaseOption.optionStart(arg) ? null : arg);
             if (BaseOption.optionStart(arg)) {
-                processUnfinishedArgument(res);
                 try {
                     if (isShortOption(arg)) {
                         parseShortOption(res, arg);
@@ -60,10 +60,8 @@ public class CommandParser implements StringArrayParser<Object, String> {
                 } catch (IllegalArgumentException e) {
                     throw new CommandLineException("Invalid command argument fragment: " + arg, e);
                 }
-            } else {
-                if (!processUnfinishedArgument(res, arg)) {
-                    res.add(creator.create(arg));
-                }
+            } else if (!used) {
+                res.add(creator.create(arg));
             }
         }
 
@@ -87,7 +85,7 @@ public class CommandParser implements StringArrayParser<Object, String> {
         if (unfinishedArgument != null) {
             fragments.add(new OptionFragment(unfinishedArgument, value));
             this.unfinishedArgument = null;
-            return true;
+            return value != null;
         }
         return false;
     }

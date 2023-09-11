@@ -71,10 +71,6 @@ public abstract class ValueArgumentBuilder<K, V, A extends ValueArgument<K, V>> 
         return self;
     }
 
-    public A build() {
-        return build(null);
-    }
-
     public A build(BiFunction<A, V, String> toCanonicalString) {
         List<?> mappers = this.mappers;
         Collector<?, ?, ?> collector = this.collector;

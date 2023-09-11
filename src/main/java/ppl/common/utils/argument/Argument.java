@@ -11,6 +11,9 @@ public class Argument<K, V> {
         if (name == null) {
             throw new IllegalArgumentException("Argument name is required.");
         }
+        if (toCanonicalString == null) {
+            throw new IllegalArgumentException("ToCanonicalString is required.");
+        }
 
         this.name = name;
         @SuppressWarnings("unchecked")
@@ -24,10 +27,6 @@ public class Argument<K, V> {
     }
 
     public String toCanonicalString(V value) {
-        if (toCanonicalString == null) {
-            return name + (value == null ? "" : "=" + value);
-        }
-
         return toCanonicalString.apply(this, value);
     }
 }

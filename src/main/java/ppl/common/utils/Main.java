@@ -7,7 +7,7 @@ public class Main {
         CommandArguments arguments = CommandArguments.newBuilder()
                 .addArgument(ValueOptionArgument.requiredIdentity("host", 'h'))
                 .addArgument(ToggleOptionArgument.toggle("enabled", 'e'))
-                .addArgument(PositionArgument.newBuilder("config").build())
+                .addArgument(PositionArgument.newBuilder("config").build(PositionArgument.defToCanonical()))
                 .build();
         CommandParser parser = new CommandParser(arguments);
         parser.parse(args).forEach(System.out::println);
