@@ -21,7 +21,7 @@ public final class ResourceUtils {
         String protocol = url.getProtocol().toLowerCase();
         String authority = url.getAuthority();      //[(user info)root:pass]@[(host)localhost]
         return protocol.equals(FILE) &&
-                (authority == null || "".equals(authority)) &&
+                (authority == null || authority.isEmpty()) &&
                 url.getPort() < 0 &&
                 url.getQuery() == null &&
                 url.getRef() == null;
