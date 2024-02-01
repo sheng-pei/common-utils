@@ -2,13 +2,18 @@ package ppl.common.utils.hdfs.agent;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import ppl.common.utils.IOUtils;
+import ppl.common.utils.exception.IOStreamException;
 import ppl.common.utils.filesystem.Path;
+import ppl.common.utils.hdfs.HdfsException;
 import ppl.common.utils.hdfs.data.BooleanBody;
 import ppl.common.utils.hdfs.data.FileStatuses;
 import ppl.common.utils.hdfs.data.FileStatusesBody;
+import ppl.common.utils.hdfs.retrier.Retrier;
+import ppl.common.utils.hdfs.retrier.RetryStage;
 import ppl.common.utils.hdfs.selector.Selector;
 import ppl.common.utils.http.Client;
 import ppl.common.utils.http.Connection;
+import ppl.common.utils.http.NetworkException;
 import ppl.common.utils.http.header.internal.NoRedirect;
 import ppl.common.utils.http.request.Request;
 import ppl.common.utils.http.response.Response;
@@ -66,15 +71,43 @@ public class Agent {
         try (InputStream is = Files.newInputStream(file.toPath())) {
             pCopyToRemote(is, remote);
         } catch (NoSuchFileException e) {
-            throw new RuntimeException("File not found: " + local, e);
+            throw new IllegalArgumentException("File not found: " + local, e);
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new NetworkException(e.getMessage(), e);
         }
     }
 
     public void copyToRemote(InputStream is, Path remote) {
         checkRemote(remote);
         pCopyToRemote(is, remote);
+    }
+
+    private void pCopyToRemote(InputStream is, Path remote) {
+        try {
+            tryCopyToRemote(remote);
+        } catch (TemporaryRedirectException e) {
+            new VoidRetrierImpl(
+                    u -> Request.put(URL.create(e.getLocation()))
+                            .chunkedLength(CHUNKED_LENGTH)
+                            .build(),
+                    conn -> ResponseProcessor.writeToRequestBody(is, conn),
+                    r -> {
+                        if (r.getCode() != ResponseCode.CREATED) {
+                            throw new HdfsException("Unknown response code: " + r.getCode());
+                        }
+                    }).apply(remote);
+        } catch (NeedAppendException e) {
+            new VoidRetrierImpl(
+                    u -> Request.post(createOperation(u, Op.APPEND))
+                            .chunkedLength(CHUNKED_LENGTH)
+                            .build(),
+                    conn -> ResponseProcessor.writeToRequestBody(is, conn),
+                    r -> {
+                        if (r.getCode() != ResponseCode.OK) {
+                            throw new HdfsException("Unknown response code: " + r.getCode());
+                        }
+                    }).apply(remote);
+        }
     }
 
     private void tryCopyToRemote(Path remote) {
@@ -86,34 +119,6 @@ public class Agent {
                 ResponseProcessor::firstStep).apply(remote);
     }
 
-    private void pCopyToRemote(InputStream is, Path remote) {
-        try {
-            tryCopyToRemote(remote);
-        } catch (TemporaryRedirectException e) {
-            new VoidRetrierImpl(
-                    u -> Request.put(URL.create(e.getLocation()))
-                            .chunkedLength(CHUNKED_LENGTH)
-                            .build(),
-                    os -> ResponseProcessor.writeToRequestBody(is, os),
-                    r -> {
-                        if (r.getCode() != ResponseCode.CREATED) {
-                            throw new RuntimeException("Unknown response code: " + r.getCode());
-                        }
-                    }).apply(remote);
-        } catch (NeedAppendException e) {
-            new VoidRetrierImpl(
-                    u -> Request.post(createOperation(u, Op.APPEND))
-                            .chunkedLength(CHUNKED_LENGTH)
-                            .build(),
-                    os -> ResponseProcessor.writeToRequestBody(is, os),
-                    r -> {
-                        if (r.getCode() != ResponseCode.OK) {
-                            throw new RuntimeException("Unknown response code: " + r.getCode());
-                        }
-                    }).apply(remote);
-        }
-    }
-
     public void copyToLocal(Path remote, Path local) {
         checkRemote(remote);
         try (InputStream is = new RetrierImpl<>(
@@ -121,8 +126,8 @@ public class Agent {
                 Response::openInputStream).apply(remote);
              OutputStream os = Files.newOutputStream(Paths.get(local.toString()))) {
             IOUtils.copy(is, os);
-        } catch (IOException e) {
-            throw new RuntimeException("IO error.", e);
+        } catch (IOException | IOStreamException e) {
+            throw new NetworkException("IO error.", e);
         }
     }
 
@@ -163,7 +168,7 @@ public class Agent {
 
     private class RetrierImpl<T> extends Retrier<Path, URL, T> {
         private final Function<URL, Request> request;
-        private final Consumer<OutputStream> requestBody;
+        private final Consumer<Connection> requestBody;
         private final Function<Response, T> response;
         private final Function<Response, ? extends RuntimeException> error;
 
@@ -172,11 +177,11 @@ public class Agent {
             }, response, ResponseProcessor::processError);
         }
 
-        public RetrierImpl(Function<URL, Request> request, Consumer<OutputStream> requestBody, Function<Response, T> response) {
+        public RetrierImpl(Function<URL, Request> request, Consumer<Connection> requestBody, Function<Response, T> response) {
             this(request, requestBody, response, ResponseProcessor::processError);
         }
 
-        public RetrierImpl(Function<URL, Request> request, Consumer<OutputStream> requestBody, Function<Response, T> response, Function<Response, ? extends RuntimeException> error) {
+        public RetrierImpl(Function<URL, Request> request, Consumer<Connection> requestBody, Function<Response, T> response, Function<Response, ? extends RuntimeException> error) {
             super(maxAttempts, stage, ERROR_TO_CONTINUE);
             this.request = request;
             this.requestBody = requestBody;
@@ -188,13 +193,7 @@ public class Agent {
         protected T execute(URL url) throws InterruptedException {
             Request request = this.request.apply(url);
             Connection conn = client.connect(request);
-            try (OutputStream os = conn.openOutputStream()) {
-                if (os != null) {
-                    requestBody.accept(os);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to close output stream.", e);
-            }
+            requestBody.accept(conn);
             Response response = conn.getResponse();
             if (response.getCode().isError()) {
                 throw error.apply(response);
@@ -210,11 +209,11 @@ public class Agent {
             }, response, ResponseProcessor::processError);
         }
 
-        public VoidRetrierImpl(Function<URL, Request> request, Consumer<OutputStream> requestBody, Consumer<Response> response) {
+        public VoidRetrierImpl(Function<URL, Request> request, Consumer<Connection> requestBody, Consumer<Response> response) {
             this(request, requestBody, response, ResponseProcessor::processError);
         }
 
-        public VoidRetrierImpl(Function<URL, Request> request, Consumer<OutputStream> requestBody, Consumer<Response> response, Function<Response, ? extends RuntimeException> error) {
+        public VoidRetrierImpl(Function<URL, Request> request, Consumer<Connection> requestBody, Consumer<Response> response, Function<Response, ? extends RuntimeException> error) {
             super(request, requestBody, r -> {
                 response.accept(r);
                 return null;

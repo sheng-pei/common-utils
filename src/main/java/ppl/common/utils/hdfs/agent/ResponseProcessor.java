@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import ppl.common.utils.IOUtils;
 import ppl.common.utils.StopWatch;
 import ppl.common.utils.exception.IOStreamException;
+import ppl.common.utils.hdfs.HdfsException;
 import ppl.common.utils.hdfs.data.ErrorBody;
 import ppl.common.utils.hdfs.data.RemoteError;
+import ppl.common.utils.http.Connection;
 import ppl.common.utils.http.NetworkException;
 import ppl.common.utils.http.header.known.ContentLength;
 import ppl.common.utils.http.header.known.ContentType;
@@ -16,6 +18,7 @@ import ppl.common.utils.http.header.value.mediatype.MediaType;
 import ppl.common.utils.http.header.value.mediatype.Mime;
 import ppl.common.utils.http.response.Response;
 import ppl.common.utils.http.response.ResponseCode;
+import ppl.common.utils.json.JsonException;
 import ppl.common.utils.json.JsonUtils;
 
 import java.io.*;
@@ -46,22 +49,24 @@ public class ResponseProcessor {
             if (remote != null && "StandbyException".equals(remote.getException())) {
                 return new StandbyException(remote.getMessage());
             } else {
-                return new RuntimeException("Unknown error: " + body);
+                return new HdfsException("Unknown error: " + body);
             }
         } catch (IOException e) {
             return new NetworkException("Error to get response body.", e);
+        } catch (JsonException e) {
+            throw new HdfsException("Invalid response body. not json.", e);
         }
     }
 
     public static <B> B processJson(Response response, TypeReference<B> reference) {
         ContentLength contentLength = response.getHeader(ContentLength.class);
         if (contentLength != null && contentLength.knownValue().getValue() == 0) {
-            throw new RuntimeException("Empty response body.");
+            throw new HdfsException("Empty response body.");
         }
 
         ContentType contentType = response.getHeader(ContentType.class);
         if (contentType == null) {
-            throw new RuntimeException("No content type is given. Has no response body?");
+            throw new HdfsException("No content type is given. Has no response body?");
         }
 
         MediaType value = contentType.knownValue();
@@ -81,6 +86,8 @@ public class ResponseProcessor {
             return JsonUtils.read(body, reference);
         } catch (IOException e) {
             throw new NetworkException("Error to get response body.", e);
+        } catch (JsonException e) {
+            throw new HdfsException("Invalid response body. not json.", e);
         }
     }
 
@@ -88,23 +95,23 @@ public class ResponseProcessor {
         if (response.getCode() == ResponseCode.TEMPORARY_REDIRECT) {
             Location location = response.getHeader(Location.class);
             if (location == null) {
-                throw new RuntimeException("Error temporary redirect. No location is found.");
+                throw new HdfsException("Error temporary redirect. No location is found.");
             } else {
                 throw new TemporaryRedirectException(location.knownValue().toCanonicalString());
             }
         } else if (response.getCode() == ResponseCode.CREATED) {
             throw new NeedAppendException();
         } else {
-            throw new RuntimeException("Unknown response code: " + response.getCode());
+            throw new HdfsException("Unknown response code: " + response.getCode());
         }
     }
 
-    public static void writeToRequestBody(InputStream is, OutputStream os) {
+    public static void writeToRequestBody(InputStream is, Connection conn) {
         StopWatch watch = StopWatch.createStopWatch();
-        try {
+        try (OutputStream os = conn.openOutputStream()) {
             IOUtils.copy(is, os, 10240);
-        } catch (IOStreamException e1) {
-            throw new RuntimeException("Network error.", e1);
+        } catch (IOException | IOStreamException e) {
+            throw new NetworkException("Something error during data was written to request body.", e);
         } finally {
             logger.warn("Transfer time: " + watch.elapse(TimeUnit.SECONDS));
         }

@@ -8,6 +8,11 @@ import ppl.common.utils.http.Client;
 
 import java.io.InputStream;
 
+/**
+ * RetryException
+ * HdfsException
+ * NetworkException?????
+ */
 public class Hdfs {
     private final Agent agent;
 

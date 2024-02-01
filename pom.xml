@@ -88,7 +88,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.21</version>
+            <version>1.24.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -127,9 +127,13 @@
 
     <distributionManagement>
         <repository>
-            <id>localRepository</id>
-            <url>file:/Users/shengpei/.m2/repository/</url>
+            <id>dtstack-release</id>
+            <url>http://nexus.dev.dtstack.cn/nexus/content/repositories/dtstack-release/</url>
         </repository>
+        <snapshotRepository>
+            <id>dtstack-snapshot</id>
+            <url>http://nexus.dev.dtstack.cn/nexus/content/repositories/dtstack-snapshot/</url>
+        </snapshotRepository>
     </distributionManagement>
 
 </project>

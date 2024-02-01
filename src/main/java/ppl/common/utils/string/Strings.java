@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public final class Strings {
 
@@ -61,18 +62,14 @@ public final class Strings {
 		return Pair.create(key, value);
 	}
 
-	public static String[] split(String string, String regex) {
-		Objects.requireNonNull(regex, "The specified regex is null");
-
-		if (string == null) {
-			return EMPTY_STRING_ARRAY;
-		}
-
+	public static Stream<String> streaming(String string, String regex) {
+		Objects.requireNonNull(string, "The source string is null.");
+		Objects.requireNonNull(regex, "The specified regex is null.");
 		List<String> accumulator = new ArrayList<>();
 		Matcher matcher = Pattern.compile(regex).matcher(string);
 		int eatenLength = 0;
 		int next = 0;
-		while(next < string.length() && matcher.find(next)) {
+		while (next < string.length() && matcher.find(next)) {
 			if (empty(matcher)) {
 				if (!emptyBeforeMatcher(matcher, eatenLength)) {
 					accumulator.add(prefixBeforeMatcher(matcher, string, eatenLength));
@@ -84,11 +81,14 @@ public final class Strings {
 				eatenLength = next = matcher.end();
 			}
 		}
-
 		if (eatenLength < string.length()) {
 			accumulator.add(string.substring(eatenLength));
 		}
-		return accumulator.toArray(EMPTY_STRING_ARRAY);
+		return accumulator.stream();
+	}
+
+	public static String[] split(String string, String regex) {
+		return streaming(string, regex).toArray(String[]::new);
 	}
 
 	private static boolean emptyBeforeMatcher(Matcher matcher, int start) {

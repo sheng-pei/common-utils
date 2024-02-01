@@ -1,7 +1,7 @@
 package ppl.common.utils.hdfs.selector;
 
 import ppl.common.utils.filesystem.Path;
-import ppl.common.utils.hdfs.agent.RetryStage;
+import ppl.common.utils.hdfs.retrier.RetryStage;
 import ppl.common.utils.http.url.URL;
 
 public interface Selector extends RetryStage<Path, URL> {

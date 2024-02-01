@@ -33,17 +33,27 @@ class StringsTest {
     }
 
     @ParameterizedTest
-    @MethodSource({"noMatchingProvider"})
-    public void testSplitWithNoMatching(String input, String regex, String[] expected) {
+    @MethodSource({"emptyStringMatchedProvider"})
+    public void testSplitWithEmptyStringMatched(String input, String regex, String[] expected) {
         String[] actual = Strings.split(input, regex);
         Assertions.assertArrayEquals(expected, actual);
     }
 
-    private static Stream<Arguments> noMatchingProvider() {
+    private static Stream<Arguments> emptyStringMatchedProvider() {
         return Stream.of(
                 Arguments.of("hello", "", new String[] {"h", "e", "l", "l", "o"}),
                 Arguments.of("a", ";*", new String[] {"a"})
         );
+    }
+
+    @Test
+    public void testPrefixMatched() {
+        Assertions.assertArrayEquals(Strings.split(";a", ";"), new String[] {"", "a"});
+    }
+
+    @Test
+    public void testSuffixMatched() {
+        Assertions.assertArrayEquals(Strings.split("a;", ";"), new String[] {"a"});
     }
 
     @ParameterizedTest

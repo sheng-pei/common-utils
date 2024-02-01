@@ -1,6 +1,8 @@
 package ppl.common.utils.hdfs.agent;
 
-public class TemporaryRedirectException extends RuntimeException {
+import ppl.common.utils.hdfs.HdfsException;
+
+public class TemporaryRedirectException extends HdfsException {
     private final String location;
     public TemporaryRedirectException(String location) {
         super("Location: " + location);

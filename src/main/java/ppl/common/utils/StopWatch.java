@@ -16,7 +16,10 @@ public final class StopWatch {
     }
 
     public long elapse() {
-        return System.nanoTime() - this.startTicker;
+        long now = System.nanoTime();
+        long res = now - this.startTicker;
+        this.startTicker = now;
+        return res;
     }
 
     public long elapse(TimeUnit unit) {

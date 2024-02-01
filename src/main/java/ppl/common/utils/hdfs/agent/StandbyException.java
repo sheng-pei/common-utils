@@ -1,6 +1,8 @@
 package ppl.common.utils.hdfs.agent;
 
-public class StandbyException extends RuntimeException {
+import ppl.common.utils.hdfs.HdfsException;
+
+public class StandbyException extends HdfsException {
     public StandbyException(String message) {
         super(message);
     }

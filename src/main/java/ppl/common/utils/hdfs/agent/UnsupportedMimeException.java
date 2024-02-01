@@ -1,6 +1,8 @@
 package ppl.common.utils.hdfs.agent;
 
-public class UnsupportedMimeException extends RuntimeException {
+import ppl.common.utils.hdfs.HdfsException;
+
+public class UnsupportedMimeException extends HdfsException {
     public UnsupportedMimeException(String message) {
         super(message);
     }

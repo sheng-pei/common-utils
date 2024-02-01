@@ -33,7 +33,7 @@ public class BaseConnection implements Connection {
     @Override
     public OutputStream openOutputStream() {
         if (Method.GET.name().equalsIgnoreCase(connection.getRequestMethod())) {
-            return null;
+            throw new IllegalStateException("Get request has no body.");
         }
 
         try {

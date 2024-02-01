@@ -9,9 +9,10 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.module.SimpleSerializers;
+import ppl.common.utils.IOUtils;
 import ppl.common.utils.enumerate.EnumUtils;
 
-import java.io.IOException;
+import java.io.*;
 
 public class JsonUtils {
     private static final ObjectMapper OBJECT_MAPPER;
@@ -91,6 +92,18 @@ public class JsonUtils {
             return OBJECT_MAPPER.writeValueAsBytes(obj);
         } catch (Throwable t) {
             throw new JsonException("Failed to write value as bytes.", t);
+        }
+    }
+
+    public static <T> T read(InputStream is, Class<T> clazz) {
+        try {
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                IOUtils.copy(is, os);
+                return OBJECT_MAPPER.readValue(os.toByteArray(), clazz);
+            }
+        } catch (Throwable t) {
+            throw new JsonException(String.format("%s could not be read from some String.",
+                    clazz.getCanonicalName()), t);
         }
     }
 

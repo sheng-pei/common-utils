@@ -1,13 +1,11 @@
-package ppl.common.utils.hdfs.agent;
+package ppl.common.utils.hdfs.retrier;
 
-import ppl.common.utils.hdfs.FailedRetryException;
-import ppl.common.utils.hdfs.RetriesInterruptedException;
 import ppl.common.utils.http.NetworkException;
 
 import java.util.List;
 import java.util.function.Function;
 
-abstract class Retrier<P, U, R> implements Function<P, R> {
+public abstract class Retrier<P, U, R> implements Function<P, R> {
 
     private final int maxAttempts;
     private final RetryStage<P, U> stage;
@@ -33,7 +31,6 @@ abstract class Retrier<P, U, R> implements Function<P, R> {
             } catch (Throwable e) {
                 if (errorsToContinue.stream()
                                 .anyMatch(c -> c.isInstance(e))) {
-                    System.out.println("Retry");
                     u = stage.next(p);
                     i++;
                 } else {

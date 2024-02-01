@@ -1,5 +1,7 @@
 package ppl.common.utils.hdfs.agent;
 
-public class NeedAppendException extends RuntimeException {
+import ppl.common.utils.hdfs.HdfsException;
+
+public class NeedAppendException extends HdfsException {
     public NeedAppendException() {}
 }
