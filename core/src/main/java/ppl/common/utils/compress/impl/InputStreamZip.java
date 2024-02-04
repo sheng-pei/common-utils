@@ -5,6 +5,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ppl.common.utils.IOUtils;
+import ppl.common.utils.compress.ArchiveException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,7 +99,11 @@ public class InputStreamZip extends AbstractCCmprss {
     }
 
     @Override
-    public void close() throws IOException {
-        is.close();
+    public void close() throws ArchiveException {
+        try {
+            is.close();
+        } catch (IOException e) {
+            throw new ArchiveException("Failed to close.", e);
+        }
     }
 }
