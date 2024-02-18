@@ -8,7 +8,7 @@ import ppl.common.utils.http.header.HeaderValue;
 import ppl.common.utils.http.request.Method;
 import ppl.common.utils.http.response.Response;
 import ppl.common.utils.http.response.ResponseCode;
-import ppl.common.utils.string.kvpair.Pair;
+import ppl.common.utils.pair.Pair;
 
 import java.io.IOException;
 import java.io.InputStream;

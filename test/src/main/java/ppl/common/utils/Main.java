@@ -2,17 +2,25 @@ package ppl.common.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ppl.common.utils.compress.Archive;
-import ppl.common.utils.compress.Archives;
+import ppl.common.utils.filesystem.core.CFile;
+import ppl.common.utils.filesystem.core.Connection;
+import ppl.common.utils.filesystem.core.FileSystem;
+import ppl.common.utils.filesystem.core.Protocol;
+import ppl.common.utils.filesystem.ftp.FtpProperties;
+import ppl.common.utils.filesystem.path.Path;
+import ppl.common.utils.filesystem.path.Paths;
+import ppl.common.utils.filesystem.sftp.SftpProperties;
 
-import java.nio.file.Paths;
+import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.List;
 
-// Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
-// then press Enter. You can now see whitespace characters in your code.
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 //        CommandArguments arguments = CommandArguments.newBuilder()
 //                .addArgument(ValueOptionArgument.requiredIdentity("host", 'h'))
 //                .addArgument(ToggleOptionArgument.toggle("enabled", 'e'))
@@ -25,8 +33,18 @@ public class Main {
 //        command.init(args);
 //        System.out.println(command.get("host"));
 //        System.out.println(command.get("config"));
-        try (Archive archive = Archives.open(Paths.get(args[0]))) {
-            archive.decompressTo(Paths.get(args[1]).toFile());
+        SftpProperties properties = new SftpProperties();
+        properties.setServer("172.16.101.180");
+        properties.setPort(22);
+        properties.setUsername("root");
+        properties.setPassword("Abc!@#135");
+        properties.setWorking("/opt/dtstack/a/b/c");
+        properties.setCharset(Charset.forName("GBK"));
+        try (FileSystem sftp = Protocol.SFTP.open(properties)) {
+            try (Connection conn = sftp.getConnection()) {
+                List<CFile> files = conn.listFiles(LocalDateTime.now().minusDays(1), true);
+                System.out.println(files.size());
+            }
         }
     }
 }

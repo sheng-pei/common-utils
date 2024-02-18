@@ -1,43 +1,54 @@
 package ppl.common.utils.argument.parser;
 
-import ppl.common.utils.argument.Fragment;
+import ppl.common.utils.pair.Pair;
+import ppl.common.utils.pair.PairStream;
 import ppl.common.utils.string.Strings;
-import ppl.common.utils.string.kvpair.Pair;
-import ppl.common.utils.string.trim.TrimPosition;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
-import java.util.*;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class DelimiterSeparatorParser implements StringParser<String, String> {
+    private enum EmptyFragment {
+        IGNORE,
+        ERROR,
+        RETAIN;
+    }
+
     private static final char DEFAULT_DELIMITER = ';';
     private static final char DEFAULT_SEPARATOR = '=';
+    private static final Function<String, String> TRIM = String::trim;
+    private static final Function<String, String> IDENTITY = Function.identity();
 
     private final char delimiter;
     private final char separator;
-    private final boolean ignoreEmptyFragment;
-    private final boolean ignoreIWhitespace;
-    private final boolean ignoreLWhitespace;
-    private final boolean ignoreRWhitespace;
-    private final boolean errorIfLeadingOrTrailingWhitespace;
+    private final Function<String, String> keyFunc;
+    private final Function<String, String> valueFunc;
+    private final boolean errorKeyIfLeadingOrTrailingWhitespace;
+    private final boolean errorValueIfLeadingOrTrailingWhitespace;
+    private final EmptyFragment emptyFragment;
 
     private DelimiterSeparatorParser(char delimiter, char separator,
-                                     boolean ignoreEmptyFragment,
-                                     boolean ignoreIWhitespace,
-                                     boolean ignoreLWhitespace,
-                                     boolean ignoreRWhitespace,
-                                     boolean errorIfLeadingOrTrailingWhitespace) {
+                                     Function<String, String> keyFunc,
+                                     Function<String, String> valueFunc,
+                                     boolean errorKeyIfLeadingOrTrailingWhitespace,
+                                     boolean errorValueIfLeadingOrTrailingWhitespace,
+                                     EmptyFragment emptyFragment) {
         this.delimiter = delimiter;
         this.separator = separator;
-        this.ignoreEmptyFragment = ignoreEmptyFragment;
-        this.ignoreIWhitespace = ignoreIWhitespace;
-        this.ignoreLWhitespace = ignoreLWhitespace;
-        this.ignoreRWhitespace = ignoreRWhitespace;
-        this.errorIfLeadingOrTrailingWhitespace = errorIfLeadingOrTrailingWhitespace;
+        this.keyFunc = keyFunc;
+        this.valueFunc = valueFunc;
+        this.errorKeyIfLeadingOrTrailingWhitespace = errorKeyIfLeadingOrTrailingWhitespace;
+        this.errorValueIfLeadingOrTrailingWhitespace = errorValueIfLeadingOrTrailingWhitespace;
+        this.emptyFragment = emptyFragment;
     }
 
     @Override
@@ -49,46 +60,39 @@ public class DelimiterSeparatorParser implements StringParser<String, String> {
     }
 
     private Stream<Fragment<String, String>> map(Stream<String> stream) {
-        return stream
-                .map(s -> ignoreIWhitespace ? Strings.trim(s) : s)
-                .map(s -> Strings.kv(s, separator))
-                .map(this::postProcess)
-                .filter(p -> !ignoreEmptyFragment || !isEmpty(p))
+        return PairStream.create(stream, s -> Strings.kv(s, separator))
+                .pmap(keyFunc, valueFunc)
+                .pmap(k -> {
+                    errorIfLeadingOrTrailingWhitespace(k, errorKeyIfLeadingOrTrailingWhitespace);
+                    return k;
+                }, v -> {
+                    errorIfLeadingOrTrailingWhitespace(v, errorValueIfLeadingOrTrailingWhitespace);
+                    return v;
+                })
+                .filter(this::processEmptyFragment)
                 .map(this::newFragment);
+    }
+
+    private boolean processEmptyFragment(Pair<String, String> pair) {
+        if (emptyFragment == EmptyFragment.RETAIN || emptyFragment == null) {
+            return true;
+        }
+
+        if (isEmpty(pair)) {
+            if (emptyFragment == EmptyFragment.ERROR) {
+                throw new IllegalArgumentException("Empty fragment.");
+            }
+            return false;
+        }
+        return true;
     }
 
     private boolean isEmpty(Pair<String, String> pair) {
         return pair.getFirst().isEmpty() && pair.getSecond() == null;
     }
 
-    private Pair<String, String> postProcess(Pair<String, String> pair) {
-        String name = ignoreLWhitespace(pair.getFirst());
-        String value = ignoreRWhitespace(pair.getSecond());
-        errorIfLeadingOrTrailingWhitespace(name);
-        errorIfLeadingOrTrailingWhitespace(value);
-        return Pair.create(name, value);
-    }
-
-    private String ignoreLWhitespace(String k) {
-        if (ignoreLWhitespace) {
-            k = Strings.trim(k, TrimPosition.AFTER);
-        }
-        return k;
-    }
-
-    private String ignoreRWhitespace(String v) {
-        if (v == null) {
-            return null;
-        }
-
-        if (ignoreRWhitespace) {
-            v = Strings.trim(v, TrimPosition.BEFORE);
-        }
-        return v;
-    }
-
-    private void errorIfLeadingOrTrailingWhitespace(String string) {
-        if (errorIfLeadingOrTrailingWhitespace) {
+    private void errorIfLeadingOrTrailingWhitespace(String string, boolean error) {
+        if (error) {
             checkIfLeadingOrTrailingWhitespace(string);
         }
     }
@@ -165,9 +169,10 @@ public class DelimiterSeparatorParser implements StringParser<String, String> {
     }
 
     public static DelimiterSeparatorParser compactAttributeParser(char delimiter, char separator) {
-        return new DelimiterSeparatorParser(delimiter, separator, false,
-                true, false, false,
-                true);
+        return new DelimiterSeparatorParser(delimiter, separator,
+                IDENTITY, IDENTITY,
+                true, true,
+                EmptyFragment.ERROR);
     }
 
     @SuppressWarnings("unused")

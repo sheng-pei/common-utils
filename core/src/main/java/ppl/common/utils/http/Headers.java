@@ -1,6 +1,6 @@
 package ppl.common.utils.http;
 
-import ppl.common.utils.argument.value.collector.ExCollectors;
+import ppl.common.utils.argument.argument.value.collector.ExCollectors;
 import ppl.common.utils.http.header.Header;
 import ppl.common.utils.http.header.HeaderName;
 import ppl.common.utils.http.header.HeaderValue;

@@ -1,6 +1,6 @@
 package ppl.common.utils.compress;
 
-import ppl.common.utils.argument.value.collector.ExCollectors;
+import ppl.common.utils.argument.argument.value.collector.ExCollectors;
 import ppl.common.utils.enumerate.UnknownEnumException;
 
 import java.util.Arrays;

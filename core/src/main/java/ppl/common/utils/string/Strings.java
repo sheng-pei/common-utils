@@ -1,6 +1,6 @@
 package ppl.common.utils.string;
 
-import ppl.common.utils.string.kvpair.Pair;
+import ppl.common.utils.pair.Pair;
 import ppl.common.utils.string.substring.PositionalArguments;
 import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.impl.SundaySubstringFinder;

@@ -58,12 +58,12 @@ public class BaseOption implements Option {
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .peek(BaseOption::checkLongOption)
+                .map(BaseOption::checkLongOption)
                 .map(l -> LONG_OPTION_PREFIX + l)
                 .collect(Collectors.toList()));
         this.shortOptions = Collections.unmodifiableList(shortOptions.stream()
                 .filter(Objects::nonNull)
-                .peek(BaseOption::checkShortOption)
+                .map(BaseOption::checkShortOption)
                 .map(c -> SHORT_OPTION_PREFIX + c)
                 .collect(Collectors.toList()));
         if (this.longOptions.isEmpty() && this.shortOptions.isEmpty()) {
@@ -71,16 +71,18 @@ public class BaseOption implements Option {
         }
     }
 
-    private static void checkLongOption(String longOption) {
+    private static String checkLongOption(String longOption) {
         if (!LONG_OPTION_PATTERN.matcher(longOption).matches()) {
             throw new IllegalArgumentException("Invalid long option: " + longOption);
         }
+        return longOption;
     }
 
-    private static void checkShortOption(Character shortOption) {
+    private static Character checkShortOption(Character shortOption) {
         if (!SHORT_OPTION_PATTERN.matcher(shortOption.toString()).matches()) {
             throw new IllegalArgumentException("Invalid short option: " + shortOption);
         }
+        return shortOption;
     }
 
     @Override

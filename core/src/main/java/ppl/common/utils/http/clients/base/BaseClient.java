@@ -110,30 +110,36 @@ public class BaseClient extends AbstractClient {
     }
 
     private boolean isChunked(Request request) {
-        boolean isChunked = 0 != request.getHeaders(TransferEncoding.class)
+        boolean isChunked = request.getHeaders(TransferEncoding.class)
                 .stream()
                 .flatMap(te -> te.value().getValues().stream())
-                .peek(hv -> {
-                    if (hv instanceof UnknownHeaderValue) {
-                        throw new IllegalArgumentException(String.format(
-                                "Unknown transfer encoding: '%s'.", hv.toCanonicalString()));
-                    }
-                })
+                .map(this::checkUnknown)
                 .map(hv -> (Coding) hv)
                 .map(Coding::getTarget)
-                .peek(k -> {
-                    if (k != CodingKind.CHUNKED) {
-                        throw new IllegalArgumentException(String.format(
-                                "Transfer encoding: '%s' is not supported but chunked.", k));
-                    }
-                })
-                .count();
+                .map(this::checkChunked)
+                .findAny()
+                .isPresent();
         Method method = request.getMethod();
         if (isChunked && !isDoOutput(request)) {
             throw new IllegalArgumentException(String.format(
                     "Chunked transfer encoding is not allowed for method '%s'.", method));
         }
         return isChunked;
+    }
+
+    private HeaderValue checkUnknown(HeaderValue hv) {
+        if (hv instanceof UnknownHeaderValue) {
+            throw new IllegalArgumentException(String.format(
+                    "Unknown transfer encoding: '%s'.", hv.toCanonicalString()));
+        }
+        return hv;
+    }
+    private CodingKind checkChunked(CodingKind kind) {
+        if (kind != CodingKind.CHUNKED) {
+            throw new IllegalArgumentException(String.format(
+                    "Transfer encoding: '%s' is not supported but chunked.", kind));
+        }
+        return kind;
     }
 
     private void processNoRedirect(HttpURLConnection conn, NoRedirect noRedirect) {

@@ -1,10 +1,10 @@
 package ppl.common.utils.command;
 
-import ppl.common.utils.argument.value.ValueArgumentNormalizer;
-import ppl.common.utils.argument.value.TypeReference;
-import ppl.common.utils.argument.value.ValueArgument;
-import ppl.common.utils.argument.value.ValueArgumentBuilder;
-import ppl.common.utils.argument.value.collector.ExCollectors;
+import ppl.common.utils.argument.argument.value.ValueArgumentNormalizer;
+import ppl.common.utils.argument.argument.value.TypeReference;
+import ppl.common.utils.argument.argument.value.ValueArgument;
+import ppl.common.utils.argument.argument.value.ValueArgumentBuilder;
+import ppl.common.utils.argument.argument.value.collector.ExCollectors;
 import ppl.common.utils.string.Strings;
 
 import java.util.Collections;

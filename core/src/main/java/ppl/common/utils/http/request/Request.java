@@ -138,7 +138,6 @@ public class Request implements Headers {
         }
 
         public Builder setHeader(Header<? extends HeaderValue> header) {
-            @SuppressWarnings("unchecked")
             List<Header<? extends HeaderValue>> headers = ensure(this.headers);
             int idx = -1;
             for (int i = 0; i < headers.size(); i++) {

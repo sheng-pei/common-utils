@@ -1,6 +1,6 @@
 package ppl.common.utils.hdfs.selector;
 
-import ppl.common.utils.filesystem.Path;
+import ppl.common.utils.filesystem.path.Path;
 import ppl.common.utils.http.Client;
 import ppl.common.utils.http.Connection;
 import ppl.common.utils.http.request.Request;

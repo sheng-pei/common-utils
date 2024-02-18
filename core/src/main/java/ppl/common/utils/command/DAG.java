@@ -88,12 +88,16 @@ public class DAG<K, E> {
 
     private List<Node<K, E>> getPaths(K[] keys) {
         return Arrays.stream(keys)
-                .peek(k -> {
-                    if (!this.all.containsKey(k)) {
-                        throw new IllegalArgumentException(Strings.format("No vertex of key '{}' exists.", k));
-                    }
-                }).map(this.all::get)
+                .map(this::checkExists)
+                .map(this.all::get)
                 .collect(Collectors.toList());
+    }
+
+    private K checkExists(K key) {
+        if (!this.all.containsKey(key)) {
+            throw new IllegalArgumentException(Strings.format("No vertex of key '{}' exists.", key));
+        }
+        return key;
     }
 
     private List<Node<K, E>> checkPaths(K[] keys, List<Node<K, E>> nodes) {

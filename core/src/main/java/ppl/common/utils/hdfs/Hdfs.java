@@ -1,6 +1,6 @@
 package ppl.common.utils.hdfs;
 
-import ppl.common.utils.filesystem.Path;
+import ppl.common.utils.filesystem.path.Path;
 import ppl.common.utils.hdfs.agent.Agent;
 import ppl.common.utils.hdfs.data.FileStatuses;
 import ppl.common.utils.hdfs.selector.Selector;

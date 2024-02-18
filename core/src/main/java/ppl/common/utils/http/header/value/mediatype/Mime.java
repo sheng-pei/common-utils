@@ -1,9 +1,9 @@
 package ppl.common.utils.http.header.value.mediatype;
 
-import ppl.common.utils.argument.Arguments;
-import ppl.common.utils.argument.value.BaseValueArgument;
-import ppl.common.utils.argument.value.ValueArgument;
-import ppl.common.utils.argument.value.ValueArgumentNormalizer;
+import ppl.common.utils.argument.argument.Arguments;
+import ppl.common.utils.argument.argument.value.BaseValueArgument;
+import ppl.common.utils.argument.argument.value.ValueArgument;
+import ppl.common.utils.argument.argument.value.ValueArgumentNormalizer;
 import ppl.common.utils.http.header.BaseArguments;
 import ppl.common.utils.http.header.value.parameter.ParameterizedHeaderValue;
 import ppl.common.utils.http.symbol.HttpCharGroup;

@@ -1,7 +1,10 @@
 package ppl.common.utils.command;
 
-import ppl.common.utils.argument.*;
-import ppl.common.utils.argument.value.ArgumentValue;
+import ppl.common.utils.argument.analyzer.Analyzer;
+import ppl.common.utils.argument.argument.Argument;
+import ppl.common.utils.argument.argument.ArgumentException;
+import ppl.common.utils.argument.parser.Fragment;
+import ppl.common.utils.argument.argument.value.ArgumentValue;
 
 import java.util.*;
 import java.util.function.Function;

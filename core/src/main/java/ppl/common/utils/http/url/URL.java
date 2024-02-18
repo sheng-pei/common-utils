@@ -3,7 +3,7 @@ package ppl.common.utils.http.url;
 import ppl.common.utils.character.ascii.Mask;
 import ppl.common.utils.net.URLEncoder;
 import ppl.common.utils.string.Strings;
-import ppl.common.utils.string.kvpair.Pair;
+import ppl.common.utils.pair.Pair;
 import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.SubstringFinder;
 import ppl.common.utils.string.substring.impl.SundaySubstringFinder;

@@ -1,6 +1,6 @@
 package ppl.common.utils.filesystem.obs;
 
-import ppl.common.utils.filesystem.FileSystemException;
+import ppl.common.utils.filesystem.core.FileSystemException;
 
 public class ObsException extends FileSystemException {
     public ObsException(String message) {

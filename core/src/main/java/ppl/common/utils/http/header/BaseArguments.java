@@ -1,7 +1,7 @@
 package ppl.common.utils.http.header;
 
-import ppl.common.utils.argument.Arguments;
-import ppl.common.utils.argument.value.ValueArgument;
+import ppl.common.utils.argument.argument.Arguments;
+import ppl.common.utils.argument.argument.value.ValueArgument;
 import ppl.common.utils.string.ascii.CaseIgnoreString;
 
 import java.util.ArrayList;

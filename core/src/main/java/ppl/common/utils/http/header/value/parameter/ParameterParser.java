@@ -1,12 +1,12 @@
 package ppl.common.utils.http.header.value.parameter;
 
-import ppl.common.utils.argument.Fragment;
+import ppl.common.utils.argument.parser.Fragment;
 import ppl.common.utils.argument.parser.NameValueParser;
 import ppl.common.utils.argument.parser.StringParser;
 import ppl.common.utils.http.symbol.HttpCharGroup;
 import ppl.common.utils.http.symbol.Lexer;
 import ppl.common.utils.string.Strings;
-import ppl.common.utils.string.kvpair.Pair;
+import ppl.common.utils.pair.Pair;
 import ppl.common.utils.string.trim.TrimPosition;
 
 import java.io.*;

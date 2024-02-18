@@ -1,5 +1,7 @@
 package ppl.common.utils.filesystem;
 
+import ppl.common.utils.filesystem.core.FileType;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;

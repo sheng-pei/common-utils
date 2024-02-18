@@ -1,13 +1,18 @@
 package ppl.common.utils.filesystem.ftp;
 
-import ppl.common.utils.filesystem.FileSystemProperties;
+import ppl.common.utils.filesystem.core.FileSystemProperties;
+
+import java.nio.charset.Charset;
 
 public class FtpProperties implements FileSystemProperties {
     private String server = "127.0.0.1";
     private int port = 21;
     private String username;
     private String password;
-    private Boolean active = false;
+    private boolean active = false;
+    private String working = ".";
+    private boolean autoCreateWorking = true;
+    private Charset charset;
 
     public String getServer() {
         return server;
@@ -53,14 +58,31 @@ public class FtpProperties implements FileSystemProperties {
         }
     }
 
-    @Override
-    public String toString() {
-        return "FtpProperties{" +
-                "server='" + server + '\'' +
-                ", port=" + port +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", active=" + active +
-                '}';
+    public String getWorking() {
+        return working;
+    }
+
+    public void setWorking(String working) {
+        if (working != null) {
+            this.working = working;
+        }
+    }
+
+    public Boolean isAutoCreateWorking() {
+        return autoCreateWorking;
+    }
+
+    public void setAutoCreateWorking(Boolean autoCreateWorking) {
+        if (autoCreateWorking != null) {
+            this.autoCreateWorking = autoCreateWorking;
+        }
+    }
+
+    public Charset getCharset() {
+        return charset;
+    }
+
+    public void setCharset(Charset charset) {
+        this.charset = charset;
     }
 }

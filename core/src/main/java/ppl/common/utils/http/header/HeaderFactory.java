@@ -3,7 +3,7 @@ package ppl.common.utils.http.header;
 import ppl.common.utils.http.symbol.HttpCharGroup;
 import ppl.common.utils.reflect.PackageLoader;
 import ppl.common.utils.string.Strings;
-import ppl.common.utils.string.kvpair.Pair;
+import ppl.common.utils.pair.Pair;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -67,7 +67,7 @@ public final class HeaderFactory {
                     }
                     return false;
                 })
-                .peek(c -> c.setAccessible(true))
+                .map(HeaderFactory::setAccessible)
                 .map(c -> {
                     @SuppressWarnings("unchecked")
                     Constructor<Header<HeaderValue>> res = (Constructor<Header<HeaderValue>>) c;
@@ -76,6 +76,11 @@ public final class HeaderFactory {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Unsupported to be used by: '" +
                         HeaderCreator.class.getCanonicalName() + "'."));
+    }
+
+    private static Constructor<?> setAccessible(Constructor<?> c) {
+        c.setAccessible(true);
+        return c;
     }
 
     private HeaderFactory() {

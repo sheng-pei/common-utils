@@ -3,7 +3,7 @@ package ppl.common.utils.hdfs.agent;
 import com.fasterxml.jackson.core.type.TypeReference;
 import ppl.common.utils.IOUtils;
 import ppl.common.utils.exception.IOStreamException;
-import ppl.common.utils.filesystem.Path;
+import ppl.common.utils.filesystem.path.Path;
 import ppl.common.utils.hdfs.HdfsException;
 import ppl.common.utils.hdfs.data.BooleanBody;
 import ppl.common.utils.hdfs.data.FileStatuses;

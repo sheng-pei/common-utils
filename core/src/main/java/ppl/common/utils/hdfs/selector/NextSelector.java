@@ -1,7 +1,7 @@
 package ppl.common.utils.hdfs.selector;
 
-import ppl.common.utils.filesystem.Path;
-import ppl.common.utils.filesystem.path.BasePath;
+import ppl.common.utils.filesystem.path.Path;
+import ppl.common.utils.filesystem.path.Paths;
 import ppl.common.utils.http.url.URL;
 
 import java.util.Arrays;
@@ -33,7 +33,7 @@ class NextSelector implements Selector {
         active = supplier.active;
         URL url = supplier.current();
         if (path.isAbsolute()) {
-            path = BasePath.get(Path.C_ROOT_DIR).relativize(path);
+            path = Paths.get(Path.C_ROOT_DIR).relativize(path);
         }
         return URL.create(url.toString() + path.normalize().toString());
     }
@@ -43,7 +43,7 @@ class NextSelector implements Selector {
         Objects.requireNonNull(path);
         URL url = supplier.get(++active);
         if (path.isAbsolute()) {
-            path = BasePath.get(Path.C_ROOT_DIR).relativize(path);
+            path = Paths.get(Path.C_ROOT_DIR).relativize(path);
         }
         return URL.create(url.toString() + path.normalize().toString());
     }

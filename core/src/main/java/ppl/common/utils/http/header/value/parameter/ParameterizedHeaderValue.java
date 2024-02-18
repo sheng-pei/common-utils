@@ -1,24 +1,20 @@
 package ppl.common.utils.http.header.value.parameter;
 
-import ppl.common.utils.argument.Analyzer;
-import ppl.common.utils.argument.Argument;
-import ppl.common.utils.argument.Arguments;
-import ppl.common.utils.argument.Fragment;
-import ppl.common.utils.argument.value.ArgumentValue;
-import ppl.common.utils.argument.value.BaseValueArgument;
-import ppl.common.utils.argument.value.ValueArgument;
+import ppl.common.utils.argument.analyzer.Analyzer;
+import ppl.common.utils.argument.argument.Arguments;
+import ppl.common.utils.argument.argument.value.ArgumentValue;
+import ppl.common.utils.argument.argument.value.ValueArgument;
 import ppl.common.utils.http.header.Context;
 import ppl.common.utils.http.header.SingleLineHeaderValue;
 import ppl.common.utils.http.symbol.HttpCharGroup;
 import ppl.common.utils.string.Strings;
 import ppl.common.utils.string.ascii.CaseIgnoreString;
-import ppl.common.utils.string.kvpair.Pair;
+import ppl.common.utils.pair.Pair;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public abstract class ParameterizedHeaderValue<

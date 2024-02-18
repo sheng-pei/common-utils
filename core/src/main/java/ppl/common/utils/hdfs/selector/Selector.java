@@ -1,6 +1,6 @@
 package ppl.common.utils.hdfs.selector;
 
-import ppl.common.utils.filesystem.Path;
+import ppl.common.utils.filesystem.path.Path;
 import ppl.common.utils.hdfs.retrier.RetryStage;
 import ppl.common.utils.http.url.URL;
 

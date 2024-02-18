@@ -5,7 +5,7 @@ import ppl.common.utils.compress.Archive;
 import ppl.common.utils.compress.ArchiveException;
 import ppl.common.utils.os.OsInfo;
 import ppl.common.utils.os.Platform;
-import ppl.common.utils.string.kvpair.Pair;
+import ppl.common.utils.pair.Pair;
 
 import java.io.File;
 import java.io.IOException;

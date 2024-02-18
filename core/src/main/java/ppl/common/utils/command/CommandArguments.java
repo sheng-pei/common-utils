@@ -1,7 +1,7 @@
 package ppl.common.utils.command;
 
-import ppl.common.utils.argument.Argument;
-import ppl.common.utils.argument.Arguments;
+import ppl.common.utils.argument.argument.Argument;
+import ppl.common.utils.argument.argument.Arguments;
 import ppl.common.utils.string.Strings;
 
 import java.util.*;

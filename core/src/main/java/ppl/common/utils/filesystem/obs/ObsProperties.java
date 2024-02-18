@@ -1,6 +1,6 @@
 package ppl.common.utils.filesystem.obs;
 
-import ppl.common.utils.filesystem.FileSystemProperties;
+import ppl.common.utils.filesystem.core.FileSystemProperties;
 
 public class ObsProperties implements FileSystemProperties {
     private final String endpoint;
