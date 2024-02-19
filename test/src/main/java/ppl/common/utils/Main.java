@@ -33,18 +33,20 @@ public class Main {
 //        command.init(args);
 //        System.out.println(command.get("host"));
 //        System.out.println(command.get("config"));
-        SftpProperties properties = new SftpProperties();
-        properties.setServer("172.16.101.180");
-        properties.setPort(22);
-        properties.setUsername("root");
-        properties.setPassword("Abc!@#135");
-        properties.setWorking("/opt/dtstack/a/b/c");
-        properties.setCharset(Charset.forName("GBK"));
-        try (FileSystem sftp = Protocol.SFTP.open(properties)) {
-            try (Connection conn = sftp.getConnection()) {
-                List<CFile> files = conn.listFiles(LocalDateTime.now().minusDays(1), true);
-                System.out.println(files.size());
-            }
-        }
+//        SftpProperties properties = new SftpProperties();
+//        properties.setServer("172.16.101.180");
+//        properties.setPort(22);
+//        properties.setUsername("root");
+//        properties.setPassword("Abc!@#135");
+//        properties.setWorking("/opt/dtstack/a/b/c");
+//        properties.setCharset(Charset.forName("GBK"));
+//        try (FileSystem sftp = Protocol.SFTP.open(properties)) {
+//            try (Connection conn = sftp.getConnection()) {
+//                List<CFile> files = conn.listFiles(LocalDateTime.now().minusDays(1), true);
+//                System.out.println(files.size());
+//            }
+//        }
+
+        System.out.println(Paths.get("").getNameCount());
     }
 }

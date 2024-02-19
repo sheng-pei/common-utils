@@ -62,11 +62,11 @@ public class Ftp implements FileSystem, AutoCloseable {
     private final Charset charset;
 
     private Ftp(FtpProperties prop) {
-        this.host = prop.getServer();
+        this.host = prop.getHost();
         this.port = prop.getPort();
         this.username = prop.getUsername();
         this.password = prop.getPassword();
-        this.active = prop.getActive();
+        this.active = prop.isActive();
         this.working = Paths.get(prop.getWorking())
                 .normalize();
         this.charset = prop.getCharset() == null ? StandardCharsets.UTF_8 : prop.getCharset();

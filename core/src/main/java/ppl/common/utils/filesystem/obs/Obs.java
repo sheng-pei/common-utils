@@ -1,196 +1,271 @@
-//package ppl.common.utils.filesystem.obs;
-//
-//import com.obs.services.ObsClient;
-//import org.apache.commons.pool2.ObjectPool;
-//import org.apache.commons.pool2.PooledObjectFactory;
-//import org.apache.commons.pool2.impl.GenericObjectPool;
-//import ppl.common.utils.filesystem.*;
-//import ppl.common.utils.filesystem.core.*;
-//
-//import java.io.File;
-//import java.io.IOException;
-//import java.time.Instant;
-//import java.util.List;
-//import java.util.concurrent.atomic.AtomicBoolean;
-//
-//public class Obs implements FileSystem {
-//
-//    private static final Protocol protocol = Protocol.OBS;
-//    private final String bucket;
-//    private final ObsClient obsClient;
-//    private final Path.Creator pathCreator;
-//    private final AtomicBoolean closed = new AtomicBoolean();
-//
-//    private final ObjectPool<PoolableConnection<ObsConnection>> pool;
-//
-//    private Obs(ObsProperties obsProperties, Path.Creator pathCreator) {
-//        this.bucket = obsProperties.getBucket();
-//        this.obsClient = new ObsClient(obsProperties.getAk(), obsProperties.getSk(), obsProperties.getEndpoint());
-//        this.pathCreator = pathCreator;
-//        PoolableConnectionFactory<ObsConnection> factory = createPooledObjectFactory();
-//        ObjectPool<PoolableConnection<ObsConnection>> pool = createObjectPool(factory);
-//        factory.setPool(pool);
-//        this.pool = pool;
-//    }
-//
-//    private PoolableConnectionFactory<ObsConnection> createPooledObjectFactory() {
-//        return new PoolableConnectionFactory<>(ObsConnection::new);
-//    }
-//
-//    private ObjectPool<PoolableConnection<ObsConnection>> createObjectPool(PooledObjectFactory<PoolableConnection<ObsConnection>> factory) {
-//        return new GenericObjectPool<>(factory);
-//    }
-//
-//    @Override
-//    public Connection getConnection() throws Exception {
-//        ensureOpen();
-//        return pool.borrowObject();
-//    }
-//
-//    @Override
-//    public void close() throws Exception {
-//        if (this.closed.compareAndSet(false, true)) {
-//            this.obsClient.close();
-//            this.pool.close();
-//        }
-//    }
-//
-//    private void ensureOpen() throws Exception {
-//        if (this.closed.get()) {
-//            throw new IOException("Filesystem is already closed.");
-//        }
-//    }
-//
-////    @Override
-////    public void store(String remote, File local) {
-////        remote = remote.trim();
-////        Path remotePath = Paths.get(remote);
-////        if (remotePath.isAbsolute()) {
-////            log.warn("Absolute remote path is not allowed for storing. Change to relative path, automatically.");
-////            remotePath = remotePath.subpath(0, remotePath.getNameCount());
-////        }
-////        Path p = workingPath.resolve(remotePath);
-////
-////        PutObjectRequest request = new PutObjectRequest();
-////        request.setBucketName(bucket);
-////        request.setObjectKey(ROOT.relativize(p).toString());
-////        request.setFile(local);
-////        try {
-////            this.client.putObject(request);
-////        } catch (com.obs.services.exception.ObsException e) {
-////            throw new ObsException("Failed to store file " + p, e);
-////        }
-////    }
-////
-////    @Override
-////    public List<String> listFiles(Instant day, boolean isDirectory) {
-////        throw new UnsupportedOperationException("Cannot list files modified on some day.");
-////    }
-////
-////    @Override
-////    public void download(String remote, File local) {
-////        Path p = workingPath.resolve(remote);
-////        ObsObject obsObject = openForRead(p);
-////        readIn(obsObject, local);
-////    }
-////
-////    private ObsObject openForRead(Path p) {
-////        try {
-////            return this.client.getObject(bucket, ROOT.relativize(p).toString());
-////        } catch (com.obs.services.exception.ObsException e) {
-////            throw new ObsException("Failed to open " + p, e);
-////        }
-////    }
-////
-////    private void readIn(ObsObject obsObject, File localFile) {
-////        try (InputStream content = obsObject.getObjectContent()) {
-////            if (content != null) {
-////                byte[] buf = new byte[1024];
-////                try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(localFile))) {
-////                    int size = content.read(buf);
-////                    while (size != -1) {
-////                        bos.write(buf, 0, size);
-////                        size = content.read(buf);
-////                    }
-////                }
-////            }
-////        } catch (IOException e) {
-////            throw new ObsException("Failed to download file from obs", e);
-////        }
-////    }
-//
-//    public static Obs create(FileSystemProperties fileSystemProperties,
-//                             Path.Creator morePathCreator) {
-//        if (!(fileSystemProperties instanceof ObsProperties)) {
-//            throw new IllegalArgumentException("Invalid configuration for protocol: " + protocol.getName());
-//        }
-//
-//        return new Obs((ObsProperties) fileSystemProperties, morePathCreator);
-//    }
-//
-//    private class ObsConnection implements Connection, Session, Validator {
-//        private volatile Path working;
-//        private final AtomicBoolean closed = new AtomicBoolean();
-//
-//        public ObsConnection() {
-//            resetSession();
-//        }
-//
-//        @Override
-//        public void resetSession() {
-//            this.working = pathCreator.create(Path.C_ROOT_DIR);
-//        }
-//
-//        @Override
-//        public Path pwd() throws IOException {
-//            ensureOpen();
-//            return this.working;
-//        }
-//
-//        @Override
-//        public void cd(String pwd) throws IOException {
-//            ensureOpen();
-//            Path working = this.working;
-//
-//            Path to = pathCreator.create(pwd);
-//            if (!to.isAbsolute()) {
-//                to = working.resolve(to);
-//            }
-//            this.working = to.normalize();
-//        }
-//
-//        @Override
-//        public void store(String remote, File local) throws IOException {
-//            ensureOpen();
-//        }
-//
-//        @Override
-//        public List<String> listFiles(Instant day, boolean isDirectory) throws IOException {
-//            ensureOpen();
-//            System.out.println("listFiles");
-//            return null;
-//        }
-//
-//        @Override
-//        public void download(String remote, File local) throws IOException {
-//            ensureOpen();
-//        }
-//
-//        @Override
-//        public void close() throws Exception {
-//            this.closed.compareAndSet(false, true);
-//        }
-//
-//        @Override
-//        public void validate() throws Exception {
-//            ensureOpen();
-//        }
-//
-//        private void ensureOpen() throws IOException {
-//            if (Obs.this.closed.get() || this.closed.get()) {
-//                throw new IOException("Already closed.");
-//            }
-//        }
-//    }
-//
-//}
+package ppl.common.utils.filesystem.obs;
+
+import com.obs.services.ObsClient;
+import com.obs.services.model.ObsObject;
+import com.obs.services.model.PutObjectRequest;
+import com.obs.services.model.fs.NewFolderRequest;
+import ppl.common.utils.IOUtils;
+import ppl.common.utils.filesystem.core.*;
+import ppl.common.utils.filesystem.path.Path;
+import ppl.common.utils.filesystem.path.Paths;
+import ppl.common.utils.filesystem.sftp.SftpException;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
+
+public class Obs implements FileSystem {
+
+    private static final Protocol protocol = Protocol.OBS;
+
+    public static Obs create(FileSystemProperties fileSystemProperties) {
+        if (!(fileSystemProperties instanceof ObsProperties)) {
+            throw new IllegalArgumentException("Invalid configuration for protocol: " + protocol.getName());
+        }
+
+        ObsProperties obsProperties = (ObsProperties) fileSystemProperties;
+        Obs obs = new Obs(obsProperties);
+        if (obsProperties.isAutoCreateWorking()) {
+            try (SimpleObsClientWrapper client = obs.new SimpleObsClientWrapper()) {
+                client.mkdirs(obs.working);
+            }
+        }
+        return obs;
+    }
+
+    private final String endpoint;
+    private final String bucket;
+    private final Path working;
+    private final ObsClient obsClient;
+    private final AtomicBoolean shutdown = new AtomicBoolean();
+
+    private Obs(ObsProperties obsProperties) {
+        this.endpoint = obsProperties.getEndpoint();
+        this.bucket = obsProperties.getBucket();
+        this.working = Paths.get(Path.C_ROOT_DIR)
+                .resolve(Paths.get(obsProperties.getWorking()))
+                .normalize();
+        this.obsClient = new ObsClient(obsProperties.getAk(), obsProperties.getSk(), obsProperties.getEndpoint());
+    }
+
+    @Override
+    public Connection getConnection() {
+        checkShutdown();
+        return new ObsConnection();
+    }
+
+    @Override
+    public void close() {
+        if (this.shutdown.compareAndSet(false, true)) {
+            try {
+                this.obsClient.close();
+            } catch (IOException e) {
+                throw new ObsException("Failed to close obs.", e);
+            }
+        }
+    }
+
+    private void checkShutdown() {
+        if (shutdown.get()) {
+            throw new SftpException(String.format("Obs '%s/%s' is already closed.", endpoint, bucket));
+        }
+    }
+
+    private class ObsConnection implements Connection {
+
+        private volatile Path working;
+        private final SimpleObsClientWrapper obs;
+        private final Path ancestor;
+        private final AtomicBoolean shutdown = new AtomicBoolean();
+
+        public ObsConnection() {
+            this.obs = new SimpleObsClientWrapper();
+            this.ancestor = Obs.this.working;
+        }
+
+        @Override
+        public String actualPath(String path) {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            return this.working.resolve(path)
+                    .normalize().toString();
+        }
+
+        @Override
+        public String actualPath(Path path) {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            return this.working.resolve(path)
+                    .normalize().toString();
+        }
+
+        @Override
+        public Path pwd() {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            return this.working;
+        }
+
+        @Override
+        public void cd(String path) {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            synchronized (this) {
+                Path working = this.working;
+                checkPath(working, Paths.get(path));
+                this.working = working.resolve(path).normalize();
+            }
+        }
+
+        @Override
+        public void cd(Path path) {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            synchronized (this) {
+                Path working = this.working;
+                checkPath(working, path);
+                this.working = working.resolve(path).normalize();
+            }
+        }
+
+        @Override
+        public void store(String remote, File local) {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            Path path = Paths.get(remote);
+            Path t = checkPath(this.working, path);
+            obs.store(t, local);
+        }
+
+        @Override
+        public void download(String remote, File local) {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            Path path = Paths.get(remote);
+            Path t = checkPath(this.working, path);
+            obs.download(t, local);
+        }
+
+        @Override
+        public void mkdir(Path path) {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            Path working = this.working;
+            Path t = checkPath(working, path);
+            if (!working.equals(t.getParent())) {
+                throw new ObsException("Mkdir error. File not found.");
+            }
+            obs.mkdirs(path);
+        }
+
+        @Override
+        public void mkdirs(Path path) {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            Path working = this.working;
+            checkPath(working, path);
+            obs.mkdirs(path);
+        }
+
+        @Override
+        public List<CFile> listFiles() {
+            //TODO, 目前没有资源，待有资源后尝试实现
+            return null;
+        }
+
+        @Override
+        public List<CFile> listFiles(LocalDateTime day, boolean isDirectory) {
+            //TODO, 目前没有资源，待有资源后尝试实现
+            throw new UnsupportedOperationException("Cannot list files modified on some day.");
+        }
+
+        @Override
+        public List<CFile> listFiles(Predicate<CFile> predicate) {
+            //TODO, 目前没有资源，待有资源后尝试实现
+            return null;
+        }
+
+        @Override
+        public void close() {
+            this.shutdown.compareAndSet(false, true);
+        }
+
+        private void checkShutdown() {
+            if (shutdown.get()) {
+                throw new ObsException(String.format(
+                        "Obs connection '%s/%s' is already closed.", endpoint, bucket));
+            }
+        }
+
+        private Path checkPath(Path pwd, Path path) {
+            Path p = pwd.resolve(path).normalize();
+            if (!p.startsWith(ancestor)) {
+                throw new ObsException(String.format("The ancestor of path '%s' is not '%s'.", p, ancestor));
+            }
+            return p;
+        }
+    }
+
+    private class SimpleObsClientWrapper implements AutoCloseable {
+
+        public void mkdirs(Path path) {
+            //TODO, 重复Key是否会有问题。
+            NewFolderRequest request = new NewFolderRequest();
+            request.setBucketName(bucket);
+            request.setObjectKey(Paths.get(Path.C_ROOT_DIR).relativize(path).toString());
+            try {
+                obsClient.newFolder(request);
+            } catch (com.obs.services.exception.ObsException e) {
+                throw new ObsException("Mkdirs error.", e);
+            }
+        }
+
+        public void store(Path path, File local) {
+            PutObjectRequest request = new PutObjectRequest();
+            request.setBucketName(bucket);
+            request.setObjectKey(Paths.get(Path.C_ROOT_DIR).relativize(path).toString());
+            request.setFile(local);
+            try {
+                obsClient.putObject(request);
+            } catch (com.obs.services.exception.ObsException e) {
+                throw new ObsException("Failed to store file: " + path, e);
+            }
+        }
+
+        public void download(Path path, File local) {
+            ObsObject obsObject = openForRead(path);
+            readIn(obsObject, local);
+        }
+
+        private ObsObject openForRead(Path p) {
+            try {
+                return obsClient.getObject(bucket, Paths.get(Path.C_ROOT_DIR).relativize(p).toString());
+            } catch (com.obs.services.exception.ObsException e) {
+                throw new ObsException("Failed to open " + p, e);
+            }
+        }
+
+        private void readIn(ObsObject obsObject, File localFile) {
+            try (InputStream content = obsObject.getObjectContent();
+                 BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(localFile.toPath()))) {
+                if (content != null) {
+                    IOUtils.copy(content, bos);
+                }
+            } catch (IOException e) {
+                throw new ObsException("Failed to download file from obs", e);
+            }
+        }
+
+        @Override
+        public void close() {
+        }
+
+    }
+
+}

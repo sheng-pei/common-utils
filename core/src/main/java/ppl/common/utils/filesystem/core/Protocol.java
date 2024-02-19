@@ -6,13 +6,15 @@ package ppl.common.utils.filesystem.core;
 //import ppl.common.utils.filesystem.sftp.Sftp;
 
 import ppl.common.utils.filesystem.ftp.Ftp;
+//import ppl.common.utils.filesystem.obs.Obs;
+import ppl.common.utils.filesystem.obs.Obs;
 import ppl.common.utils.filesystem.sftp.Sftp;
 
 public enum Protocol {
 
     FTP("ftp", Ftp::create),
-    SFTP("sftp",Sftp::create);
-//    OBS("obs", Obs::create, PathImpl::get);
+    SFTP("sftp",Sftp::create),
+    OBS("obs", Obs::create);
 
     private final String name;
     private final Creator creator;

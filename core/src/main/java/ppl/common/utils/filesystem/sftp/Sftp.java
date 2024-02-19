@@ -33,18 +33,11 @@ public class Sftp implements FileSystem, AutoCloseable {
         }
 
         SftpProperties sftpProperties = (SftpProperties) properties;
-        if (sftpProperties.isChannelFirst()) {
-            sftpProperties.setCoreSession(1);
-        }
-        if (!sftpProperties.isChannelFirst() && sftpProperties.getCoreSession() == 1) {
-            sftpProperties.setChannelFirst(true);
-        }
-
-        Sftp sftp = new Sftp((SftpProperties) properties);
+        Sftp sftp = new Sftp(sftpProperties);
         Session session = sftp.newSession();
         try {
-            try (SimpleSftpClientWrapper sftpClient = new Sftp.SimpleSftpClientWrapper(session, sftpProperties.getCharset())) {
-                if (sftpProperties.isAutoCreateWorking()) {
+            if (sftpProperties.isAutoCreateWorking()) {
+                try (SimpleSftpClientWrapper sftpClient = new Sftp.SimpleSftpClientWrapper(session, sftpProperties.getCharset())) {
                     sftpClient.mkdirs(sftp.working);
                 }
             }
@@ -71,7 +64,7 @@ public class Sftp implements FileSystem, AutoCloseable {
 
 
     private Sftp(SftpProperties properties) {
-        this.host = properties.getServer();
+        this.host = properties.getHost();
         this.port = properties.getPort();
         this.username = properties.getUsername();
         this.password = properties.getPassword();
