@@ -48,7 +48,7 @@ public class Main {
 //            }
 //        }
 
-        Exts exts = new Exts(Arrays.asList("", "gz", "tar.gz", "zip"));
-        System.out.println(exts.getExt("a.ta7r.gz"));
+        Exts exts = new Exts(Arrays.asList("zip"));
+        System.out.println(exts.getExt("a.zip"));
     }
 }

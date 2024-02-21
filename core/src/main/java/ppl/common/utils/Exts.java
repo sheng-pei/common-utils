@@ -40,7 +40,7 @@ public class Exts {
         }
         String first = string.substring(periodIdx + 1);
         if (max == 0) {
-            return new Ext(false, first);
+            return new Ext(exts.contains(first), first);
         }
 
         int idx = 0;
