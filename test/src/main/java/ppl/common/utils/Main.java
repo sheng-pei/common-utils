@@ -15,6 +15,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -47,6 +48,7 @@ public class Main {
 //            }
 //        }
 
-        System.out.println(Paths.get("").getNameCount());
+        Exts exts = new Exts(Arrays.asList("", "gz", "tar.gz", "zip"));
+        System.out.println(exts.getExt("a.ta7r.gz"));
     }
 }
