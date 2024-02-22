@@ -1,4 +1,4 @@
-package ppl.common.utils.variable;
+package ppl.common.utils.string.variable;
 
 import java.util.Objects;
 

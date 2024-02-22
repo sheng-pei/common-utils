@@ -1,4 +1,4 @@
-package ppl.common.utils.variable;
+package ppl.common.utils.string.variable;
 
 public class VariablePatternException extends RuntimeException {
     public VariablePatternException() {

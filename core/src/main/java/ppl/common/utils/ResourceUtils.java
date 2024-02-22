@@ -1,4 +1,4 @@
-package ppl.common.utils.resource;
+package ppl.common.utils;
 
 import ppl.common.utils.exception.ResourceException;
 
