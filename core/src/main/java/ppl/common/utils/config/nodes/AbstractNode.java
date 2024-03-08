@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 
 public abstract class AbstractNode implements Node {
 
-    private final int keyStart;
+    private final String key;
     private final String path;
 
     protected AbstractNode(String path) {
@@ -20,7 +20,7 @@ public abstract class AbstractNode implements Node {
                             "or field name, nonempty string with no letter '[', ']', or '{' field name '}'.");
         }
 
-        this.keyStart = path.equals(".") ? 1 : matcher.end(matcher.groupCount());
+        this.key = path.equals(".") ? null : matcher.group("last");
         this.path = path;
     }
 
@@ -31,8 +31,8 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public final Integer index() {
-        String k = key();
-        if (k.startsWith("[")) {
+        String k = key;
+        if (k != null && k.startsWith("[")) {
             return Integer.parseInt(k.substring(1, k.length() - 1));
         }
         return null;
@@ -40,7 +40,11 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public final String fieldName() {
-        String k = key();
+        String k = key;
+        if (k == null) {
+            return null;
+        }
+
         if (k.startsWith("{")) {
             return k.substring(1, k.length() - 1);
         } else if (!k.startsWith("[")) {
@@ -49,37 +53,19 @@ public abstract class AbstractNode implements Node {
         return null;
     }
 
-    private String key() {
-        return this.path.substring(this.keyStart);
-    }
-
     @Override
     public final String path() {
         return this.path;
     }
 
     protected final String childPath(String fieldName) {
-        if (fieldName.equals("") || fieldName.startsWith("{") || fieldName.startsWith("[")) {
-            throw new IllegalArgumentException("FieldName do not allow for starting with '{' or '['.");
-        }
-
-        return Strings.format("{}{}{}", this.path, pathSeparator(), pathKeyOnFieldName(fieldName));
-    }
-
-    private String pathKeyOnFieldName(String fieldName) {
-        return fieldName.contains(PATH_SEPARATOR) ? "{" + fieldName + "}" : fieldName;
+        ParsedName pn = ParsedName.obj(fieldName);
+        return Strings.format("{}{}{}", this.path, pathSeparator(), pn);
     }
 
     protected final String childPath(Integer index) {
-        if (index == null || index < 0) {
-            throw new IllegalArgumentException("Index must be non-negative.");
-        }
-
-        return Strings.format("{}{}{}", this.path, pathSeparator(), pathKeyOnIndex(index));
-    }
-
-    private String pathKeyOnIndex(Integer index) {
-        return "[" + index + "]";
+        ParsedName pn = ParsedName.arr(index);
+        return Strings.format("{}{}{}", this.path, pathSeparator(), pn);
     }
 
     private String pathSeparator() {

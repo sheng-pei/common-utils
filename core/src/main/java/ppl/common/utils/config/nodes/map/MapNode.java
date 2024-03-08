@@ -33,7 +33,11 @@ public final class MapNode extends AbstractNode {
         if (!this.map.containsKey(fieldName)) {
             return new MissingNode(path);
         }
-        return Nodes.createByPath(path, this.map.get(fieldName));
+        try {
+            return Nodes.createByPath(path, this.map.get(fieldName));
+        } catch (RuntimeException e) {
+            throw new NodeException("Unknown value of '" + path + "'.", e);
+        }
     }
 
     @Override
@@ -49,77 +53,77 @@ public final class MapNode extends AbstractNode {
 
     @Override
     public String textValue(String def) {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public String textValue() {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Byte byteValue(Byte def) {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Byte byteValue() {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Short shortValue(Short def) {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Short shortValue() {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Integer intValue(Integer def) {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Integer intValue() {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Long longValue(Long def) {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Long longValue() {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Boolean boolValue(Boolean def) {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Boolean boolValue() {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Double doubleValue(Double def) {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public Double doubleValue() {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
     @Override
     public <E extends Enum<E>> E enumValue(Class<E> enumClass) {
-        throw new ConvertException("Container node");
+        throw new ConvertException("Map node");
     }
 
 }

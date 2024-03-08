@@ -36,46 +36,52 @@ public class JacksonNode extends AbstractNode {
     public Node getChild(String fieldName) {
         String path = childPath(fieldName);
         JsonNode node = json.path(fieldName);
-        return create(path, node);
+        try {
+            return create(path, node);
+        } catch (RuntimeException e) {
+            throw new NodeException("Unknown value of '" + path + "'.", e);
+        }
     }
 
     @Override
     public Node getChild(Integer index) {
         String path = childPath(index);
         JsonNode node = json.path(index);
-        return create(path, node);
+        try {
+            return create(path, node);
+        } catch (RuntimeException e) {
+            throw new NodeException("Unknown value of '" + path + "'.", e);
+        }
     }
 
     private Node create(String path, JsonNode node) {
-        Node res;
         if (node.isMissingNode()) {
-            res = new MissingNode(path);
-        } else if (node.isValueNode()) {
+            return new MissingNode(path);
+        } else {
+            return Nodes.createByPath(path, value(node));
+        }
+    }
+
+    private Object value(JsonNode node) {
+        if (node.isValueNode()) {
             if (node.isNumber()) {
-                res = Nodes.createByPath(path, node.numberValue());
+                return node.numberValue();
             } else if (node.isBoolean()) {
-                res = Nodes.createByPath(path, node.booleanValue());
+                return node.booleanValue();
             } else if (node.isNull()) {
-                res = Nodes.createByPath(path, null);
+                return null;
             } else if (node.isTextual()) {
-                res = Nodes.createByPath(path, node.textValue());
-            } else if (node.isBinary()) {
-                try {
-                    res = Nodes.createByPath(path, node.binaryValue());
-                } catch (IOException e) {
-                    throw new NodeException("Unreachable.");
-                }
+                return node.textValue();
             } else if (node.isPojo()) {
-                res = Nodes.createByPath(path, ((POJONode) node).getPojo());
+                return ((POJONode) node).getPojo();
             } else {
-                throw new NodeException("Unknown jackson value node type.");
+                throw new IllegalArgumentException("Disallowed jackson value node type in config.");
             }
         } else if (node.isContainerNode()) {
-            res = Nodes.createByPath(path, node);
+            return node;
         } else {
-            throw new NodeException("Unknown jackson node type.");
+            throw new IllegalArgumentException("Disallowed jackson node type in config.");
         }
-        return res;
     }
 
     @Override
@@ -96,7 +102,7 @@ public class JacksonNode extends AbstractNode {
     @Override
     public String textValue() {
         if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
+            throw new ConvertException("Jackson container node.");
         }
         return Converters.stringValue(json);
     }
@@ -109,7 +115,7 @@ public class JacksonNode extends AbstractNode {
     @Override
     public Byte byteValue() {
         if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
+            throw new ConvertException("Jackson container node.");
         }
         return Converters.byteValue(json);
     }
@@ -122,7 +128,7 @@ public class JacksonNode extends AbstractNode {
     @Override
     public Short shortValue() {
         if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
+            throw new ConvertException("Jackson container node.");
         }
         return Converters.shortValue(json);
     }
@@ -135,7 +141,7 @@ public class JacksonNode extends AbstractNode {
     @Override
     public Integer intValue() {
         if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
+            throw new ConvertException("Jackson container node.");
         }
         return Converters.intValue(json);
     }
@@ -148,7 +154,7 @@ public class JacksonNode extends AbstractNode {
     @Override
     public Long longValue() {
         if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
+            throw new ConvertException("Jackson container node.");
         }
         return Converters.longValue(json);
     }
@@ -161,7 +167,7 @@ public class JacksonNode extends AbstractNode {
     @Override
     public Boolean boolValue() {
         if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
+            throw new ConvertException("Jackson container node.");
         }
         return Converters.boolValue(json);
     }
@@ -174,7 +180,7 @@ public class JacksonNode extends AbstractNode {
     @Override
     public Double doubleValue() {
         if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
+            throw new ConvertException("Jackson container node.");
         }
         return Converters.doubleValue(json);
     }
@@ -182,7 +188,7 @@ public class JacksonNode extends AbstractNode {
     @Override
     public <E extends Enum<E>> E enumValue(Class<E> enumClass) {
         if (json.isContainerNode()) {
-            throw new ConvertException("Container node.");
+            throw new ConvertException("Jackson container node.");
         }
         return Converters.convert(json, enumClass);
     }

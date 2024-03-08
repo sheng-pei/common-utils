@@ -21,7 +21,7 @@ public interface NodeFactory {
     /**
      * Create a root node out of the material.
      * @param material the material to process.
-     * @return
+     * @return root of config
      */
     Node createRoot(Object material);
 
@@ -29,7 +29,7 @@ public interface NodeFactory {
      * Create a node out of the material.
      * @param path the config path of the created node.
      * @param material the material to process.
-     * @return
+     * @return a node
      */
     Node create(String path, Object material);
 

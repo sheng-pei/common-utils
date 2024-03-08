@@ -4,8 +4,6 @@ package ppl.common.utils.config;
  * Signal that data conversion fail.
  */
 public class ConvertException extends RuntimeException {
-    public ConvertException() {
-    }
 
     public ConvertException(String message) {
         super(message);
@@ -15,11 +13,4 @@ public class ConvertException extends RuntimeException {
         super(message, cause);
     }
 
-    public ConvertException(Throwable cause) {
-        super(cause);
-    }
-
-    public ConvertException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

@@ -1,6 +1,7 @@
 package ppl.common.utils.config.nodes.iterator;
 
 import ppl.common.utils.config.Node;
+import ppl.common.utils.config.NodeException;
 import ppl.common.utils.config.Nodes;
 
 import java.util.Iterator;
@@ -24,11 +25,17 @@ public class ArrayIterator implements Iterator<Node> {
 
     @Override
     public Node next() {
+        String path = childPathCreator.apply(this.cursor);
+        Object ele = iter.next();
+
+        Node node;
         try {
-            Object ele = iter.next();
-            return Nodes.createByPath(childPathCreator.apply(this.cursor ++), ele);
-        } catch (NoSuchElementException e) {
-            throw new NoSuchElementException("No such element: " + childPathCreator.apply(this.cursor));
+            node = Nodes.createByPath(path, ele);
+        } catch (RuntimeException e) {
+            throw new NodeException("Unknown value of '" + path + "'.", e);
         }
+
+        this.cursor ++;
+        return node;
     }
 }

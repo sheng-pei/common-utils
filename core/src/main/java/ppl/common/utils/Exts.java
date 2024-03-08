@@ -33,6 +33,10 @@ public class Exts {
         return cnt;
     }
 
+    private Exts.Builder builder() {
+        return new Builder();
+    }
+
     public Ext getExt(String string) {
         int periodIdx = string.lastIndexOf('.');
         if (periodIdx == -1) {
@@ -56,6 +60,19 @@ public class Exts {
             idx++;
         }
         return ret == null ? new Ext(false, first) : new Ext(true, ret);
+    }
+
+    public static class Builder {
+        private final Set<String> exts = new HashSet<>();
+
+        public Builder add(String ext) {
+            this.exts.add(ext);
+            return this;
+        }
+
+        public Exts build() {
+            return new Exts(exts);
+        }
     }
 
     public static class Ext {

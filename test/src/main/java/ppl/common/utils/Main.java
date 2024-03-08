@@ -2,6 +2,9 @@ package ppl.common.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ppl.common.utils.config.Node;
+import ppl.common.utils.config.Nodes;
+import ppl.common.utils.config.Value;
 import ppl.common.utils.filesystem.core.CFile;
 import ppl.common.utils.filesystem.core.Connection;
 import ppl.common.utils.filesystem.core.FileSystem;
@@ -12,16 +15,18 @@ import ppl.common.utils.filesystem.path.Paths;
 import ppl.common.utils.filesystem.sftp.SftpProperties;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
 //        CommandArguments arguments = CommandArguments.newBuilder()
 //                .addArgument(ValueOptionArgument.requiredIdentity("host", 'h'))
 //                .addArgument(ToggleOptionArgument.toggle("enabled", 'e'))
@@ -47,8 +52,16 @@ public class Main {
 //                System.out.println(files.size());
 //            }
 //        }
-
-        Exts exts = new Exts(Arrays.asList("zip"));
-        System.out.println(exts.getExt("a.zip"));
+        Properties properties = new Properties();
+        properties.load(Main.class.getClassLoader().getResourceAsStream("a.properties"));
+        Node node = Nodes.root(properties);
+        System.out.println(node.size());
+        for (Node n : node) {
+            for (Node n1 : n) {
+                for (Node n2 : n1) {
+                    System.out.println(n2.path() + ": " + n2.textValue());
+                }
+            }
+        }
     }
 }

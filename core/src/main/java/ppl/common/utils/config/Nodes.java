@@ -7,6 +7,7 @@ import ppl.common.utils.config.nodes.NullNode;
 import ppl.common.utils.config.nodes.jackson.JacksonFactory;
 import ppl.common.utils.config.nodes.list.ListFactory;
 import ppl.common.utils.config.nodes.map.MapFactory;
+import ppl.common.utils.config.nodes.map.PropertiesFactory;
 import ppl.common.utils.config.nodes.scalar.ScalarFactory;
 
 import java.util.*;
@@ -43,6 +44,7 @@ public class Nodes {
         res.add(new ListFactory());
         res.add(new MapFactory());
         res.add(new JacksonFactory());
+        res.add(new PropertiesFactory());
         return res;
     }
 
@@ -118,7 +120,6 @@ public class Nodes {
      * @return a node out of the specified material whose path is the specified path. It is
      * created by a factory that accepts the material and has the highest priority if the
      * material is not null. Otherwise, a {@link NullNode} will be returned.
-     * @throws IllegalArgumentException if no factory accepts the specified material.
      */
     public static Node createByPath(String path, Object material) {
         if (material == null) {
@@ -140,16 +141,32 @@ public class Nodes {
     public static <E> Set<E> toSet(Node reader, Function<Node, E> elementConverter) {
         Objects.requireNonNull(reader, "Reader must not be null.");
         Objects.requireNonNull(elementConverter, "Element converter must not be null.");
+        if (reader instanceof NullNode || reader instanceof MissingNode) {
+            return Collections.emptySet();
+        }
+
         Set<E> res = new HashSet<>();
-        reader.iterator().forEachRemaining(r -> res.add(elementConverter.apply(r)));
+        if (reader.isContainer()) {
+            reader.iterator().forEachRemaining(r -> res.add(elementConverter.apply(r)));
+        } else {
+            res.add(elementConverter.apply(reader));
+        }
         return res;
     }
 
     public static <E> List<E> toList(Node reader, Function<Node, E> elementConverter) {
         Objects.requireNonNull(reader, "Reader must not be null.");
         Objects.requireNonNull(elementConverter, "Element converter must not be null.");
+        if (reader instanceof NullNode || reader instanceof MissingNode) {
+            return Collections.emptyList();
+        }
+
         List<E> res = new ArrayList<>();
-        reader.iterator().forEachRemaining(r -> res.add(elementConverter.apply(r)));
+        if (reader.isContainer()) {
+            reader.iterator().forEachRemaining(r -> res.add(elementConverter.apply(r)));
+        } else {
+            res.add(elementConverter.apply(reader));
+        }
         return res;
     }
 
@@ -157,6 +174,14 @@ public class Nodes {
         Objects.requireNonNull(reader, "Reader must not be null.");
         Objects.requireNonNull(kConverter, "Key converter must not be null.");
         Objects.requireNonNull(vConverter, "Value converter must not be null.");
+        if (reader instanceof NullNode || reader instanceof MissingNode) {
+            return Collections.emptyMap();
+        }
+
+        if (!reader.isContainer()) {
+            throw new NodeException("Scalar node.");
+        }
+
         Map<K, V> res = new HashMap<>();
         reader.iterator().forEachRemaining(r -> {
             res.put(kConverter.apply(r), vConverter.apply(r));

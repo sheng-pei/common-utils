@@ -8,6 +8,8 @@ public final class StopWatch {
         return new StopWatch().start();
     }
 
+    private StopWatch() {}
+
     private long startTicker;
 
     private StopWatch start() {

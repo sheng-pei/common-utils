@@ -1,6 +1,5 @@
 package ppl.common.utils.config.nodes.iterator;
 
-import ppl.common.utils.string.Strings;
 import ppl.common.utils.config.Node;
 import ppl.common.utils.config.NodeException;
 import ppl.common.utils.config.Nodes;
@@ -40,9 +39,7 @@ public class ObjectIterator implements Iterator<Node> {
         try {
             return Nodes.createByPath(path, entry.getValue());
         } catch (IllegalArgumentException e) {
-            throw new NodeException(Strings.format("Unrecognized value type: '{}' of path: '{}'",
-                    entry.getValue() == null ? "null" : entry.getValue().getClass().getName(), path
-            ), e);
+            throw new NodeException("Unknown value of '" + path + "'.", e);
         }
     }
 }
