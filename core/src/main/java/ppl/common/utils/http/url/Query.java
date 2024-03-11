@@ -1,39 +1,34 @@
 package ppl.common.utils.http.url;
 
+import ppl.common.utils.character.ascii.AsciiGroup;
+import ppl.common.utils.character.ascii.Mask;
+import ppl.common.utils.net.URLDecoder;
 import ppl.common.utils.net.URLEncoder;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Predicate;
 
 public class Query {
-    private static final char DEFAULT_DELIMITER = '=';
-    private static final URLEncoder DEFAULT_ENCODER = URLEncoder.builder()
-            .or(Predicate.<Character>isEqual(DEFAULT_DELIMITER).negate())
-            .build();
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-    private final char delimiter;
+    public static Query create(String name, String value) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Name is required.");
+        }
+        return new Query(name, value);
+    }
+
     private final String name;
     private final String value;
-    private final URLEncoder encoder;
 
-    private Query(String name, String value, char delimiter) {
-        if (delimiter == DEFAULT_DELIMITER) {
-            encoder = DEFAULT_ENCODER;
-        } else {
-            encoder = URLEncoder.builder()
-                    .or(Predicate.<Character>isEqual(DEFAULT_DELIMITER).negate())
-                    .build();
-        }
-        this.delimiter = delimiter;
+    private Query(String name, String value) {
         this.name = name;
         this.value = value;
     }
 
-    private Query(String name, String value) {
-        this(name, value, DEFAULT_DELIMITER);
-    }
-
     public Query setValue(String value) {
-        return new Query(name, value, delimiter);
+        return new Query(name, value);
     }
 
     public String getName() {
@@ -44,16 +39,25 @@ public class Query {
         return value;
     }
 
-    @Override
-    public String toString() {
-        return encoder.parse(name) + (value == null ? "" : delimiter + value);
+    public String name() {
+        return URLDecoder.decode(name, DEFAULT_CHARSET);
     }
 
-    public static Query create(String name, String value) {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("Name is required.");
-        }
-        return new Query(name, value);
+    public String value() {
+        return URLDecoder.decode(value, DEFAULT_CHARSET);
+    }
+
+    public String name(Charset charset) {
+        return URLDecoder.decode(name, charset);
+    }
+
+    public String value(Charset charset) {
+        return URLDecoder.decode(value, charset);
+    }
+
+    @Override
+    public String toString() {
+        return "(" + name + (value == null ? "" : "," + value) + ")";
     }
 
 }

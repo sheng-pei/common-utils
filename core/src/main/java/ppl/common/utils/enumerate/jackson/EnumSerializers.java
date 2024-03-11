@@ -9,6 +9,12 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class EnumSerializers extends SimpleSerializers {
+    private static final EnumSerializers INSTANCE = new EnumSerializers();
+
+    public static EnumSerializers getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public JsonSerializer<?> findSerializer(SerializationConfig config, JavaType type, BeanDescription beanDesc) {
         Class<?> raw = type.getRawClass();

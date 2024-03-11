@@ -162,8 +162,8 @@ public class Agent {
     }
 
     private URL createOperation(URL url, Op op) {
-        return url.appendQuery("op", op.name())
-                .appendQuery("user.name", user);
+        return url.appendDynamicQuery("op", op.name())
+                .appendDynamicQuery("user.name", user);
     }
 
     private class RetrierImpl<T> extends Retrier<Path, URL, T> {

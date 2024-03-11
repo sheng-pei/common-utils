@@ -11,8 +11,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import ppl.common.utils.IOUtils;
 import ppl.common.utils.enumerate.EnumUtils;
+import ppl.common.utils.enumerate.jackson.EnumDeserializers;
+import ppl.common.utils.enumerate.jackson.EnumSerializers;
 
 import java.io.*;
+import java.util.Date;
 import java.util.List;
 
 public class JsonUtils {
@@ -20,52 +23,10 @@ public class JsonUtils {
 
     static {
         SimpleModule module = new SimpleModule();
-        module.setSerializers(new SimpleSerializers() {
-            @Override
-            public JsonSerializer<?> findSerializer(SerializationConfig config, JavaType type, BeanDescription beanDesc) {
-                Class<?> raw = type.getRawClass();
-                if (type.getRawClass().isEnum()) {
-                    @SuppressWarnings("unchecked")
-                    Class<? extends Enum<?>> eClass = (Class<? extends Enum<?>>) raw;
-                    if (EnumUtils.isEncodeSupport(eClass)) {
-                        return new JsonSerializer<Enum<? extends Enum<?>>>() {
-                            @Override
-                            public void serialize(Enum<? extends Enum<?>> value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                                Object obj = EnumUtils.encode(value);
-                                if (obj instanceof String) {
-                                    gen.writeString(obj.toString());
-                                } else if (obj instanceof Character) {
-                                    gen.writeString(obj.toString());
-                                } else if (obj instanceof Number) {
-                                    gen.writeNumber(obj.toString());
-                                }
-                            }
-                        };
-                    }
-                }
-                return super.findSerializer(config, type, beanDesc);
-            }
-        });
-        module.setDeserializers(new SimpleDeserializers() {
-            @Override
-            public JsonDeserializer<?> findEnumDeserializer(Class<?> type, DeserializationConfig config, BeanDescription beanDesc) throws JsonMappingException {
-                if (type.isEnum()) {
-                    @SuppressWarnings("unchecked")
-                    Class<? extends Enum<?>> eClass = (Class<? extends Enum<?>>) type;
-                    if (EnumUtils.isEncodeSupport(eClass)) {
-                        return new JsonDeserializer<Enum<? extends Enum<?>>>() {
-                            @SuppressWarnings({"DuplicateThrows", "RedundantThrows"})
-                            @Override
-                            public Enum<? extends Enum<?>> deserialize(JsonParser p, DeserializationContext context) throws IOException, JacksonException {
-                                Class<?> keyClass = EnumUtils.getKeyType(eClass);
-                                return EnumUtils.enumOf(eClass, p.readValueAs(keyClass));
-                            }
-                        };
-                    }
-                }
-                return super.findEnumDeserializer(type, config, beanDesc);
-            }
-        });
+        module.setSerializers(new EnumSerializers());
+        module.setDeserializers(new EnumDeserializers());
+        module.addDeserializer(Date.class, new DateTimeDeserializer());
+        module.addSerializer(Date.class, new DateTimeSerializer());
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(module);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

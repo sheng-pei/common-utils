@@ -2,8 +2,11 @@ package ppl.common.utils.net;
 
 import ppl.common.utils.HexUtils;
 import ppl.common.utils.character.ascii.AsciiGroup;
+import ppl.common.utils.exception.UnreachableCodeException;
 import ppl.common.utils.string.Strings;
 
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Predicate;
@@ -30,27 +33,30 @@ public class URLEncoder {
         }
 
         byte[] bytes = string.getBytes(charset);
-        StringBuilder builder = new StringBuilder(string.length());
+        ByteArrayOutputStream stream = new ByteArrayOutputStream(bytes.length);
         for (int i = 0; i < bytes.length; i++) {
             if ('%' == bytes[i] && percentEncodingReserved) {
                 if (bytes.length - i > 2 &&
                         AsciiGroup.HEX_DIGIT.test((char) bytes[i+1]) &&
                         AsciiGroup.HEX_DIGIT.test((char) bytes[i+2])) {
-                    builder.append((char) bytes[i])
-                            .append((char) bytes[i + 1])
-                            .append((char) bytes[i + 2]);
+                    stream.write(bytes, i, 3);
                     i += 2;
                     continue;
                 }
             }
 
             if (dontNeedToEncode.test((char) bytes[i])) {
-                builder.append((char) bytes[i]);
+                stream.write(bytes[i]);
             } else {
-                builder.append('%').append(HexUtils.hex(bytes[i]));
+                stream.write('%');
+                stream.write(HexUtils.hex(bytes[i]).getBytes(), 0, 2);
             }
         }
-        return builder.toString();
+        try {
+            return stream.toString(charset.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new UnreachableCodeException(e);
+        }
     }
 
     public static String encode(String string) {

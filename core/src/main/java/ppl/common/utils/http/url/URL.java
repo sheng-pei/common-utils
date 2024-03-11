@@ -1,9 +1,11 @@
 package ppl.common.utils.http.url;
 
+import ppl.common.utils.character.ascii.AsciiGroup;
 import ppl.common.utils.character.ascii.Mask;
+import ppl.common.utils.net.URLDecoder;
 import ppl.common.utils.net.URLEncoder;
-import ppl.common.utils.string.Strings;
 import ppl.common.utils.pair.Pair;
+import ppl.common.utils.string.Strings;
 import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.SubstringFinder;
 import ppl.common.utils.string.substring.impl.SundaySubstringFinder;
@@ -11,17 +13,20 @@ import ppl.common.utils.string.substring.impl.SundaySubstringFinder;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Standard or compatible form of http(s) url like 'host[:8888][/path][?query][#fragment]'.
  */
 public class URL {
-
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
     private static final String DEFAULT_PROTOCOL = HTTP;
@@ -69,7 +74,7 @@ public class URL {
         int skip;
         if (chars[start] == '/') {//Starts with '//' i.e. authority. Use default scheme: http.
             skip = start + 2;
-        } else if (chars[start] == '[') {//Maybe starts with ip-literal, incompatible url.
+        } else if (chars[start] == '[') {//Maybe starts with ip-literal, compatible url.
             skip = start;
         } else {
             SubstringFinder finder = new SundaySubstringFinder("://");
@@ -138,7 +143,7 @@ public class URL {
     private static void invalidUserInfo(char[] chars, int start) {
         int atIdx = Strings.indexOf('@', chars, start, chars.length);
         if (atIdx >= 0) {
-            throw new IllegalArgumentException("Invalid authority, userinfo is not allowed.");
+            throw new IllegalArgumentException("Invalid authority, userinfo is not allowed for http(s).");
         }
     }
 
@@ -249,8 +254,16 @@ public class URL {
         return (HttpURLConnection) new java.net.URL(toString()).openConnection(proxy);
     }
 
-    public URL base() {
-        return new URL(scheme, host, port, "", null, null, Collections.emptyList());
+    public String scheme() {
+        return scheme;
+    }
+
+    public String host() {
+        return host;
+    }
+
+    public int port() {
+        return port;
     }
 
     public String path() {
@@ -265,60 +278,55 @@ public class URL {
         return fragment;
     }
 
-    public URL appendQuery(String name, String value) {
-        Query q = Query.create(name, value);
-        checkQuery(q);
+    public URL raw() {
+        return new URL(scheme, host, port, path, query, fragment, Collections.emptyList());
+    }
+
+    public URL base() {
+        return new URL(scheme, host, port, "", null, null, Collections.emptyList());
+    }
+
+    public URL noQuery() {
+        return new URL(scheme, host, port, path, null, fragment, Collections.emptyList());
+    }
+
+    public URL appendDynamicQuery(String name, String value) {
+        Query q = Query.create(DYNAMIC_QUERY_ENCODER.parse(name, DEFAULT_CHARSET),
+                DYNAMIC_QUERY_ENCODER.parse(value, DEFAULT_CHARSET));
         List<Query> queries = new ArrayList<>(this.queries);
         queries.add(q);
         return new URL(scheme, host, port, path, this.query, fragment, Collections.unmodifiableList(queries));
     }
 
-    public URL replaceQuery(int i, Query query) {
-        checkQuery(query);
-        List<Query> queries = new ArrayList<>(this.queries);
-        queries.set(i, query);
+    public URL removeDynamicQuery(String name) {
+        List<Query> queries = this.queries.stream()
+                .filter(q -> !(q.name(DEFAULT_CHARSET).equals(URLDecoder.decode(name, DEFAULT_CHARSET))))
+                .collect(Collectors.toList());
         return new URL(scheme, host, port, path, this.query, fragment, Collections.unmodifiableList(queries));
     }
 
-    private void checkQuery(Query query) {
-        String qStr = query.toString();
-        if (!QUERY_AND_FRAGMENT_PATTERN.matcher(qStr).matches()) {
-            throw new IllegalArgumentException("Invalid query: '" + qStr + "'.");
-        }
-    }
-
-    public Query getQuery(int i) {
+    public Query getDynamicQuery(int i) {
         if (queries == null || i < 0 || i >= queries.size()) {
             throw new IndexOutOfBoundsException("" + i);
         }
         return queries.get(i);
     }
 
-    public URL clearQuery() {
-        return new URL(scheme, host, port, path, null, fragment, Collections.emptyList());
-    }
-
-    public URL rawUrl() {
-        return new URL(scheme, host, port, path, query, fragment, Collections.emptyList());
-    }
-
     @Override
     public String toString() {
-        URLEncoder encoder = URLEncoder.builder()
-                .setPercentEncodingReserved(true)
-                .or(Predicate.<Character>isEqual('&').negate())
-                .build();
         StringBuilder builder = new StringBuilder(scheme).append(":")
                 .append("//").append(generateAuthority());
-                if (path != null) {
-                    builder.append(path);
-                }
-        String query = appendToUrlQuery(concatAppendQueries(encoder));
-        if (query != null) {
-            builder.append('?').append(query);
+        if (path != null) {
+            builder.append(path);
         }
+
+        String[] dynamicQueries = dynamicQueries();
+        builder.append('?')
+                .append(concatQuery(this.query, dynamicQueries));
+
         if (fragment != null) {
-            builder.append('#').append(fragment);
+            builder.append('#')
+                    .append(fragment);
         }
         return builder.toString();
     }
@@ -336,28 +344,32 @@ public class URL {
         return builder.toString();
     }
 
-    private String concatAppendQueries(URLEncoder encoder) {
-        StringBuilder appendQueries = new StringBuilder();
+    private static final String QUERY_DELIMITER = "&";
+    private static final String NV_SEPARATOR = "=";
+    private static final URLEncoder DYNAMIC_QUERY_ENCODER = URLEncoder.builder()
+            .setPercentEncodingReserved(true)
+            .or(Mask.mask("$'()*+,;:@/?-").predicate())
+            .or(Mask.NON_OCTET.predicate())
+            .build();
+
+    private String[] dynamicQueries() {
         List<Query> queries = this.queries;
+        List<String> ret = new ArrayList<>();
         if (queries != null && !queries.isEmpty()) {
             for (Query q : queries) {
-                appendQueries.append(encoder.parse(q.toString())).append('&');
+                ret.add(q.getName() + NV_SEPARATOR + q.getValue());
             }
-            appendQueries.setLength(appendQueries.length() - 1);
         }
-        return appendQueries.toString();
+        return ret.toArray(new String[0]);
     }
 
-    private String appendToUrlQuery(String appendQueries) {
-        String query = this.query;
+    private String concatQuery(String query, String[] dynamicQueries) {
+        String ret = "";
         if (query != null && !query.isEmpty()) {
-            if (!appendQueries.isEmpty()) {
-                query = query + '&' + appendQueries;
-            }
-        } else {
-            if (!appendQueries.isEmpty()) {
-                query = appendQueries;
-            }
+            ret += query + QUERY_DELIMITER;
+        }
+        if (dynamicQueries.length != 0) {
+            query = ret + String.join(QUERY_DELIMITER, dynamicQueries);
         }
         return query;
     }

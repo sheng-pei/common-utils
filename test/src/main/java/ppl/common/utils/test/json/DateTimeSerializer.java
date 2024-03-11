@@ -1,4 +1,4 @@
-package ppl.common.utils.json;
+package ppl.common.utils.test.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

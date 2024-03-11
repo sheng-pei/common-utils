@@ -10,6 +10,12 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class EnumDeserializers extends SimpleDeserializers {
+    private static final EnumDeserializers INSTANCE = new EnumDeserializers();
+
+    public static EnumDeserializers getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public JsonDeserializer<?> findEnumDeserializer(Class<?> type, DeserializationConfig config, BeanDescription beanDesc) throws JsonMappingException {
         if (type.isEnum()) {

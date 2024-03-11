@@ -1,6 +1,7 @@
-package ppl.common.utils.json;
+package ppl.common.utils.test.json;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
@@ -13,7 +14,7 @@ import java.util.Date;
 public class DateTimeDeserializer extends JsonDeserializer<Date> {
 
     @Override
-    public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+    public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
         String text = jsonParser.getText();
         if (text == null || text.isEmpty()) {
             return null;
@@ -27,7 +28,8 @@ public class DateTimeDeserializer extends JsonDeserializer<Date> {
     }
 
     @Override
-    public Class<?> handledType() {
+    public Class<Date> handledType() {
         return Date.class;
     }
+
 }
