@@ -17,6 +17,7 @@ import ppl.common.utils.filesystem.ftp.FtpProperties;
 import ppl.common.utils.filesystem.path.Path;
 import ppl.common.utils.filesystem.path.Paths;
 import ppl.common.utils.filesystem.sftp.SftpProperties;
+import ppl.common.utils.http.url.Queries;
 import ppl.common.utils.http.url.Query;
 import ppl.common.utils.http.url.URL;
 import ppl.common.utils.net.URLEncoder;
@@ -84,11 +85,7 @@ public class Main {
         url = url.removeDynamicQuery("jk");
         System.out.println(url.toString());
 
-        URLEncoder encoder = URLEncoder.builder()
-                .or(Mask.mask("$'()*+,;:@/?-").predicate())
-                .or(Mask.NON_OCTET.predicate())
-                .build();
-        System.out.println(encoder.parse("&=jfie nzj.?d你好"));
-        System.out.println("你好");
+        List<Query> q = Queries.parseQueries("%20a=jng=ko&&finge=你好");
+        System.out.println(q.toString());
     }
 }

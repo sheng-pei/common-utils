@@ -6,7 +6,7 @@
     <parent>
         <groupId>ppl.common.utils</groupId>
         <artifactId>common-utils</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>common-utils-test</artifactId>
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>ppl.common.utils</groupId>
             <artifactId>common-utils-core</artifactId>
-            <version>1.4-SNAPSHOT</version>
+            <version>1.5-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

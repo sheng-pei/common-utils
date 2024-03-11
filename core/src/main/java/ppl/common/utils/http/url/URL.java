@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class URL {
                     "(?:(?:[0-9a-fA-F]{1,4}:){0,5}[0-9a-fA-F]{1,4})?::[0-9a-fA-F]{1,4}|" +
                     "(?:(?:[0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4})?::");
     private static final Pattern PATH_PATTERN = Pattern.compile("(?:/(?:[a-zA-Z0-9_.~!$&'()*+,;=:@-]|[^\\00-\\0177]|%[0-9a-fA-F]{2})*)*");
-    private static final Pattern QUERY_AND_FRAGMENT_PATTERN = Pattern.compile("(?:[a-zA-Z0-9_.~!$&'()*+,;=:@/?-]|[^\\00-\\0177]|%[0-9a-fA-F]{2})*");
+    public static final Pattern QUERY_AND_FRAGMENT_PATTERN = Pattern.compile("(?:[a-zA-Z0-9_.~!$&'()*+,;=:@/?-]|[^\\00-\\0177]|%[0-9a-fA-F]{2})*");
 
     private final String scheme;
     private final String host;
@@ -291,10 +292,21 @@ public class URL {
     }
 
     public URL appendDynamicQuery(String name, String value) {
-        Query q = Query.create(DYNAMIC_QUERY_ENCODER.parse(name, DEFAULT_CHARSET),
-                DYNAMIC_QUERY_ENCODER.parse(value, DEFAULT_CHARSET));
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Name is required.");
+        }
+
+        Query q = Query.create(DYNAMIC_QUERY_NAME_ENCODER.parse(name, DEFAULT_CHARSET),
+                DYNAMIC_QUERY_VALUE_ENCODER.parse(value, DEFAULT_CHARSET));
         List<Query> queries = new ArrayList<>(this.queries);
         queries.add(q);
+        return new URL(scheme, host, port, path, this.query, fragment, Collections.unmodifiableList(queries));
+    }
+
+    public URL appendDynamicQuery(Query query) {
+        Objects.requireNonNull(query, "Query is required.");
+        List<Query> queries = new ArrayList<>(this.queries);
+        queries.add(query);
         return new URL(scheme, host, port, path, this.query, fragment, Collections.unmodifiableList(queries));
     }
 
@@ -344,11 +356,16 @@ public class URL {
         return builder.toString();
     }
 
-    private static final String QUERY_DELIMITER = "&";
-    private static final String NV_SEPARATOR = "=";
-    private static final URLEncoder DYNAMIC_QUERY_ENCODER = URLEncoder.builder()
+    public static final String QUERY_DELIMITER = "&";
+    public static final String NV_SEPARATOR = "=";
+    private static final URLEncoder DYNAMIC_QUERY_NAME_ENCODER = URLEncoder.builder()
             .setPercentEncodingReserved(true)
             .or(Mask.mask("$'()*+,;:@/?-").predicate())
+            .or(Mask.NON_OCTET.predicate())
+            .build();
+    private static final URLEncoder DYNAMIC_QUERY_VALUE_ENCODER = URLEncoder.builder()
+            .setPercentEncodingReserved(true)
+            .or(Mask.mask("$'()*+=,;:@/?-").predicate())
             .or(Mask.NON_OCTET.predicate())
             .build();
 

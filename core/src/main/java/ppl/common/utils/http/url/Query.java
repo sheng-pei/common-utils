@@ -1,22 +1,22 @@
 package ppl.common.utils.http.url;
 
-import ppl.common.utils.character.ascii.AsciiGroup;
-import ppl.common.utils.character.ascii.Mask;
 import ppl.common.utils.net.URLDecoder;
-import ppl.common.utils.net.URLEncoder;
+import ppl.common.utils.pair.Pair;
+import ppl.common.utils.string.Strings;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Predicate;
 
 public class Query {
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-    public static Query create(String name, String value) {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("Name is required.");
-        }
+    static Query create(String name, String value) {
         return new Query(name, value);
+    }
+
+    static Query parse(String query) {
+        Pair<String, String> pair = Strings.kv(query, URL.NV_SEPARATOR.charAt(0));
+        return Query.create(pair.getFirst(), pair.getSecond());
     }
 
     private final String name;
