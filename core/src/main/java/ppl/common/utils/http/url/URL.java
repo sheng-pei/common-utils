@@ -15,10 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -291,13 +288,25 @@ public class URL {
         return new URL(scheme, host, port, path, null, fragment, Collections.emptyList());
     }
 
-    public URL appendDynamicQuery(String name, String value) {
+    public URL dynamic() {
+        if (query == null || query.isEmpty()) {
+            return this;
+        }
+
+        List<Query> queries = Queries.unsafeParseQueries(query);
+        return new URL(scheme, host, port, path, null, fragment, Collections.unmodifiableList(queries));
+    }
+
+    public URL appendDynamicQuery(String name, Object value) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Name is required.");
         }
 
-        Query q = Query.create(DYNAMIC_QUERY_NAME_ENCODER.parse(name, DEFAULT_CHARSET),
-                DYNAMIC_QUERY_VALUE_ENCODER.parse(value, DEFAULT_CHARSET));
+        String v = Optional.ofNullable(value)
+                .map(Object::toString)
+                .map(s -> DYNAMIC_QUERY_VALUE_ENCODER.parse(s, DEFAULT_CHARSET))
+                .orElse(null);
+        Query q = Query.create(DYNAMIC_QUERY_NAME_ENCODER.parse(name, DEFAULT_CHARSET), v);
         List<Query> queries = new ArrayList<>(this.queries);
         queries.add(q);
         return new URL(scheme, host, port, path, this.query, fragment, Collections.unmodifiableList(queries));
@@ -315,6 +324,12 @@ public class URL {
                 .filter(q -> !(q.name(DEFAULT_CHARSET).equals(URLDecoder.decode(name, DEFAULT_CHARSET))))
                 .collect(Collectors.toList());
         return new URL(scheme, host, port, path, this.query, fragment, Collections.unmodifiableList(queries));
+    }
+
+    public List<Query> getDynamicQuery(String name) {
+        return this.queries.stream()
+                .filter(q -> q.name(DEFAULT_CHARSET).equals(URLDecoder.decode(name, DEFAULT_CHARSET)))
+                .collect(Collectors.toList());
     }
 
     public Query getDynamicQuery(int i) {

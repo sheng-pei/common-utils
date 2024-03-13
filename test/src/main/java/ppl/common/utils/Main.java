@@ -1,41 +1,19 @@
 package ppl.common.utils;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ppl.common.utils.character.ascii.Mask;
-import ppl.common.utils.config.Node;
-import ppl.common.utils.config.Nodes;
-import ppl.common.utils.config.Value;
-import ppl.common.utils.filesystem.core.CFile;
-import ppl.common.utils.filesystem.core.Connection;
-import ppl.common.utils.filesystem.core.FileSystem;
-import ppl.common.utils.filesystem.core.Protocol;
-import ppl.common.utils.filesystem.ftp.FtpProperties;
-import ppl.common.utils.filesystem.path.Path;
-import ppl.common.utils.filesystem.path.Paths;
-import ppl.common.utils.filesystem.sftp.SftpProperties;
 import ppl.common.utils.http.url.Queries;
 import ppl.common.utils.http.url.Query;
 import ppl.common.utils.http.url.URL;
-import ppl.common.utils.net.URLEncoder;
 import ppl.common.utils.test.JsonData;
 import ppl.common.utils.test.ResBody;
 import ppl.common.utils.test.json.JsonUtil;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.util.List;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -87,5 +65,13 @@ public class Main {
 
         List<Query> q = Queries.parseQueries("%20a=jng=ko&&finge=你好");
         System.out.println(q.toString());
+
+        java.net.URL url1 = new java.net.URL("http://localhost:18080/myapp/rest1/test2");
+        HttpURLConnection conn = (HttpURLConnection) url1.openConnection();
+        conn.connect();
+        conn.getInputStream();
+        conn.disconnect();
+
+        url1.openConnection();
     }
 }

@@ -18,11 +18,7 @@ public class Queries {
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Invalid http url query string: '" + queries + "'.");
         }
-        String[] strings = Strings.split(queries, Pattern.quote(URL.QUERY_DELIMITER));
-        return Arrays.stream(strings)
-                .filter(Strings::isNotEmpty)
-                .map(Query::parse)
-                .collect(Collectors.toList());
+        return unsafeParseQueries(queries);
     }
 
     public static Query parseQuery(String query) {
@@ -38,5 +34,13 @@ public class Queries {
         }
 
         return Query.parse(query);
+    }
+
+    static List<Query> unsafeParseQueries(String queries) {
+        String[] strings = Strings.split(queries, Pattern.quote(URL.QUERY_DELIMITER));
+        return Arrays.stream(strings)
+                .filter(Strings::isNotEmpty)
+                .map(Query::parse)
+                .collect(Collectors.toList());
     }
 }

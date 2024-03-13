@@ -44,7 +44,7 @@ public class Query {
     }
 
     public String value() {
-        return URLDecoder.decode(value, DEFAULT_CHARSET);
+        return value == null ? null : URLDecoder.decode(value, DEFAULT_CHARSET);
     }
 
     public String name(Charset charset) {
@@ -52,7 +52,7 @@ public class Query {
     }
 
     public String value(Charset charset) {
-        return URLDecoder.decode(value, charset);
+        return value == null ? null : URLDecoder.decode(value, charset);
     }
 
     @Override

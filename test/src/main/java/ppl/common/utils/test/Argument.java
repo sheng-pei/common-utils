@@ -1,4 +1,4 @@
-package ppl.common.utils.argument.argument;
+package ppl.common.utils.test;
 
 import java.util.function.BiFunction;
 
@@ -7,7 +7,7 @@ public class Argument<K, V> {
     private final BiFunction<Argument<K, V>, V, String> toCanonicalString;
 
     protected Argument(K name,
-                       BiFunction<? extends Argument<K, V>, V, String> toCanonicalString) {
+                       BiFunction<Argument<K, V>, V, String> toCanonicalString) {
         if (name == null) {
             throw new IllegalArgumentException("Argument name is required.");
         }
@@ -26,7 +26,7 @@ public class Argument<K, V> {
         return this.name;
     }
 
-    public final String toCanonicalString(V value) {
+    public String toCanonicalString(V value) {
         return toCanonicalString.apply(this, value);
     }
 }
