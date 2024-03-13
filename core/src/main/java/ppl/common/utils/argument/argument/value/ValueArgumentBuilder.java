@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-public abstract class ValueArgumentBuilder<K, V, A extends ValueArgument<K, V>> {
+public abstract class ValueArgumentBuilder<K, V> {
 
     protected K name;
     protected Function<String, Stream<String>> splitter;
@@ -24,17 +24,13 @@ public abstract class ValueArgumentBuilder<K, V, A extends ValueArgument<K, V>> 
         this.name = name;
     }
 
-    public ValueArgumentBuilder<K, V, A> split(Function<String, Stream<String>> splitter) {
+    public ValueArgumentBuilder<K, V> split(Function<String, Stream<String>> splitter) {
         Objects.requireNonNull(splitter);
         this.splitter = splitter;
         return self();
     }
 
-    public ValueArgumentBuilder<K, V, A> map(Function<V, V> mapper) {
-        return map(mapper, null);
-    }
-
-    public <R, A extends ValueArgument<K, R>> ValueArgumentBuilder<K, R, A> map(Function<V, R> mapper, TypeReference<A> ref) {
+    public <R> ValueArgumentBuilder<K, R> map(Function<V, R> mapper) {
         Objects.requireNonNull(mapper);
         if (collector != null) {
             throw new IllegalStateException("Setting mapper after collector is not allowed.");
@@ -50,16 +46,12 @@ public abstract class ValueArgumentBuilder<K, V, A extends ValueArgument<K, V>> 
         return self();
     }
 
-    public ValueArgumentBuilder<K, V, A> collect() {
+    public ValueArgumentBuilder<K, V> collect() {
         this.collector = ExCollectors.one();
         return self();
     }
 
-    public ValueArgumentBuilder<K, V, A> collect(Collector<V, ?, V> collector) {
-        return collect(collector, null);
-    }
-
-    public <R, A extends ValueArgument<K, R>> ValueArgumentBuilder<K, R, A> collect(Collector<V, ?, R> collector, TypeReference<A> ref) {
+    public <R> ValueArgumentBuilder<K, R> collect(Collector<V, ?, R> collector) {
         Objects.requireNonNull(collector);
         this.collector = collector;
         return self();
@@ -71,7 +63,7 @@ public abstract class ValueArgumentBuilder<K, V, A extends ValueArgument<K, V>> 
         return self;
     }
 
-    public A build(BiFunction<A, V, String> toCanonicalString) {
+    public <A extends ValueArgument<K, V>> A build(BiFunction<A, V, String> toCanonicalString) {
         List<?> mappers = this.mappers;
         Collector<?, ?, ?> collector = this.collector;
         return create(name, splitter,
@@ -80,7 +72,7 @@ public abstract class ValueArgumentBuilder<K, V, A extends ValueArgument<K, V>> 
                 toCanonicalString);
     }
 
-    protected abstract A create(
+    protected abstract <A extends ValueArgument<K, V>> A create(
             K name,
             Function<String, Stream<String>> splitter,
             List<?> mappers,

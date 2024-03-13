@@ -3,7 +3,6 @@ package ppl.common.utils.command;
 import ppl.common.utils.argument.argument.value.ValueArgumentNormalizer;
 import ppl.common.utils.argument.argument.value.ValueArgument;
 import ppl.common.utils.argument.argument.value.ValueArgumentBuilder;
-import ppl.common.utils.argument.argument.value.TypeReference;
 import ppl.common.utils.string.Strings;
 
 import java.util.*;
@@ -19,12 +18,6 @@ public class PositionArgument<V> extends ValueArgument<String, V> {
             ValueArgumentNormalizer.newBuilder("", true)
                     .withKey(p -> "")
                     .build();
-
-    public static <V> TypeReference<PositionArgument<V>> ref() {
-        @SuppressWarnings("unchecked")
-        TypeReference<PositionArgument<V>> res = (TypeReference<PositionArgument<V>>) TypeReference.TYPE_REFERENCE;
-        return res;
-    }
 
     public static <V> BiFunction<PositionArgument<V>, V, String> newToCanonical(Function<V, String> value) {
         return ValueArgumentNormalizer.<String, V, PositionArgument<V>>newBuilder("", true)
@@ -75,21 +68,26 @@ public class PositionArgument<V> extends ValueArgument<String, V> {
                 getPosition(), getName());
     }
 
-    public static class Builder<V> extends ValueArgumentBuilder<String, V, PositionArgument<V>> {
+    public static class Builder<V> extends ValueArgumentBuilder<String, V> {
         private Builder(String name) {
             super(name);
         }
 
         @Override
-        protected PositionArgument<V> create(
+        protected <A extends ValueArgument<String, V>> A create(
                 String name,
                 Function<String, Stream<String>> splitter,
                 List<?> mappers,
                 Collector<?, ?, ?> collector,
-                BiFunction<PositionArgument<V>, V, String> toCanonicalString) {
-            return new PositionArgument<>(name,
+                BiFunction<A, V, String> toCanonicalString) {
+            BiFunction<PositionArgument<V>, V, String> bi = defToCanonical();
+            @SuppressWarnings("unchecked")
+            BiFunction<PositionArgument<V>, V, String> in = (BiFunction<PositionArgument<V>, V, String>) toCanonicalString;
+            @SuppressWarnings("unchecked")
+            A ret = (A) new PositionArgument<>(name,
                     splitter, mappers,
-                    collector, toCanonicalString == null ? defToCanonical() : toCanonicalString);
+                    collector, toCanonicalString == null ? bi : in);
+            return ret;
         }
     }
 }

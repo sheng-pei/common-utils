@@ -20,7 +20,7 @@ public class Mime implements Arguments<CaseIgnoreString, String, ValueArgument<C
     private static final ValueArgument<CaseIgnoreString, Charset> CHARSET_ARGUMENT =
             BaseValueArgument.newBuilder(CaseIgnoreString.create("charset"))
                     .map(Mime::eraseQuotedString)
-                    .map(Charset::forName, BaseValueArgument.ref())
+                    .map(Charset::forName)
                     .collect()
                     .build(ValueArgumentNormalizer.<CaseIgnoreString, Charset, BaseValueArgument<CaseIgnoreString, Charset>>newBuilder(
                             "" + ParameterizedHeaderValue.SEPARATOR,

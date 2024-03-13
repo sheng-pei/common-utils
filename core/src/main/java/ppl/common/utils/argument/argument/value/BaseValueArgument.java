@@ -8,12 +8,6 @@ import java.util.stream.Stream;
 
 public class BaseValueArgument<K, V> extends ValueArgument<K, V> {
 
-    public static <K, V> TypeReference<BaseValueArgument<K, V>> ref() {
-        @SuppressWarnings("unchecked")
-        TypeReference<BaseValueArgument<K, V>> res = (TypeReference<BaseValueArgument<K, V>>) TypeReference.TYPE_REFERENCE;
-        return res;
-    }
-
     protected BaseValueArgument(K name,
                                 Function<String, Stream<String>> splitter,
                                 @SuppressWarnings("rawtypes") List mappers,
@@ -22,24 +16,23 @@ public class BaseValueArgument<K, V> extends ValueArgument<K, V> {
         super(name, splitter, mappers, collector, toCanonicalString);
     }
 
-    public static <K> ValueArgumentBuilder<K, String, BaseValueArgument<K, String>> newBuilder(K name) {
+    public static <K> ValueArgumentBuilder<K, String> newBuilder(K name) {
         return new Builder<>(name);
     }
 
-    public static class Builder<K, V> extends ValueArgumentBuilder<K, V, BaseValueArgument<K, V>> {
+    public static class Builder<K, V> extends ValueArgumentBuilder<K, V> {
 
-        public Builder(K name) {
+        private Builder(K name) {
             super(name);
         }
 
         @Override
-        protected BaseValueArgument<K, V> create(
-                K name,
-                Function<String, Stream<String>> splitter,
-                List<?> mappers,
-                Collector<?, ?, ?> collector,
-                BiFunction<BaseValueArgument<K, V>, V, String> toCanonicalString) {
-            return new BaseValueArgument<>(name, splitter, mappers, collector, toCanonicalString);
+        protected <A extends ValueArgument<K, V>> A create(K name, Function<String, Stream<String>> splitter, List<?> mappers, Collector<?, ?, ?> collector, BiFunction<A, V, String> toCanonicalString) {
+            @SuppressWarnings("unchecked")
+            BiFunction<BaseValueArgument<K, V>, V, String> in = (BiFunction<BaseValueArgument<K, V>, V, String>) toCanonicalString;
+            @SuppressWarnings("unchecked")
+            A ret = (A) new BaseValueArgument<>(name, splitter, mappers, collector, in);
+            return ret;
         }
     }
 

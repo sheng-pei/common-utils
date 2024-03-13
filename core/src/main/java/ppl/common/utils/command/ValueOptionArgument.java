@@ -1,9 +1,8 @@
 package ppl.common.utils.command;
 
-import ppl.common.utils.argument.argument.value.ValueArgumentNormalizer;
-import ppl.common.utils.argument.argument.value.TypeReference;
 import ppl.common.utils.argument.argument.value.ValueArgument;
 import ppl.common.utils.argument.argument.value.ValueArgumentBuilder;
+import ppl.common.utils.argument.argument.value.ValueArgumentNormalizer;
 import ppl.common.utils.argument.argument.value.collector.ExCollectors;
 import ppl.common.utils.string.Strings;
 
@@ -16,12 +15,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ValueOptionArgument<V> extends ValueArgument<String, V> implements Option {
-
-    public static <V> TypeReference<ValueOptionArgument<V>> ref() {
-        @SuppressWarnings("unchecked")
-        TypeReference<ValueOptionArgument<V>> res = (TypeReference<ValueOptionArgument<V>>) TypeReference.TYPE_REFERENCE;
-        return res;
-    }
 
     private static class OptionId implements Function<BaseOption, String> {
         @Override
@@ -67,7 +60,7 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
 
     public static ValueOptionArgument<String> requiredIdentity(String longOption, Character shortOption) {
         return newBuilder(longOption, shortOption)
-                .collect(ExCollectors.required(), ValueOptionArgument.ref())
+                .collect(ExCollectors.required())
                 .build(defToCanonical());
     }
 
@@ -90,7 +83,7 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
                                                                List<String> longOptions,
                                                                List<Character> shortOptions) {
         return newBuilder(name, longOptions, shortOptions)
-                .collect(ExCollectors.one(), ValueOptionArgument.ref())
+                .collect(ExCollectors.one())
                 .build(defToCanonical());
     }
 
@@ -139,11 +132,24 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
         return Strings.format("{}, name->{}", this.option, getName());
     }
 
-    public static class Builder<V> extends ValueArgumentBuilder<String, V, ValueOptionArgument<V>> {
+    public static class Builder<V> extends ValueArgumentBuilder<String, V> {
         private final BaseOption.Builder option = BaseOption.newBuilder();
 
         private Builder(String name) {
             super(name);
+        }
+
+        @Override
+        protected <A extends ValueArgument<String, V>> A create(String name, Function<String, Stream<String>> splitter, List<?> mappers, Collector<?, ?, ?> collector, BiFunction<A, V, String> toCanonicalString) {
+            BiFunction<ValueOptionArgument<V>, V, String> bi = defToCanonical();
+            @SuppressWarnings("unchecked")
+            BiFunction<ValueOptionArgument<V>, V, String> in = (BiFunction<ValueOptionArgument<V>, V, String>) toCanonicalString;
+            @SuppressWarnings("unchecked")
+            A ret = (A) new ValueOptionArgument<>(name,
+                    option.build(),
+                    splitter, mappers,
+                    collector, toCanonicalString == null ? bi : in);
+            return ret;
         }
 
         private Builder<V> withLongOptions(List<String> longOptions) {
@@ -158,19 +164,6 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
                     .distinct()
                     .collect(Collectors.toList()));
             return this;
-        }
-
-        @Override
-        protected ValueOptionArgument<V> create(
-                String name,
-                Function<String, Stream<String>> splitter,
-                List<?> mappers,
-                Collector<?, ?, ?> collector,
-                BiFunction<ValueOptionArgument<V>, V, String> toCanonicalString) {
-            return new ValueOptionArgument<>(name,
-                    option.build(),
-                    splitter, mappers,
-                    collector, toCanonicalString == null ? defToCanonical() : toCanonicalString);
         }
     }
 
