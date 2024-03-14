@@ -1,5 +1,7 @@
 package ppl.common.utils.argument.argument;
 
+import java.util.Objects;
+
 public abstract class Argument {
     private final String name;
 
@@ -17,4 +19,16 @@ public abstract class Argument {
 
     public abstract String keyString();
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Argument argument = (Argument) object;
+        return Objects.equals(name, argument.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }

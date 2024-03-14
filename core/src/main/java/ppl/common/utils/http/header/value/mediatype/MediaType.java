@@ -8,6 +8,10 @@ import ppl.common.utils.http.header.value.parameter.ParameterizedHeaderValue;
 
 public class MediaType extends ParameterizedHeaderValue<Mime, MediaType> {
 
+    public static HeaderValue create(String mediaType) {
+        return create(mediaType, null);
+    }
+
     public static HeaderValue create(String mediaType, Context context) {
         try {
             return new MediaType(mediaType, context);

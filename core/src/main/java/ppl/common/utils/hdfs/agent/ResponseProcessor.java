@@ -31,7 +31,7 @@ public class ResponseProcessor {
     public static RuntimeException processError(Response response) {
         ContentType contentType = response.getHeader(ContentType.class);
         MediaType value = contentType.knownValue();
-        if (value == null || !Mime.JSON.equals(value.getTarget())) {
+        if (value == null || !Mime.JSON.equals(value.getArguments())) {
             return new UnsupportedMimeException("Only json is supported. " +
                     "Please check content type: " + contentType.toCanonicalString());
         }
@@ -70,7 +70,7 @@ public class ResponseProcessor {
         }
 
         MediaType value = contentType.knownValue();
-        if (value == null || !Mime.JSON.equals(value.getTarget())) {
+        if (value == null || !Mime.JSON.equals(value.getArguments())) {
             throw new UnsupportedMimeException("Only json is supported. " +
                     "Please check content type: " + contentType.toCanonicalString());
         }

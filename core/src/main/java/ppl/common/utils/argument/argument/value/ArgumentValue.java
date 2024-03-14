@@ -16,6 +16,10 @@ public class ArgumentValue<V> {
         this.value = value;
     }
 
+    public ValueArgument<V> getArgument() {
+        return argument;
+    }
+
     public String keyString() {
         return argument.keyString();
     }

@@ -26,12 +26,6 @@ public class BaseArguments implements Arguments<String, ValueArgument<Object>> {
     }
 
     @Override
-    public List<ValueArgument<Object>> getArguments() {
-        Map<CaseIgnoreString, ValueArgument<Object>> arguments = map();
-        return arguments.isEmpty() ? Collections.emptyList() : new ArrayList<>(arguments.values());
-    }
-
-    @Override
     public ValueArgument<Object> getByKey(String s) {
         if (s == null) {
             return null;

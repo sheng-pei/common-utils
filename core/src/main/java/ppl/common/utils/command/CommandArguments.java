@@ -41,13 +41,6 @@ public class CommandArguments implements Arguments<Object, Argument> {
     }
 
     @Override
-    public List<Argument> getArguments() {
-        @SuppressWarnings({"rawtypes", "unchecked"})
-        List<Argument> res = new ArrayList<>(allArguments.values());
-        return res;
-    }
-
-    @Override
     public Argument getByKey(Object s) {
         if (s instanceof String) {
             String option = (String) s;

@@ -9,6 +9,9 @@ import ppl.common.utils.filesystem.core.Connection;
 import ppl.common.utils.filesystem.core.FileSystem;
 import ppl.common.utils.filesystem.core.Protocol;
 import ppl.common.utils.filesystem.sftp.SftpProperties;
+import ppl.common.utils.http.header.HeaderValue;
+import ppl.common.utils.http.header.known.ContentType;
+import ppl.common.utils.http.header.value.mediatype.MediaType;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -86,5 +89,9 @@ public class Main {
 //        conn.disconnect();
 //
 //        url1.openConnection();
+        HeaderValue mediaType = MediaType.create("appLication/jSon;chaRset=utf-8;charset=gbk", null);
+        System.out.println(mediaType.toCanonicalString());
+        MediaType mt = (MediaType) mediaType;
+        System.out.println(mt.getArguments());
     }
 }

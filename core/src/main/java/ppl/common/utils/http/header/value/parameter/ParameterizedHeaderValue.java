@@ -1,6 +1,7 @@
 package ppl.common.utils.http.header.value.parameter;
 
 import ppl.common.utils.argument.analyzer.Analyzer;
+import ppl.common.utils.argument.argument.Argument;
 import ppl.common.utils.argument.argument.Arguments;
 import ppl.common.utils.argument.argument.value.ArgumentValue;
 import ppl.common.utils.argument.argument.value.ValueArgument;
@@ -9,7 +10,6 @@ import ppl.common.utils.http.header.SingleLineHeaderValue;
 import ppl.common.utils.http.symbol.HttpCharGroup;
 import ppl.common.utils.pair.Pair;
 import ppl.common.utils.string.Strings;
-import ppl.common.utils.string.ascii.CaseIgnoreString;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,37 +18,37 @@ import java.util.Map;
 import java.util.function.Function;
 
 public abstract class ParameterizedHeaderValue<
-        T extends Arguments<String, ValueArgument<Object>>,
-        P extends ParameterizedHeaderValue<T, P>> extends SingleLineHeaderValue {
+        AS extends Arguments<String, ValueArgument<Object>>,
+        PHV extends ParameterizedHeaderValue<AS, PHV>> extends SingleLineHeaderValue {
 
     static final char DELIMITER = ';';
     public static final char SEPARATOR = '=';
 
-    private final T target;
-    private final Map<CaseIgnoreString, ArgumentValue<Object>> parameters;
+    private final AS arguments;
+    private final Map<Argument, ArgumentValue<Object>> parameters;
     private final String unknownParameters;
 
     protected ParameterizedHeaderValue(String value,
-                                       Function<String, T> targetCreator,
+                                       Function<String, AS> argumentsCreator,
                                        Context context) {
         super(value);
-        Pair<String, String> pair = cutTargetFrom(value);
-        T target = createTarget(pair.getFirst(), targetCreator);
-        Analyzer<String> analyzer = new Analyzer<>(target);
+        Pair<String, String> pair = partitionTargetAndArguments(value);
+        AS arguments = createArguments(pair.getFirst(), argumentsCreator);
+        Analyzer<String> analyzer = new Analyzer<>(arguments);
         ParameterParser parser = parser(context);
         List<Object> res = analyzer.analyse(parser.parse(pair.getSecond()));
 
-        Map<CaseIgnoreString, ArgumentValue<Object>> ps = new HashMap<>();
+        Map<Argument, ArgumentValue<Object>> ps = new HashMap<>();
         StringBuilder ups = new StringBuilder();
         res.forEach(o -> {
             if (o instanceof ArgumentValue) {
                 @SuppressWarnings("unchecked")
                 ArgumentValue<Object> av = (ArgumentValue<Object>) o;
-                ps.put(CaseIgnoreString.create(av.name()), av);
+                ps.put(av.getArgument(), av);
             } else if (o instanceof ValueArgument) {
                 @SuppressWarnings("unchecked")
                 ValueArgument<Object> a = (ValueArgument<Object>) o;
-                ps.put(CaseIgnoreString.create(a.name()), ArgumentValue.create(a, null));
+                ps.put(a, ArgumentValue.create(a, null));
             } else {
                 ups.append(o).append(DELIMITER).append(" ");
             }
@@ -57,18 +57,22 @@ public abstract class ParameterizedHeaderValue<
             ups.setLength(ups.length() - 2);
         }
 
-        this.target = target;
+        this.arguments = arguments;
         this.parameters = ps;
         this.unknownParameters = ups.toString();
     }
 
+    public AS getArguments() {
+        return arguments;
+    }
+
     private static <T extends Arguments<String, ValueArgument<Object>>>
-    T createTarget(String target, Function<String, T> targetCreator) {
+    T createArguments(String target, Function<String, T> targetCreator) {
         required(target);
         return targetCreator.apply(target);
     }
 
-    private static Pair<String, String> cutTargetFrom(String string) {
+    private static Pair<String, String> partitionTargetAndArguments(String string) {
         char[] chars = string.toCharArray();
         int start = 0;
         String first;
@@ -113,58 +117,53 @@ public abstract class ParameterizedHeaderValue<
         return ParameterParser.DEFAULT;
     }
 
-    public T getTarget() {
-        return target;
-    }
-
-    public final P appendLexicalParameter(String name, String value) {
+    public final PHV appendLexicalParameter(String name, String value) {
         ensureKnown(name);
         ParameterParser parser = ParameterParser.DEFAULT;
-        List<Object> res = new Analyzer<>(target)
+        List<Object> res = new Analyzer<>(arguments)
                 .analyse(parser.parse(name, value));
         @SuppressWarnings("unchecked")
         ArgumentValue<Object> av = (ArgumentValue<Object>) res.get(0);
-        CaseIgnoreString n = CaseIgnoreString.create(av.name());
-        ArgumentValue<Object> exist = parameters.get(n);
-        parameters.put(n, exist == null ? av : exist.merge(av));
+        ArgumentValue<Object> exist = parameters.get(av.getArgument());
+        parameters.put(av.getArgument(), exist == null ? av : exist.merge(av));
         return self();
     }
 
-    public final P removeParameter(String name) {
+    public final PHV removeParameter(String name) {
         ensureKnown(name);
-        CaseIgnoreString k = CaseIgnoreString.create(name);
-        parameters.remove(k);
+        parameters.remove(arguments.getByKey(name));
         return self();
     }
 
-    private P self() {
+    private PHV self() {
         @SuppressWarnings("unchecked")
-        P p = (P) this;
-        return p;
+        PHV PHV = (PHV) this;
+        return PHV;
     }
 
-    public final P setParameter(String name, Object value) {
+    public final PHV setParameter(String name, Object value) {
         ensureKnown(name);
-        ArgumentValue<Object> av = ArgumentValue.create(target.getByName(name), value);
-        parameters.remove(CaseIgnoreString.create(name));
+        ValueArgument<Object> a = arguments.getByKey(name);
+        ArgumentValue<Object> av = ArgumentValue.create(a, value);
+        parameters.remove(a);
         return appendLexicalParameter(name, av.toString());
     }
 
     public final Object getParameter(String name) {
         ensureKnown(name);
-        ArgumentValue<Object> p = parameters.get(CaseIgnoreString.create(name));
+        ArgumentValue<Object> p = parameters.get(arguments.getByKey(name));
         return p == null ? null : p.value();
     }
 
     public final boolean hasParameter(String name) {
         ensureKnown(name);
-        return parameters.containsKey(CaseIgnoreString.create(name));
+        return parameters.containsKey(arguments.getByKey(name));
     }
 
     private void ensureKnown(String name) {
-        if (target.getByKey(name) == null) {
+        if (arguments.getByKey(name) == null) {
             throw new IllegalArgumentException(Strings.format(
-                    "Unknown parameter: '{}' for: '{}'.", name, target));
+                    "Unknown parameter: '{}' for: '{}'.", name, arguments));
         }
     }
 
@@ -175,7 +174,7 @@ public abstract class ParameterizedHeaderValue<
 
     private String toCanonicalString(Collection<? extends ArgumentValue<?>> parameters) {
         String p = concatParameters(parameters);
-        return target.toString() + (p.isEmpty() ? "" : DELIMITER + " " + concatParameters(parameters));
+        return arguments.toString() + (p.isEmpty() ? "" : DELIMITER + " " + concatParameters(parameters));
     }
 
     private String concatParameters(Collection<? extends ArgumentValue<?>> parameters) {

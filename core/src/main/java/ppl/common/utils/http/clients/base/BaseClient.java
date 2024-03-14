@@ -115,7 +115,7 @@ public class BaseClient extends AbstractClient {
                 .flatMap(te -> te.value().getValues().stream())
                 .map(this::checkUnknown)
                 .map(hv -> (Coding) hv)
-                .map(Coding::getTarget)
+                .map(Coding::getArguments)
                 .map(this::checkChunked)
                 .findAny()
                 .isPresent();

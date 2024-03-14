@@ -118,11 +118,6 @@ public class Mime implements Arguments<String, ValueArgument<Object>> {
     }
 
     @Override
-    public List<ValueArgument<Object>> getArguments() {
-        return arguments.getArguments();
-    }
-
-    @Override
     public ValueArgument<Object> getByKey(String s) {
         return arguments.getByKey(s);
     }
