@@ -20,6 +20,10 @@ public class ContentType implements Header<MediaType> {
         this.value = mediaType;
     }
 
+    public ContentType(String mediaType) {
+        this(MediaType.ensureKnown(mediaType));
+    }
+
     @Override
     public HeaderValue value() {
         return value;

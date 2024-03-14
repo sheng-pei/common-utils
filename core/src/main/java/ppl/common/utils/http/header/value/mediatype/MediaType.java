@@ -20,6 +20,10 @@ public class MediaType extends ParameterizedHeaderValue<Mime, MediaType> {
         }
     }
 
+    public static MediaType ensureKnown(String mediaType) {
+        return new MediaType(mediaType, null);
+    }
+
     private MediaType(String mediaType, Context context) {
         super(mediaType, Mime::create, context);
     }
