@@ -3,6 +3,7 @@ package ppl.common.utils.command;
 import ppl.common.utils.argument.analyzer.Analyzer;
 import ppl.common.utils.argument.argument.Argument;
 import ppl.common.utils.argument.argument.ArgumentException;
+import ppl.common.utils.argument.argument.value.ValueArgument;
 import ppl.common.utils.argument.parser.Fragment;
 import ppl.common.utils.argument.argument.value.ArgumentValue;
 
@@ -95,6 +96,37 @@ public class Command {
 
     public <V> V get(String argument, Class<V> clazz) {
         return get(argument, null, clazz);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (Object o : toggles.entrySet()) {
+            @SuppressWarnings("unchecked")
+            Map.Entry<String, Argument> e = (Map.Entry<String, Argument>) o;
+            builder.append(e.getValue().keyString()).append(SEPARATOR);
+        }
+        for (Object o : values.entrySet()) {
+            @SuppressWarnings("unchecked")
+            Map.Entry<String, ArgumentValue<?>> e = (Map.Entry<String, ArgumentValue<?>>) o;
+            ArgumentValue<?> av = e.getValue();
+            String k = av.keyString();
+            String v = av.valueString();
+            builder.append(k);
+            if (v != null) {
+                builder.append(SEPARATOR);
+                builder.append(v);
+            }
+            builder.append(SEPARATOR);
+        }
+        if (!remains.isEmpty()) {
+            builder.append(BaseOption.END_OPTION_FLAG).append(SEPARATOR);
+            for (String r : remains) {
+                builder.append(r).append(SEPARATOR);
+            }
+        }
+        builder.setLength(builder.length() - SEPARATOR.length());
+        return builder.toString();
     }
 }
 
