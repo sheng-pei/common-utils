@@ -48,7 +48,7 @@ public class ECharset implements Element<Charset>, RequestInitializer {
                 MediaType mediaType = (MediaType) value;
                 Mime mime = mediaType.getTarget();
                 String name = Client.CHARSET;
-                if (mime.get(name) != null && !mediaType.hasParameter(name)) {
+                if (mime.getByKey(name) != null && !mediaType.hasParameter(name)) {
                     mediaType = mediaType.appendLexicalParameter(name, charset.toString());
                     request.setHeader(new ContentType(mediaType));
                 }

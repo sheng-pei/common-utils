@@ -15,6 +15,7 @@ import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -23,17 +24,17 @@ public class Main {
         CommandArguments arguments = CommandArguments.newBuilder()
                 .addArgument(ValueOptionArgument.newBuilder("test", 't').split(s -> {
                     return Arrays.stream(s.split(","));
-                }).map(Integer::parseInt).collect(ExCollectors.set()).build(ValueOptionArgument.newToCanonical(s -> {
+                }).map(Integer::parseInt).collect(ExCollectors.set()).build(s -> {
                     StringBuilder builder = new StringBuilder();
                     for (Integer i : s) {
                         builder.append(i).append(",");
                     }
                     builder.setLength(builder.length() - 1);
                     return builder.toString();
-                })))
+                }))
                 .addArgument(ValueOptionArgument.requiredIdentity("host", 'h'))
                 .addArgument(ToggleOptionArgument.toggle("enabled", 'e'))
-                .addArgument(PositionArgument.newBuilder("config").build(PositionArgument.defToCanonical()))
+                .addArgument(PositionArgument.newBuilder("config").build(Function.identity()))
                 .build();
         CommandParser parser = new CommandParser(arguments);
 //        parser.parse(args).forEach(System.out::println);

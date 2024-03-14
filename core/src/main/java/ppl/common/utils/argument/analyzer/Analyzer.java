@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class Analyzer<K, S> {
-    private final Arguments<K, S, ?> arguments;
+public class Analyzer<S> {
+    private final Arguments<S, ?> arguments;
 
-    public Analyzer(Arguments<K, S, ?> arguments) {
+    public Analyzer(Arguments<S, ?> arguments) {
         this.arguments = arguments;
     }
 
@@ -29,17 +29,18 @@ public class Analyzer<K, S> {
      */
     public List<Object> analyse(Stream<Fragment<S, String>> entryStream) {
         List<Object> res = new ArrayList<>();
-        Map<K, FeedingStream<K, Object>> feedingStreams = new HashMap<>();
+        Map<String, FeedingStream<Object>> feedingStreams = new HashMap<>();
         entryStream.forEach(f -> {
-            Argument<K, Object> argument = arguments.get(f.getKey());
+            Argument argument = arguments.getByKey(f.getKey());
             if (argument == null) {
                 res.add(f);
             } else if (argument instanceof ValueArgument) {
-                ValueArgument<K, Object> valueArgument = (ValueArgument<K, Object>) argument;
+                @SuppressWarnings("unchecked")
+                ValueArgument<Object> valueArgument = (ValueArgument<Object>) argument;
                 feedingStreams
-                        .computeIfAbsent(argument.getName(), k -> valueArgument.stream())
+                        .computeIfAbsent(argument.name(), k -> valueArgument.stream())
                         .feed(f.getValue());
-            } else {
+            } else {//argument instanceof Argument
                 if (f.getValue() != null) {
                     throw new ArgumentException(String.format(
                             "The argument: '%s' is a no value argument and cannot receive value: '%s'.",

@@ -96,7 +96,7 @@ public class CommandParser implements StringArrayParser<Object, String> {
         String remain = argument.substring(sLen + 1);
 
         try {
-            Argument<String, ?> op = option(option);
+            Argument op = option(option);
             if (op instanceof ToggleOptionArgument) {
                 fragments.add(new OptionFragment(option, null));
                 parseBriefToggleShortOptions(fragments, remain);
@@ -112,7 +112,7 @@ public class CommandParser implements StringArrayParser<Object, String> {
         char[] chars = toggleShortOptions.toCharArray();
         for (char c : chars) {
             String option = sOption(c);
-            Argument<String, ?> op;
+            Argument op;
             try {
                 op = option(option);
             } catch (IllegalArgumentException e) {
@@ -137,7 +137,7 @@ public class CommandParser implements StringArrayParser<Object, String> {
     }
 
     private void parseLongOption(List<Fragment<?, String>> fragments, String option) {
-        Argument<String, ?> op = option(option);
+        Argument op = option(option);
         if (op instanceof ToggleOptionArgument) {
             fragments.add(new OptionFragment(option, null));
         } else {
@@ -149,8 +149,8 @@ public class CommandParser implements StringArrayParser<Object, String> {
         return BaseOption.SHORT_OPTION_PREFIX + c;
     }
 
-    private Argument<String, Object> option(String option) {
-        Argument<String, Object> op = arguments.get(option);
+    private Argument option(String option) {
+        Argument op = arguments.getByKey(option);
         if (op == null) {
             throw new IllegalArgumentException(Strings.format(
                     "Unknown option '{}'.", option));

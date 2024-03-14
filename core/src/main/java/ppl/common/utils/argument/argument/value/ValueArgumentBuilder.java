@@ -1,36 +1,36 @@
 package ppl.common.utils.argument.argument.value;
 
+import ppl.common.utils.argument.argument.Argument;
+import ppl.common.utils.argument.argument.ArgumentBuilder;
 import ppl.common.utils.argument.argument.value.collector.ExCollectors;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-public abstract class ValueArgumentBuilder<K, V> {
+public abstract class ValueArgumentBuilder<V> extends ArgumentBuilder {
 
-    protected K name;
     protected Function<String, Stream<String>> splitter;
     @SuppressWarnings("rawtypes")
     protected List mappers;
     @SuppressWarnings("rawtypes")
     protected Collector collector;
 
-    public ValueArgumentBuilder(K name) {
-        this.name = name;
+    public ValueArgumentBuilder(String name) {
+        super(name);
     }
 
-    public ValueArgumentBuilder<K, V> split(Function<String, Stream<String>> splitter) {
+    public ValueArgumentBuilder<V> split(Function<String, Stream<String>> splitter) {
         Objects.requireNonNull(splitter);
         this.splitter = splitter;
         return self();
     }
 
-    public <R> ValueArgumentBuilder<K, R> map(Function<V, R> mapper) {
+    public <R> ValueArgumentBuilder<R> map(Function<V, R> mapper) {
         Objects.requireNonNull(mapper);
         if (collector != null) {
             throw new IllegalStateException("Setting mapper after collector is not allowed.");
@@ -46,12 +46,12 @@ public abstract class ValueArgumentBuilder<K, V> {
         return self();
     }
 
-    public ValueArgumentBuilder<K, V> collect() {
+    public ValueArgumentBuilder<V> collect() {
         this.collector = ExCollectors.one();
         return self();
     }
 
-    public <R> ValueArgumentBuilder<K, R> collect(Collector<V, ?, R> collector) {
+    public <R> ValueArgumentBuilder<R> collect(Collector<V, ?, R> collector) {
         Objects.requireNonNull(collector);
         this.collector = collector;
         return self();
@@ -63,20 +63,26 @@ public abstract class ValueArgumentBuilder<K, V> {
         return self;
     }
 
-    public <A extends ValueArgument<K, V>> A build(BiFunction<A, V, String> toCanonicalString) {
+    public final <A extends ValueArgument<V>> A build(Function<V, String> normalizer) {
         List<?> mappers = this.mappers;
         Collector<?, ?, ?> collector = this.collector;
         return create(name, splitter,
                 mappers == null ? null : Collections.unmodifiableList(mappers),
-                collector == null ? ExCollectors.one() : collector,
-                toCanonicalString);
+                collector == null ? ExCollectors.one() : collector, normalizer);
     }
 
-    protected abstract <A extends ValueArgument<K, V>> A create(
-            K name,
+    @Override
+    protected final <A extends Argument> A create(String name) {
+        @SuppressWarnings("unchecked")
+        A ret = (A) create(name, splitter, mappers, collector, Object::toString);
+        return ret;
+    }
+
+    protected abstract <A extends ValueArgument<V>> A create(
+            String name,
             Function<String, Stream<String>> splitter,
             List<?> mappers,
             Collector<?, ?, ?> collector,
-            BiFunction<A, V, String> toCanonicalString);
+            Function<V, String> valueNormalizer);
 
 }

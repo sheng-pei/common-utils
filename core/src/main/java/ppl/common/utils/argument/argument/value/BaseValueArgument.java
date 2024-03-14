@@ -1,39 +1,47 @@
 package ppl.common.utils.argument.argument.value;
 
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-public class BaseValueArgument<K, V> extends ValueArgument<K, V> {
+public class BaseValueArgument<V> extends ValueArgument<V> {
 
-    protected BaseValueArgument(K name,
+    protected BaseValueArgument(String name,
                                 Function<String, Stream<String>> splitter,
                                 @SuppressWarnings("rawtypes") List mappers,
                                 @SuppressWarnings("rawtypes") Collector collector,
-                                BiFunction<BaseValueArgument<K, V>, V, String> toCanonicalString) {
-        super(name, splitter, mappers, collector, toCanonicalString);
+                                Function<V, String> valueNormalizer) {
+        super(name, splitter, mappers, collector, valueNormalizer);
     }
 
-    public static <K> ValueArgumentBuilder<K, String> newBuilder(K name) {
+    @Override
+    public String keyString() {
+        return name();
+    }
+
+    public static ValueArgumentBuilder<String> newBuilder(String name) {
         return new Builder<>(name);
     }
 
-    public static class Builder<K, V> extends ValueArgumentBuilder<K, V> {
+    public static class Builder<V> extends ValueArgumentBuilder<V> {
 
-        private Builder(K name) {
+        private Builder(String name) {
             super(name);
         }
 
         @Override
-        protected <A extends ValueArgument<K, V>> A create(K name, Function<String, Stream<String>> splitter, List<?> mappers, Collector<?, ?, ?> collector, BiFunction<A, V, String> toCanonicalString) {
+        protected <A extends ValueArgument<V>> A create(
+                String name,
+                Function<String, Stream<String>> splitter,
+                List<?> mappers,
+                Collector<?, ?, ?> collector,
+                Function<V, String> valueNormalizer) {
             @SuppressWarnings("unchecked")
-            BiFunction<BaseValueArgument<K, V>, V, String> in = (BiFunction<BaseValueArgument<K, V>, V, String>) toCanonicalString;
-            @SuppressWarnings("unchecked")
-            A ret = (A) new BaseValueArgument<>(name, splitter, mappers, collector, in);
+            A ret = (A) new BaseValueArgument<>(name, splitter, mappers, collector, valueNormalizer);
             return ret;
         }
+
     }
 
 }

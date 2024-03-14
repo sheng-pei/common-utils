@@ -3,30 +3,24 @@ package ppl.common.utils.http.header.value.mediatype;
 import ppl.common.utils.argument.argument.Arguments;
 import ppl.common.utils.argument.argument.value.BaseValueArgument;
 import ppl.common.utils.argument.argument.value.ValueArgument;
-import ppl.common.utils.argument.argument.value.ValueArgumentNormalizer;
 import ppl.common.utils.http.header.BaseArguments;
-import ppl.common.utils.http.header.value.parameter.ParameterizedHeaderValue;
+import ppl.common.utils.http.header.value.UnknownParameterTargetException;
 import ppl.common.utils.http.symbol.HttpCharGroup;
 import ppl.common.utils.http.symbol.Lexer;
 import ppl.common.utils.string.Strings;
 import ppl.common.utils.string.ascii.CaseIgnoreString;
-import ppl.common.utils.http.header.value.UnknownParameterTargetException;
 
 import java.nio.charset.Charset;
 import java.util.*;
 
-public class Mime implements Arguments<CaseIgnoreString, String, ValueArgument<CaseIgnoreString, Object>> {
+public class Mime implements Arguments<String, ValueArgument<Object>> {
 
-    private static final ValueArgument<CaseIgnoreString, Charset> CHARSET_ARGUMENT =
-            BaseValueArgument.newBuilder(CaseIgnoreString.create("charset"))
+    private static final ValueArgument<Charset> CHARSET_ARGUMENT =
+            BaseValueArgument.newBuilder("charset")
                     .map(Mime::eraseQuotedString)
                     .map(Charset::forName)
                     .collect()
-                    .build(ValueArgumentNormalizer.<CaseIgnoreString, Charset, BaseValueArgument<CaseIgnoreString, Charset>>newBuilder(
-                            "" + ParameterizedHeaderValue.SEPARATOR,
-                            true)
-                            .withValue(v -> Lexer.quoteString(v.name().toLowerCase()))
-                            .build());
+                    .build(v -> Lexer.quoteString(v.name().toLowerCase()));
 
     private static final Map<CaseIgnoreString, Mime> MIMES;
     public static final Mime JSON;
@@ -67,14 +61,14 @@ public class Mime implements Arguments<CaseIgnoreString, String, ValueArgument<C
         this(string, Collections.emptyList());
     }
 
-    Mime(String string, List<? extends ValueArgument<CaseIgnoreString, ?>> arguments) {
+    Mime(String string, List<? extends ValueArgument<?>> arguments) {
         string = Strings.emptyIfNull(string).trim();
         int slashIdx = string.indexOf('/');
         if (slashIdx < 0) {
             throw new IllegalArgumentException("Subtype is required.");
         }
         if (!Lexer.isToken(string.substring(0, slashIdx)) ||
-                !Lexer.isToken(string.substring(slashIdx+1))) {
+                !Lexer.isToken(string.substring(slashIdx + 1))) {
             throw new IllegalArgumentException("Type or subtype is not token.");
         }
         this.mime = CaseIgnoreString.create(string);
@@ -124,17 +118,17 @@ public class Mime implements Arguments<CaseIgnoreString, String, ValueArgument<C
     }
 
     @Override
-    public List<ValueArgument<CaseIgnoreString, Object>> getArguments() {
+    public List<ValueArgument<Object>> getArguments() {
         return arguments.getArguments();
     }
 
     @Override
-    public ValueArgument<CaseIgnoreString, Object> get(String s) {
-        return arguments.get(s);
+    public ValueArgument<Object> getByKey(String s) {
+        return arguments.getByKey(s);
     }
 
     @Override
-    public ValueArgument<CaseIgnoreString, Object> getByName(CaseIgnoreString caseIgnoreString) {
-        return arguments.getByName(caseIgnoreString);
+    public ValueArgument<Object> getByName(String name) {
+        return arguments.getByName(name);
     }
 }

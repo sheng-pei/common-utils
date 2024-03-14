@@ -4,54 +4,56 @@ import ppl.common.utils.argument.argument.Arguments;
 import ppl.common.utils.argument.argument.value.ValueArgument;
 import ppl.common.utils.string.ascii.CaseIgnoreString;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.*;
 
-public class BaseArguments implements Arguments<CaseIgnoreString, String, ValueArgument<CaseIgnoreString, Object>> {
+public class BaseArguments implements Arguments<String, ValueArgument<Object>> {
 
     public static final BaseArguments EMPTY = new BaseArguments(Collections.emptyList());
 
     @SuppressWarnings("rawtypes")
     private final Map arguments;
 
-    public BaseArguments(List<? extends ValueArgument<CaseIgnoreString, ?>> arguments) {
-        this.arguments = Collections.unmodifiableMap(arguments.stream()
-                .collect(Collectors.toMap(ValueArgument::getName, Function.identity())));
+    public BaseArguments(List<? extends ValueArgument<?>> arguments) {
+        Map<Object, Object> m = new HashMap<>();
+        for (ValueArgument<?> va : arguments) {
+            CaseIgnoreString cis = CaseIgnoreString.create(va.name());
+            if (m.containsKey(cis)) {
+                throw new IllegalArgumentException("Duplicate argument: " + cis.toString() + ".");
+            }
+            m.put(cis, va);
+        }
+        this.arguments = Collections.unmodifiableMap(m);
     }
 
     @Override
-    public List<ValueArgument<CaseIgnoreString, Object>> getArguments() {
-        Map<CaseIgnoreString, ValueArgument<CaseIgnoreString, Object>> arguments = map();
+    public List<ValueArgument<Object>> getArguments() {
+        Map<CaseIgnoreString, ValueArgument<Object>> arguments = map();
         return arguments.isEmpty() ? Collections.emptyList() : new ArrayList<>(arguments.values());
     }
 
     @Override
-    public ValueArgument<CaseIgnoreString, Object> get(String s) {
+    public ValueArgument<Object> getByKey(String s) {
         if (s == null) {
             return null;
         }
-        return pGetByName(CaseIgnoreString.create(s));
+        return pGetByName(s);
     }
 
     @Override
-    public ValueArgument<CaseIgnoreString, Object> getByName(CaseIgnoreString caseIgnoreString) {
-        if (caseIgnoreString == null) {
+    public ValueArgument<Object> getByName(String name) {
+        if (name == null) {
             return null;
         }
-        return pGetByName(caseIgnoreString);
+        return pGetByName(name);
     }
 
-    private ValueArgument<CaseIgnoreString, Object> pGetByName(CaseIgnoreString caseIgnoreString) {
-        return map().get(caseIgnoreString);
+    private ValueArgument<Object> pGetByName(String name) {
+        return map().get(CaseIgnoreString.create(name));
     }
 
-    private Map<CaseIgnoreString, ValueArgument<CaseIgnoreString, Object>> map() {
+    private Map<CaseIgnoreString, ValueArgument<Object>> map() {
         @SuppressWarnings("unchecked")
-        Map<CaseIgnoreString, ValueArgument<CaseIgnoreString, Object>> arguments = this.arguments;
+        Map<CaseIgnoreString, ValueArgument<Object>> arguments = this.arguments;
         return arguments;
     }
 

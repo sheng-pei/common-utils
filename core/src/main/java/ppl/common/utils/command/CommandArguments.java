@@ -7,14 +7,12 @@ import ppl.common.utils.string.Strings;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class CommandArguments implements Arguments<String, Object, Argument<String, Object>> {
+public class CommandArguments implements Arguments<Object, Argument> {
     private static final Pattern NAME_PATTERN = Pattern.compile("[a-zA-Z][a-zA-Z0-9]*");
 
-    @SuppressWarnings("rawtypes")
     private static final Set<Class<? extends Argument>> SUPPORTED_ARGUMENT_TYPE;
 
     static {
-        @SuppressWarnings("rawtypes")
         Set<Class<? extends Argument>> supported = new HashSet<>();
         supported.add(PositionArgument.class);
         supported.add(ValueOptionArgument.class);
@@ -43,14 +41,14 @@ public class CommandArguments implements Arguments<String, Object, Argument<Stri
     }
 
     @Override
-    public List<Argument<String, Object>> getArguments() {
+    public List<Argument> getArguments() {
         @SuppressWarnings({"rawtypes", "unchecked"})
-        List<Argument<String, Object>> res = new ArrayList<>(allArguments.values());
+        List<Argument> res = new ArrayList<>(allArguments.values());
         return res;
     }
 
     @Override
-    public Argument<String, Object> get(Object s) {
+    public Argument getByKey(Object s) {
         if (s instanceof String) {
             String option = (String) s;
             if (BaseOption.isLongOption(option)) {
@@ -68,34 +66,26 @@ public class CommandArguments implements Arguments<String, Object, Argument<Stri
                 "a short option or a non-negative index.");
     }
 
-    private Argument<String, Object> getLongOption(String option) {
-        @SuppressWarnings("unchecked")
-        Argument<String, Object> argument = (Argument<String, Object>) longOptions.get(option);
-        return argument;
+    private Argument getLongOption(String option) {
+        return (Argument) longOptions.get(option);
     }
 
-    private Argument<String, Object> getShortOption(String option) {
-        @SuppressWarnings("unchecked")
-        Argument<String, Object> argument = (Argument<String, Object>) shortOptions.get(option);
-        return argument;
+    private Argument getShortOption(String option) {
+        return (Argument) shortOptions.get(option);
     }
 
-    private Argument<String, Object> getPosition(int index) {
+    private Argument getPosition(int index) {
         if (index >= positions.size()) {
             return null;
         }
 
-        @SuppressWarnings("unchecked")
-        Argument<String, Object> argument = (Argument<String, Object>) positions.get(index);
-        return argument;
+        return (Argument) positions.get(index);
     }
 
     @Override
-    public Argument<String, Object> getByName(String name) {
+    public Argument getByName(String name) {
         checkName(name);
-        @SuppressWarnings("unchecked")
-        Argument<String, Object> res = (Argument<String, Object>) allArguments.get(name);
-        return res;
+        return (Argument) allArguments.get(name);
     }
 
     private static void checkName(String name) {
@@ -123,7 +113,7 @@ public class CommandArguments implements Arguments<String, Object, Argument<Stri
 
         public CommandArguments build() {
             @SuppressWarnings({"rawtypes", "unchecked"})
-            Map<String, Argument<String, Object>> allArguments = (Map) this.allArguments;
+            Map<String, Argument> allArguments = (Map) this.allArguments;
             allArguments = allArguments == null ? Collections.emptyMap() : Collections.unmodifiableMap(allArguments);
             @SuppressWarnings({"rawtypes", "unchecked"})
             Map<String, ValueOptionArgument<Object>> longOptions = (Map) this.longOptions;
@@ -139,7 +129,7 @@ public class CommandArguments implements Arguments<String, Object, Argument<Stri
         }
 
 
-        public Builder addArgument(Argument<String, ?> argument) {
+        public Builder addArgument(Argument argument) {
             checkArgument(argument);
             addAllArgument(argument);
             _addArgument(argument);
@@ -167,10 +157,10 @@ public class CommandArguments implements Arguments<String, Object, Argument<Stri
             return this;
         }
 
-        private void addAllArgument(Argument<String, ?> argument) {
-            String name = argument.getName();
+        private void addAllArgument(Argument argument) {
+            String name = argument.name();
             @SuppressWarnings("unchecked")
-            Map<String, Argument<String, ?>> allArguments = ensureAllArguments();
+            Map<String, Argument> allArguments = ensureAllArguments();
             if (allArguments.containsKey(name)) {
                 throw new IllegalArgumentException(Strings.format(
                         "The arguments '{}' and '{}' has same name: '{}'.",
@@ -179,7 +169,7 @@ public class CommandArguments implements Arguments<String, Object, Argument<Stri
             allArguments.put(name, argument);
         }
 
-        private void _addArgument(Argument<String, ?> argument) {
+        private void _addArgument(Argument argument) {
             if (argument instanceof ValueOptionArgument) {
                 _addValueOptionArgument((ValueOptionArgument<?>) argument);
             } else if (argument instanceof ToggleOptionArgument) {
@@ -215,9 +205,9 @@ public class CommandArguments implements Arguments<String, Object, Argument<Stri
             addShortOption(argument, argument);
         }
 
-        private void addShortOption(Option option, Argument<String, ?> argument) {
+        private void addShortOption(Option option, Argument argument) {
             @SuppressWarnings("unchecked")
-            Map<String, Argument<String, ?>> optionArguments = ensureShortOptions();
+            Map<String, Argument> optionArguments = ensureShortOptions();
             addOption(optionArguments, option.getShortOptions(), argument);
         }
 
@@ -229,15 +219,15 @@ public class CommandArguments implements Arguments<String, Object, Argument<Stri
             addLongOption(argument, argument);
         }
 
-        private void addLongOption(Option option, Argument<String, ?> argument) {
+        private void addLongOption(Option option, Argument argument) {
             @SuppressWarnings("unchecked")
-            Map<String, Argument<String, ?>> optionArguments = ensureLongOptions();
+            Map<String, Argument> optionArguments = ensureLongOptions();
             addOption(optionArguments, option.getLongOptions(), argument);
         }
 
-        private void addOption(Map<String, Argument<String, ?>> optionArguments,
+        private void addOption(Map<String, Argument> optionArguments,
                                List<String> options,
-                               Argument<String, ?> argument) {
+                               Argument argument) {
             options.forEach(o -> {
                 if (optionArguments.containsKey(o)) {
                     throw new IllegalArgumentException(Strings.format(
@@ -291,8 +281,8 @@ public class CommandArguments implements Arguments<String, Object, Argument<Stri
             return positions = res;
         }
 
-        private void checkArgument(Argument<String, ?> argument) {
-            checkName(argument.getName());
+        private void checkArgument(Argument argument) {
+            checkName(argument.name());
         }
 
     }

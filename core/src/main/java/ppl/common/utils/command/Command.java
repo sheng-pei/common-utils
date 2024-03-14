@@ -18,7 +18,7 @@ public class Command {
 
     private final CommandArguments arguments;
     private final CommandParser parser;
-    private final Analyzer<String, Object> analyzer;
+    private final Analyzer<Object> analyzer;
 
     @SuppressWarnings("rawtypes")
     private Map toggles;
@@ -37,12 +37,12 @@ public class Command {
         List<Object> analyzedCommand = analyse(stream);
         this.values = analyzedCommand.stream()
                 .filter(v -> v instanceof ArgumentValue)
-                .map(v -> (ArgumentValue<?, ?>) v)
-                .collect(Collectors.toMap(ArgumentValue::key, Function.identity()));
+                .map(v -> (ArgumentValue<?>) v)
+                .collect(Collectors.toMap(ArgumentValue::name, Function.identity()));
         this.toggles = analyzedCommand.stream()
                 .filter(v -> v instanceof Argument)
-                .map(v -> (Argument<?, ?>) v)
-                .collect(Collectors.toMap(Argument::getName, Function.identity()));
+                .map(v -> (Argument) v)
+                .collect(Collectors.toMap(Argument::name, Function.identity()));
         this.remains = analyzedCommand.stream()
                 .filter(av -> av instanceof Fragment)
                 .map(Object::toString)
@@ -58,7 +58,7 @@ public class Command {
     }
 
     public Object get(String argument, Object defaultValue) {
-        Argument<String, ?> a = this.arguments.getByName(argument);
+        Argument a = this.arguments.getByName(argument);
         if (a == null) {
             throw new IllegalArgumentException("Unknown argument: " + argument);
         }
@@ -72,7 +72,7 @@ public class Command {
         }
 
         @SuppressWarnings("unchecked")
-        ArgumentValue<String, Object> av = (ArgumentValue<String, Object>) this.values.get(argument);
+        ArgumentValue<Object> av = (ArgumentValue<Object>) this.values.get(argument);
         if (av != null) {
             return av.value();
         } else if (toggles.containsKey(argument)) {

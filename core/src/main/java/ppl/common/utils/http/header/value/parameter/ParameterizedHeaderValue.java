@@ -7,9 +7,9 @@ import ppl.common.utils.argument.argument.value.ValueArgument;
 import ppl.common.utils.http.header.Context;
 import ppl.common.utils.http.header.SingleLineHeaderValue;
 import ppl.common.utils.http.symbol.HttpCharGroup;
+import ppl.common.utils.pair.Pair;
 import ppl.common.utils.string.Strings;
 import ppl.common.utils.string.ascii.CaseIgnoreString;
-import ppl.common.utils.pair.Pair;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,14 +18,14 @@ import java.util.Map;
 import java.util.function.Function;
 
 public abstract class ParameterizedHeaderValue<
-        T extends Arguments<CaseIgnoreString, String, ValueArgument<CaseIgnoreString, Object>>,
+        T extends Arguments<String, ValueArgument<Object>>,
         P extends ParameterizedHeaderValue<T, P>> extends SingleLineHeaderValue {
 
     static final char DELIMITER = ';';
     public static final char SEPARATOR = '=';
 
     private final T target;
-    private final Map<CaseIgnoreString, ArgumentValue<CaseIgnoreString, Object>> parameters;
+    private final Map<CaseIgnoreString, ArgumentValue<Object>> parameters;
     private final String unknownParameters;
 
     protected ParameterizedHeaderValue(String value,
@@ -34,21 +34,21 @@ public abstract class ParameterizedHeaderValue<
         super(value);
         Pair<String, String> pair = cutTargetFrom(value);
         T target = createTarget(pair.getFirst(), targetCreator);
-        Analyzer<CaseIgnoreString, String> analyzer = new Analyzer<>(target);
+        Analyzer<String> analyzer = new Analyzer<>(target);
         ParameterParser parser = parser(context);
         List<Object> res = analyzer.analyse(parser.parse(pair.getSecond()));
 
-        Map<CaseIgnoreString, ArgumentValue<CaseIgnoreString, Object>> ps = new HashMap<>();
+        Map<CaseIgnoreString, ArgumentValue<Object>> ps = new HashMap<>();
         StringBuilder ups = new StringBuilder();
         res.forEach(o -> {
             if (o instanceof ArgumentValue) {
                 @SuppressWarnings("unchecked")
-                ArgumentValue<CaseIgnoreString, Object> av =  (ArgumentValue<CaseIgnoreString, Object>) o;
-                ps.put(av.key(), av);
+                ArgumentValue<Object> av = (ArgumentValue<Object>) o;
+                ps.put(CaseIgnoreString.create(av.name()), av);
             } else if (o instanceof ValueArgument) {
                 @SuppressWarnings("unchecked")
-                ValueArgument<CaseIgnoreString, Object> a = (ValueArgument<CaseIgnoreString, Object>) o;
-                ps.put(a.getName(), ArgumentValue.create(a, null));
+                ValueArgument<Object> a = (ValueArgument<Object>) o;
+                ps.put(CaseIgnoreString.create(a.name()), ArgumentValue.create(a, null));
             } else {
                 ups.append(o).append(DELIMITER).append(" ");
             }
@@ -62,8 +62,7 @@ public abstract class ParameterizedHeaderValue<
         this.unknownParameters = ups.toString();
     }
 
-    private static
-    <T extends Arguments<CaseIgnoreString, String, ValueArgument<CaseIgnoreString, Object>>>
+    private static <T extends Arguments<String, ValueArgument<Object>>>
     T createTarget(String target, Function<String, T> targetCreator) {
         required(target);
         return targetCreator.apply(target);
@@ -124,9 +123,9 @@ public abstract class ParameterizedHeaderValue<
         List<Object> res = new Analyzer<>(target)
                 .analyse(parser.parse(name, value));
         @SuppressWarnings("unchecked")
-        ArgumentValue<CaseIgnoreString, Object> av = (ArgumentValue<CaseIgnoreString, Object>) res.get(0);
-        CaseIgnoreString n = av.key();
-        ArgumentValue<CaseIgnoreString, Object> exist = parameters.get(n);
+        ArgumentValue<Object> av = (ArgumentValue<Object>) res.get(0);
+        CaseIgnoreString n = CaseIgnoreString.create(av.name());
+        ArgumentValue<Object> exist = parameters.get(n);
         parameters.put(n, exist == null ? av : exist.merge(av));
         return self();
     }
@@ -146,15 +145,14 @@ public abstract class ParameterizedHeaderValue<
 
     public final P setParameter(String name, Object value) {
         ensureKnown(name);
-        CaseIgnoreString k = CaseIgnoreString.create(name);
-        ArgumentValue<CaseIgnoreString, Object> av = ArgumentValue.create(target.getByName(k), value);
-        parameters.remove(k);
+        ArgumentValue<Object> av = ArgumentValue.create(target.getByName(name), value);
+        parameters.remove(CaseIgnoreString.create(name));
         return appendLexicalParameter(name, av.toString());
     }
 
     public final Object getParameter(String name) {
         ensureKnown(name);
-        ArgumentValue<CaseIgnoreString, Object> p = parameters.get(CaseIgnoreString.create(name));
+        ArgumentValue<Object> p = parameters.get(CaseIgnoreString.create(name));
         return p == null ? null : p.value();
     }
 
@@ -164,7 +162,7 @@ public abstract class ParameterizedHeaderValue<
     }
 
     private void ensureKnown(String name) {
-        if (target.get(name) == null) {
+        if (target.getByKey(name) == null) {
             throw new IllegalArgumentException(Strings.format(
                     "Unknown parameter: '{}' for: '{}'.", name, target));
         }
@@ -175,12 +173,12 @@ public abstract class ParameterizedHeaderValue<
         return toCanonicalString(parameters.values());
     }
 
-    private String toCanonicalString(Collection<? extends ArgumentValue<CaseIgnoreString, ?>> parameters) {
+    private String toCanonicalString(Collection<? extends ArgumentValue<?>> parameters) {
         String p = concatParameters(parameters);
         return target.toString() + (p.isEmpty() ? "" : DELIMITER + " " + concatParameters(parameters));
     }
 
-    private String concatParameters(Collection<? extends ArgumentValue<CaseIgnoreString, ?>> parameters) {
+    private String concatParameters(Collection<? extends ArgumentValue<?>> parameters) {
         StringBuilder pBuilder = new StringBuilder();
         appendParameters(parameters, pBuilder);
         if (!parameters.isEmpty() && unknownParameters.isEmpty()) {
@@ -191,9 +189,25 @@ public abstract class ParameterizedHeaderValue<
         return pBuilder.toString();
     }
 
-    private void appendParameters(Collection<? extends ArgumentValue<CaseIgnoreString, ?>> parameters,
-                                  StringBuilder builder) {
-        parameters.forEach(av -> builder.append(av).append(DELIMITER).append(" "));
+    private void appendParameters(
+            Collection<? extends ArgumentValue<?>> parameters,
+            StringBuilder builder) {//TODO, av 规范化输出
+        parameters.forEach(av -> {
+            String k = av.keyString();
+            String v = av.valueString();
+            builder.append(k);
+            if (v != null || !ignoreSeparatorIfNullValue()) {
+                builder.append(SEPARATOR);
+            }
+            if (v != null) {
+                builder.append(v);
+            }
+            builder.append(DELIMITER).append(" ");
+        });
+    }
+
+    private boolean ignoreSeparatorIfNullValue() {
+        return true;
     }
 
 }

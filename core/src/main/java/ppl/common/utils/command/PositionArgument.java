@@ -1,36 +1,15 @@
 package ppl.common.utils.command;
 
-import ppl.common.utils.argument.argument.value.ValueArgumentNormalizer;
 import ppl.common.utils.argument.argument.value.ValueArgument;
 import ppl.common.utils.argument.argument.value.ValueArgumentBuilder;
 import ppl.common.utils.string.Strings;
 
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-public class PositionArgument<V> extends ValueArgument<String, V> {
-
-    @SuppressWarnings({"rawtypes"})
-    private static final BiFunction DEFAULT_TO_CANONICAL_STRING =
-            ValueArgumentNormalizer.newBuilder("", true)
-                    .withKey(p -> "")
-                    .build();
-
-    public static <V> BiFunction<PositionArgument<V>, V, String> newToCanonical(Function<V, String> value) {
-        return ValueArgumentNormalizer.<String, V, PositionArgument<V>>newBuilder("", true)
-                .withKey(p -> "")
-                .withValue(value)
-                .build();
-    }
-
-    public static <V> BiFunction<PositionArgument<V>, V, String> defToCanonical() {
-        @SuppressWarnings("unchecked")
-        BiFunction<PositionArgument<V>, V, String> res = DEFAULT_TO_CANONICAL_STRING;
-        return res;
-    }
+public class PositionArgument<V> extends ValueArgument<V> {
 
     public static Builder<String> newBuilder(String name) {
         return new Builder<>(name);
@@ -42,8 +21,13 @@ public class PositionArgument<V> extends ValueArgument<String, V> {
                              Function<String, Stream<String>> splitter,
                              @SuppressWarnings("rawtypes") List mappers,
                              @SuppressWarnings("rawtypes") Collector collector,
-                             BiFunction<PositionArgument<V>, V, String> toCanonicalString) {
-        super(name, splitter, mappers, collector, toCanonicalString);
+                             Function<V, String> valueNormalizer) {
+        super(name, splitter, mappers, collector, valueNormalizer);
+    }
+
+    @Override
+    public String keyString() {
+        return "";
     }
 
     public void init(int position) {
@@ -65,28 +49,25 @@ public class PositionArgument<V> extends ValueArgument<String, V> {
     public String toString() {
         return Strings.format(
                 "position->{}, name->{}",
-                getPosition(), getName());
+                getPosition(), name());
     }
 
-    public static class Builder<V> extends ValueArgumentBuilder<String, V> {
+    public static class Builder<V> extends ValueArgumentBuilder<V> {
         private Builder(String name) {
             super(name);
         }
 
         @Override
-        protected <A extends ValueArgument<String, V>> A create(
+        protected <A extends ValueArgument<V>> A create(
                 String name,
                 Function<String, Stream<String>> splitter,
                 List<?> mappers,
                 Collector<?, ?, ?> collector,
-                BiFunction<A, V, String> toCanonicalString) {
-            BiFunction<PositionArgument<V>, V, String> bi = defToCanonical();
-            @SuppressWarnings("unchecked")
-            BiFunction<PositionArgument<V>, V, String> in = (BiFunction<PositionArgument<V>, V, String>) toCanonicalString;
+                Function<V, String> valueNormalizer) {
             @SuppressWarnings("unchecked")
             A ret = (A) new PositionArgument<>(name,
                     splitter, mappers,
-                    collector, toCanonicalString == null ? bi : in);
+                    collector, valueNormalizer);
             return ret;
         }
     }

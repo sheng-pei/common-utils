@@ -4,26 +4,25 @@ import ppl.common.utils.argument.argument.Arguments;
 import ppl.common.utils.argument.argument.value.ValueArgument;
 import ppl.common.utils.http.header.BaseArguments;
 import ppl.common.utils.http.header.value.UnknownParameterTargetException;
-import ppl.common.utils.string.ascii.CaseIgnoreString;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public enum CodingKind implements Arguments<CaseIgnoreString, String, ValueArgument<CaseIgnoreString, Object>> {
+public enum CodingKind implements Arguments<String, ValueArgument<Object>> {
     CHUNKED("chunked"),
     COMPRESS("compress"),
     DEFLATE("deflate"),
     GZIP("gzip");
 
     private final String name;
-    private final Arguments<CaseIgnoreString, String, ValueArgument<CaseIgnoreString, Object>> arguments;
+    private final BaseArguments arguments;
 
     CodingKind(String name) {
         this(name, Collections.emptyList());
     }
 
-    CodingKind(String name, List<ValueArgument<CaseIgnoreString, ?>> arguments) {
+    CodingKind(String name, List<ValueArgument<?>> arguments) {
         this.name = name;
         this.arguments = arguments.isEmpty() ? BaseArguments.EMPTY : new BaseArguments(arguments);
     }
@@ -51,17 +50,17 @@ public enum CodingKind implements Arguments<CaseIgnoreString, String, ValueArgum
     }
 
     @Override
-    public List<ValueArgument<CaseIgnoreString, Object>> getArguments() {
+    public List<ValueArgument<Object>> getArguments() {
         return arguments.getArguments();
     }
 
     @Override
-    public ValueArgument<CaseIgnoreString, Object> get(String s) {
-        return arguments.get(s);
+    public ValueArgument<Object> getByKey(String s) {
+        return arguments.getByKey(s);
     }
 
     @Override
-    public ValueArgument<CaseIgnoreString, Object> getByName(CaseIgnoreString caseIgnoreString) {
-        return arguments.getByName(caseIgnoreString);
+    public ValueArgument<Object> getByName(String name) {
+        return arguments.getByName(name);
     }
 }

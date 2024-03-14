@@ -2,53 +2,17 @@ package ppl.common.utils.command;
 
 import ppl.common.utils.argument.argument.value.ValueArgument;
 import ppl.common.utils.argument.argument.value.ValueArgumentBuilder;
-import ppl.common.utils.argument.argument.value.ValueArgumentNormalizer;
 import ppl.common.utils.argument.argument.value.collector.ExCollectors;
 import ppl.common.utils.string.Strings;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ValueOptionArgument<V> extends ValueArgument<String, V> implements Option {
-
-    private static class OptionId implements Function<BaseOption, String> {
-        @Override
-        public String apply(BaseOption option) {
-            List<String> first = option.getLongOptions();
-            List<String> second = option.getShortOptions();
-            if (!first.isEmpty()) {
-                return first.get(0);
-            } else {
-                return second.get(0);
-            }
-        }
-    }
-
-    private static final OptionId OPTION_ID = new OptionId();
-
-    @SuppressWarnings({"rawtypes"})
-    private static final BiFunction DEFAULT_TO_CANONICAL_STRING =
-            ValueArgumentNormalizer.newBuilder(Command.SEPARATOR, true)
-                    .withKey(a -> OPTION_ID.apply(((ValueOptionArgument) a).option))
-                    .build();
-
-    public static <V> BiFunction<ValueOptionArgument<V>, V, String> newToCanonical(Function<V, String> value) {
-        return ValueArgumentNormalizer.<String, V, ValueOptionArgument<V>>newBuilder(Command.SEPARATOR, true)
-                .withKey(a -> OPTION_ID.apply(a.option))
-                .withValue(value)
-                .build();
-    }
-
-    public static <V> BiFunction<ValueOptionArgument<V>, V, String> defToCanonical() {
-        @SuppressWarnings("unchecked")
-        BiFunction<ValueOptionArgument<V>, V, String> res = DEFAULT_TO_CANONICAL_STRING;
-        return res;
-    }
+public class ValueOptionArgument<V> extends ValueArgument<V> implements Option {
 
     public static ValueOptionArgument<String> requiredIdentity(String longOption) {
         return requiredIdentity(longOption, null);
@@ -61,7 +25,7 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
     public static ValueOptionArgument<String> requiredIdentity(String longOption, Character shortOption) {
         return newBuilder(longOption, shortOption)
                 .collect(ExCollectors.required())
-                .build(defToCanonical());
+                .build(Function.identity());
     }
 
     public static ValueOptionArgument<String> optionalIdentity(String longOption) {
@@ -84,7 +48,7 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
                                                                List<Character> shortOptions) {
         return newBuilder(name, longOptions, shortOptions)
                 .collect(ExCollectors.one())
-                .build(defToCanonical());
+                .build(Function.identity());
     }
 
     public static Builder<String> newBuilder(String longOption, Character shortOption) {
@@ -112,8 +76,8 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
                                 Function<String, Stream<String>> splitter,
                                 @SuppressWarnings("rawtypes") List mappers,
                                 @SuppressWarnings("rawtypes") Collector collector,
-                                BiFunction<ValueOptionArgument<V>, V, String> toCanonicalString) {
-        super(name, splitter, mappers, collector, toCanonicalString);
+                                Function<V, String> valueNormalizer) {
+        super(name, splitter, mappers, collector, valueNormalizer);
         this.option = option;
     }
 
@@ -129,10 +93,15 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
 
     @Override
     public String toString() {
-        return Strings.format("{}, name->{}", this.option, getName());
+        return Strings.format("{}, name->{}", this.option, name());
     }
 
-    public static class Builder<V> extends ValueArgumentBuilder<String, V> {
+    @Override
+    public String keyString() {
+        return id();
+    }
+
+    public static class Builder<V> extends ValueArgumentBuilder<V> {
         private final BaseOption.Builder option = BaseOption.newBuilder();
 
         private Builder(String name) {
@@ -140,15 +109,16 @@ public class ValueOptionArgument<V> extends ValueArgument<String, V> implements 
         }
 
         @Override
-        protected <A extends ValueArgument<String, V>> A create(String name, Function<String, Stream<String>> splitter, List<?> mappers, Collector<?, ?, ?> collector, BiFunction<A, V, String> toCanonicalString) {
-            BiFunction<ValueOptionArgument<V>, V, String> bi = defToCanonical();
-            @SuppressWarnings("unchecked")
-            BiFunction<ValueOptionArgument<V>, V, String> in = (BiFunction<ValueOptionArgument<V>, V, String>) toCanonicalString;
+        protected <A extends ValueArgument<V>> A create(
+                String name,
+                Function<String, Stream<String>> splitter,
+                List<?> mappers, Collector<?, ?, ?> collector,
+                Function<V, String> valueNormalizer) {
             @SuppressWarnings("unchecked")
             A ret = (A) new ValueOptionArgument<>(name,
                     option.build(),
                     splitter, mappers,
-                    collector, toCanonicalString == null ? bi : in);
+                    collector, valueNormalizer);
             return ret;
         }
 

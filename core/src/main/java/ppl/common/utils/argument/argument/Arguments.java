@@ -2,10 +2,10 @@ package ppl.common.utils.argument.argument;
 
 import java.util.List;
 
-public interface Arguments<K, S, R extends Argument<K, Object>> {
+public interface Arguments<S, R extends Argument> {
     List<R> getArguments();
 
-    R get(S s);
+    R getByKey(S s);
 
-    R getByName(K name);
+    R getByName(String name);
 }

@@ -10,26 +10,28 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-public class ValueArgument<K, V> extends Argument<K, V> {
+public abstract class ValueArgument<V> extends Argument {
     private final Function<String, Stream<String>> splitter;
     @SuppressWarnings("rawtypes")
     private final List mappers;
     @SuppressWarnings("rawtypes")
     private final Collector collector;
+    private final Function<V, String> valueNormalizer;
 
-    protected ValueArgument(K name,
+    protected ValueArgument(String name,
                             Function<String, Stream<String>> splitter,
                             @SuppressWarnings("rawtypes") List mappers,
                             @SuppressWarnings("rawtypes") Collector collector,
-                            BiFunction<? extends ValueArgument<K, V>, V, String> toCanonicalString) {
-        super(name, toCanonicalString);
+                            Function<V, String> valueNormalizer) {
+        super(name);
         this.splitter = splitter;
         this.mappers = mappers == null ? Collections.emptyList() : mappers;
         this.collector = collector;
+        this.valueNormalizer = valueNormalizer;
     }
 
-    public FeedingStream<K, V> stream() {
-        return new FeedingStream<K, V>() {
+    public FeedingStream<V> stream() {
+        return new FeedingStream<V>() {
 
             private Object container;
 
@@ -56,7 +58,7 @@ public class ValueArgument<K, V> extends Argument<K, V> {
             }
 
             @Override
-            public ArgumentValue<K, V> produce() {
+            public ArgumentValue<V> produce() {
                 if (container == null) {
                     return null;
                 }
@@ -74,4 +76,10 @@ public class ValueArgument<K, V> extends Argument<K, V> {
         return v;
     }
 
+    public String valueString(V v) {
+        return valueNormalizer.apply(v);
+    }
+
+    @Override
+    public abstract String keyString();
 }
