@@ -10,6 +10,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Queries {
+    public static Query createQuery(String name, String value) {
+        return Query.create(name, value);
+    }
+
     public static List<Query> parseQueries(String queries) {
         if (queries == null || queries.isEmpty()) {
             return Collections.emptyList();
