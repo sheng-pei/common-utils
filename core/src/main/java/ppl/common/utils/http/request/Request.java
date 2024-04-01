@@ -88,7 +88,7 @@ public class Request implements Headers {
         private Proxy proxy;
         private SSLContext sslContext;
         private final Method method;
-        private final URL url;
+        private URL url;
         private int chunkedLength;
         @SuppressWarnings("rawtypes")
         private List headers = Collections.emptyList();
@@ -137,6 +137,20 @@ public class Request implements Headers {
             return this;
         }
 
+        public Builder replaceQuery(String name, String value) {
+            URL url = this.url;
+            this.url = url.dynamic()
+                    .removeDynamicQuery(name)
+                    .appendDynamicQuery(name, value);
+            return this;
+        }
+
+        public Builder appendQuery(String name, String value) {
+            URL url = this.url;
+            this.url = url.appendDynamicQuery(name, value);
+            return this;
+        }
+
         public Builder setHeader(Header<? extends HeaderValue> header) {
             List<Header<? extends HeaderValue>> headers = ensure(this.headers);
             int idx = -1;
@@ -160,7 +174,6 @@ public class Request implements Headers {
         }
 
         public Builder appendHeader(Header<? extends HeaderValue> header) {
-            @SuppressWarnings("unchecked")
             List<Header<? extends HeaderValue>> headers = ensure(this.headers);
             headers.add(header);
             this.headers = headers;
