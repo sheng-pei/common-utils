@@ -137,7 +137,14 @@ public class Request implements Headers {
             return this;
         }
 
-        public Builder replaceQuery(String name, String value) {
+        public Builder removeQuery(String name) {
+            URL url = this.url;
+            this.url = url.dynamic()
+                    .removeDynamicQuery(name);
+            return this;
+        }
+
+        public Builder replaceQuery(String name, Object value) {
             URL url = this.url;
             this.url = url.dynamic()
                     .removeDynamicQuery(name)
@@ -145,7 +152,7 @@ public class Request implements Headers {
             return this;
         }
 
-        public Builder appendQuery(String name, String value) {
+        public Builder appendQuery(String name, Object value) {
             URL url = this.url;
             this.url = url.appendDynamicQuery(name, value);
             return this;
