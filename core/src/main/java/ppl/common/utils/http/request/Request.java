@@ -84,6 +84,10 @@ public class Request implements Headers {
         return new Builder(Method.DELETE, url);
     }
 
+    public static Builder builder(Method method, URL url) {
+        return new Builder(method, url);
+    }
+
     public static class Builder {
         private Proxy proxy;
         private SSLContext sslContext;
