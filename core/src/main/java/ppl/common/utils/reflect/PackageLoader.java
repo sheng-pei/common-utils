@@ -49,15 +49,20 @@ public class PackageLoader {
         return allClasses.stream();
     }
 
+    public Stream<Class<?>> load(boolean concreteOnly) {
+        return load()
+                .filter(c -> !concreteOnly || (c.getModifiers() & Modifier.ABSTRACT) == 0);
+    }
+
     public <T> Stream<Class<? extends T>> load(Class<T> clazz) {
         return load(clazz, false);
     }
 
-    public <T> Stream<Class<? extends T>> load(Class<T> clazz, boolean shouldNotAbstract) {
+    public <T> Stream<Class<? extends T>> load(Class<T> clazz, boolean concreteOnly) {
         Objects.requireNonNull(clazz, "Target class is required.");
         return load()
                 .filter(clazz::isAssignableFrom)
-                .filter(c -> !shouldNotAbstract || (c.getModifiers() & Modifier.ABSTRACT) == 0)
+                .filter(c -> !concreteOnly || (c.getModifiers() & Modifier.ABSTRACT) == 0)
                 .map(c -> {
                     @SuppressWarnings("unchecked")
                     Class<? extends T> res = (Class<? extends T>) c;
@@ -103,8 +108,8 @@ public class PackageLoader {
                 .filter(n -> n.startsWith(resourceName))
                 .filter(n -> n.endsWith(".class"))
                 .map(n -> n.substring(0, n.length() - 6))
-                .filter(this::isUserOuterClassName)
                 .map(n -> n.replaceAll("/", "."))
+                .filter(this::isUserOuterClassName)
                 .map(this::loadClass)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -118,8 +123,8 @@ public class PackageLoader {
                 .map(root::relativize)
                 .map(Path::toString)
                 .map(n -> n.substring(0, n.length() - 6))
+                .map(n -> n.replaceAll(Pattern.quote(File.separator), "."))
                 .filter(this::isUserOuterClassName)
-                .map(n -> n.replaceAll("/", "."))
                 .map(this::loadClass)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -137,16 +142,15 @@ public class PackageLoader {
 
     private Stream<Path> listFiles(Path realPath) throws IOException {
         PathMatcher pathMatcher = FileSystems.getDefault()
-                .getPathMatcher("glob:" + realPath.resolve("**.class"));
-        return Files.find(realPath, Integer.MAX_VALUE,
-                (p, u) -> pathMatcher.matches(p) && !u.isDirectory(),
+                .getPathMatcher("glob:**.class");
+        return Files.find(realPath, Integer.MAX_VALUE, (p, u) -> pathMatcher.matches(p) && !u.isDirectory(),
                 FileVisitOption.FOLLOW_LINKS);
     }
 
     private static final Pattern USER_OUTER_CLASSNAME_PATTERN = Pattern.compile("[a-zA-Z][a-zA-Z0-9_]*");
     private Boolean isUserOuterClassName(String string) {
         String name = string;
-        int idx = name.lastIndexOf('/');
+        int idx = name.lastIndexOf('.');
         if (idx >= 0) {
             name = name.substring(idx + 1);
         }
