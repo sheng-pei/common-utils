@@ -3,7 +3,7 @@ package ppl.common.utils.config.convert;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ppl.common.utils.Condition;
+import ppl.common.utils.order.Condition;
 import ppl.common.utils.string.Strings;
 import ppl.common.utils.cache.ConcurrentCache;
 import ppl.common.utils.cache.Cache;

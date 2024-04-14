@@ -1,6 +1,6 @@
 package ppl.common.utils.enumerate;
 
-import ppl.common.utils.Condition;
+import ppl.common.utils.order.Condition;
 import ppl.common.utils.string.Strings;
 
 import java.util.Collections;

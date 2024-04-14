@@ -13,9 +13,14 @@ class VariableString implements StringReplacer {
 
     @Override
     public String replace(Map<String, Object> env) {
+        return replace(env, true);
+    }
+
+    @Override
+    public String replace(Map<String, Object> env, boolean reserveNullVariable) {
         Objects.requireNonNull(env, "Env couldn't be null");
         Object tmp = env.get(this.name);
-        return tmp == null ? "" : tmp.toString();
+        return tmp == null ? (reserveNullVariable ? "${" + this.name + "}" : "") : tmp.toString();
     }
 
     @Override

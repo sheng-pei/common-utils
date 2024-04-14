@@ -13,6 +13,11 @@ class RawString implements StringReplacer {
 
     @Override
     public String replace(Map<String, Object> env) {
+        return replace(env, true);
+    }
+
+    @Override
+    public String replace(Map<String, Object> env, boolean reserveNullVariable) {
         Objects.requireNonNull(env, "Env couldn't be null");
         return this.str;
     }

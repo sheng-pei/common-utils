@@ -1,4 +1,6 @@
-package ppl.common.utils;
+package ppl.common.utils.order;
+
+import java.util.Comparator;
 
 public final class Condition {
 
@@ -26,6 +28,10 @@ public final class Condition {
 
     public static <T extends Comparable<T>> boolean in(T value, T start, T end) {
         return start.compareTo(value) <= 0 && value.compareTo(end) <= 0;
+    }
+
+    public static <T> boolean in(T value, T start, T end, Comparator<T> comparator) {
+        return comparator.compare(start, value) <= 0 && comparator.compare(value, end) <= 0;
     }
 
 }

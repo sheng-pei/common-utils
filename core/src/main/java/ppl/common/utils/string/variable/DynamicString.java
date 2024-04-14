@@ -120,9 +120,14 @@ class DynamicString implements StringReplacer {
 
     @Override
     public String replace(Map<String, Object> env) {
+        return replace(env, true);
+    }
+
+    @Override
+    public String replace(Map<String, Object> env, boolean reserveNullVariable) {
         Objects.requireNonNull(env, "Env couldn't be null");
         StringBuilder builder = new StringBuilder();
-        this.parts.forEach(p -> builder.append(p.replace(env)));
+        this.parts.forEach(p -> builder.append(p.replace(env, reserveNullVariable)));
         return builder.toString();
     }
 
