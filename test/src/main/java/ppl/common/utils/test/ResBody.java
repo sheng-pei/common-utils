@@ -19,4 +19,8 @@ public class ResBody<D extends Data> {
     public void setData(D data) {
         this.data = data;
     }
+
+    public static class A<U> {
+
+    }
 }

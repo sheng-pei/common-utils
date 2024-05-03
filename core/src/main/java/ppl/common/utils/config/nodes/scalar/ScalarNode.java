@@ -135,6 +135,6 @@ public class ScalarNode extends AbstractNode {
 
     @Override
     public <E extends Enum<E>> E enumValue(Class<E> enumClass) {
-        return Converters.convert(scalar, enumClass);
+        return Converters.def().convert(scalar, enumClass);
     }
 }

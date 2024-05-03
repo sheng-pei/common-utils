@@ -3,91 +3,26 @@ package ppl.common.utils.config.convert;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ppl.common.utils.cache.ConcurrentReferenceValueCache;
+import ppl.common.utils.cache.ReferenceType;
+import ppl.common.utils.exception.UnreachableCodeException;
 import ppl.common.utils.order.Condition;
 import ppl.common.utils.string.Strings;
-import ppl.common.utils.cache.ConcurrentCache;
 import ppl.common.utils.cache.Cache;
 import ppl.common.utils.enumerate.EnumEncoderNotSupportedException;
 import ppl.common.utils.enumerate.EnumUtils;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 
 public final class Converters {
 
     private static final Logger logger = LoggerFactory.getLogger((Converters.class));
+    private static final Map<Class<?>, Converter<?>> SYSTEM_CONVERTERS;
 
-    private static final Converters INSTANCE = new Converters();
-
-    private static final Set<Class<?>> INTEGER_TYPE = new HashSet<Class<?>>() {
-        {
-            add(Byte.class);
-            add(Short.class);
-            add(Integer.class);
-            add(Long.class);
-        }
-    };
-
-    private static long primitiveIntegerToLong(Object o) {
-        if (o instanceof JsonNode) {
-            JsonNode jNode = (JsonNode) o;
-            if (jNode.isInt() || jNode.isLong() || jNode.isShort()) {
-                return jNode.longValue();
-            }
-        } else if (isPrimitiveInteger(o.getClass())) {
-            return ((Number) o).longValue();
-        }
-        throw new IllegalArgumentException("Couldn't be represented as byte short int long (java primitive).");
-    }
-    private static Object toEnumKey(Object o) {
-        if (o instanceof JsonNode) {
-            JsonNode jNode = (JsonNode) o;
-            if (jNode.isTextual()) {
-                return jNode.textValue();
-            } else if (jNode.isInt() || jNode.isShort() || jNode.isLong()) {
-                return jNode.longValue();
-            }
-        } else if (o instanceof String || isPrimitiveInteger(o.getClass())) {
-            return o;
-        }
-        throw new IllegalArgumentException("Couldn't be converted to enum.");
-    }
-    private static boolean isPrimitiveInteger(Class<?> clazz) {
-        return INTEGER_TYPE.contains(clazz);
-    }
-    private static boolean inInt(Long l) {
-        return Condition.in(l, Integer.MIN_VALUE, Integer.MAX_VALUE);
-    }
-    private static boolean inShort(Long i) {
-        return Condition.in(i, Short.MIN_VALUE, Short.MAX_VALUE);
-    }
-    private static boolean inByte(Long i) {
-        return Condition.in(i, Byte.MIN_VALUE, Byte.MAX_VALUE);
-    }
-
-    public static Converters getInstance() {
-        return INSTANCE;
-    }
-
-    private final Map<Class<?>, Converter<?>> systemConverters;
-    private final List<Converter<?>> customConverters = new CopyOnWriteArrayList<>();
-    private final Cache<Class<?>, Converter<?>> customConverterCache = new Cache<Class<?>, Converter<?>>() {
-
-        private final ConcurrentCache<Class<?>, Converter<?>> cache = new ConcurrentCache<>(100);
-
-        @Override
-        public Converter<?> get(Class<?> aClass) {
-            return cache.get(aClass);
-        }
-
-        @Override
-        public void put(Class<?> aClass, Converter<?> converter) {
-            cache.put(aClass, converter);
-        }
-    };
-
-    private Converters() {
-
+    static {
         Map<Class<?>, Converter<?>> systemConverters = new HashMap<>();
 
         systemConverters.put(char.class, Converter.castConverter());
@@ -224,13 +159,11 @@ public final class Converters {
             @SuppressWarnings("rawtypes")
             Class<? extends Enum> enumClass = c;
             try {
-                @SuppressWarnings("unchecked")
-                Enum<?> res = EnumUtils.enumOf(enumClass, o);
-                return res;
+                return EnumUtils.enumOf(enumClass, o);
             } catch (EnumEncoderNotSupportedException e) {
                 logger.debug(Strings.format(
                         "The enum class '{}' is not support enum encoder. " +
-                        "Use named or ordinal instead.", enumClass.getName()
+                                "Use named or ordinal instead.", enumClass.getName()
                 ), e);
             }
 
@@ -248,8 +181,89 @@ public final class Converters {
         });
         systemConverters.put(Enum.class, enumConverter);
 
-        this.systemConverters = systemConverters;
+        SYSTEM_CONVERTERS = systemConverters;
     }
+
+    private static final Converters DEFAULT = new Converters();
+
+    private static final Set<Class<?>> INTEGER_TYPE = new HashSet<Class<?>>() {
+        {
+            add(Byte.class);
+            add(Short.class);
+            add(Integer.class);
+            add(Long.class);
+        }
+    };
+
+    private static long primitiveIntegerToLong(Object o) {
+        if (o instanceof JsonNode) {
+            JsonNode jNode = (JsonNode) o;
+            if (jNode.isInt() || jNode.isLong() || jNode.isShort()) {
+                return jNode.longValue();
+            }
+        } else if (isPrimitiveInteger(o.getClass())) {
+            return ((Number) o).longValue();
+        }
+        throw new IllegalArgumentException("Couldn't be represented as byte short int long (java primitive).");
+    }
+    private static Object toEnumKey(Object o) {
+        if (o instanceof JsonNode) {
+            JsonNode jNode = (JsonNode) o;
+            if (jNode.isTextual()) {
+                return jNode.textValue();
+            } else if (jNode.isInt() || jNode.isShort() || jNode.isLong()) {
+                return jNode.longValue();
+            }
+        } else if (o instanceof String || isPrimitiveInteger(o.getClass())) {
+            return o;
+        }
+        throw new IllegalArgumentException("Couldn't be converted to enum.");
+    }
+    private static boolean isPrimitiveInteger(Class<?> clazz) {
+        return INTEGER_TYPE.contains(clazz);
+    }
+    private static boolean inInt(Long l) {
+        return Condition.in(l, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+    private static boolean inShort(Long i) {
+        return Condition.in(i, Short.MIN_VALUE, Short.MAX_VALUE);
+    }
+    private static boolean inByte(Long i) {
+        return Condition.in(i, Byte.MIN_VALUE, Byte.MAX_VALUE);
+    }
+
+    public static Converters def() {
+        return DEFAULT;
+    }
+
+    private final List<Converter<?>> customConverters = new CopyOnWriteArrayList<>();
+    private final Cache<Class<?>, Converter<?>> customConverterCache = new Cache<Class<?>, Converter<?>>() {
+
+        @Override
+        public Converter<?> get(Class<?> key, Callable<? extends Converter<?>> loader) throws ExecutionException {
+            return cache.get(key, loader);
+        }
+
+        @Override
+        public Converter<?> getIfPresent(Class<?> key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Converter<?> putIfAbsent(Class<?> key, Converter<?> value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void invalid(Class<?> key) {
+            throw new UnsupportedOperationException();
+        }
+
+        private final Cache<Class<?>, Converter<?>> cache = new ConcurrentReferenceValueCache<>(ReferenceType.SOFT);
+
+    };
+
+    public Converters() {}
 
     public <T> void addConverter(Converter<T> converter) {
         customConverters.add(converter);
@@ -279,30 +293,26 @@ public final class Converters {
     @SuppressWarnings("unchecked")
     private <T> Converter<T> getSystemConverter(Class<T> targetClazz) {
         if (targetClazz.isEnum()) {
-            return (Converter<T>) systemConverters.get(Enum.class);
-        } else if (systemConverters.containsKey(targetClazz)) {
-            return (Converter<T>) systemConverters.get(targetClazz);
+            return (Converter<T>) SYSTEM_CONVERTERS.get(Enum.class);
+        } else if (SYSTEM_CONVERTERS.containsKey(targetClazz)) {
+            return (Converter<T>) SYSTEM_CONVERTERS.get(targetClazz);
         }
         return null;
     }
 
     @SuppressWarnings("unchecked")
     private <T> Converter<T> getCustomConverter(Class<T> targetClazz) {
-        Converter<T> converter = (Converter<T>) this.customConverterCache.get(targetClazz);
-        if (converter != null) {
-            return converter;
+        try {
+            return (Converter<T>) this.customConverterCache.get(targetClazz,
+                    () -> findCustomConverter(targetClazz));
+        } catch (ExecutionException e) {
+            throw new UnreachableCodeException(e);
         }
-
-        converter = findCustomConverter(targetClazz);
-        if (converter != null) {
-            this.customConverterCache.put(targetClazz, converter);
-            return converter;
-        }
-        return null;
     }
 
     @SuppressWarnings("unchecked")
     private <T> Converter<T> findCustomConverter(Class<T> targetClazz) {
+        System.out.println("findCustomConverter");
         for (Converter<?> c : customConverters) {
             if (c.accept(targetClazz)) {
                 return (Converter<T>) c;
@@ -318,7 +328,7 @@ public final class Converters {
      * @return data of char (java primitive)
      */
     public static Character charValue(Object obj) {
-        return internalConvert(obj, Character.class);
+        return defaultConvert(obj, Character.class);
     }
 
     /**
@@ -331,7 +341,7 @@ public final class Converters {
      * @return data of byte (java primitive)
      */
     public static Byte byteValue(Object obj) {
-        return internalConvert(obj, Byte.class);
+        return defaultConvert(obj, Byte.class);
     }
 
     /**
@@ -344,7 +354,7 @@ public final class Converters {
      * @return data of short (java primitive).
      */
     public static Short shortValue(Object obj) {
-        return internalConvert(obj, Short.class);
+        return defaultConvert(obj, Short.class);
     }
 
     /**
@@ -357,7 +367,7 @@ public final class Converters {
      * @return data of int (java primitive)
      */
     public static Integer intValue(Object obj) {
-        return internalConvert(obj, Integer.class);
+        return defaultConvert(obj, Integer.class);
     }
 
     /**
@@ -369,7 +379,7 @@ public final class Converters {
      * @return data of long (java primitive)
      */
     public static Long longValue(Object obj) {
-        return internalConvert(obj, Long.class);
+        return defaultConvert(obj, Long.class);
     }
 
     /**
@@ -381,7 +391,7 @@ public final class Converters {
      * @return data of float (java primitive)
      */
     public static Float floatValue(Object obj) {
-        return internalConvert(obj, Float.class);
+        return defaultConvert(obj, Float.class);
     }
 
     /**
@@ -393,7 +403,7 @@ public final class Converters {
      * @return data of double (java primitive)
      */
     public static Double doubleValue(Object obj) {
-        return internalConvert(obj, Double.class);
+        return defaultConvert(obj, Double.class);
     }
 
     /**
@@ -405,7 +415,7 @@ public final class Converters {
      * @return data of boolean (java primitive)
      */
     public static Boolean boolValue(Object obj) {
-        return internalConvert(obj, Boolean.class);
+        return defaultConvert(obj, Boolean.class);
     }
 
     /**
@@ -417,7 +427,7 @@ public final class Converters {
      * @return data of String (java)
      */
     public static String stringValue(Object obj) {
-        return internalConvert(obj, String.class);
+        return defaultConvert(obj, String.class);
     }
 
     /**
@@ -432,7 +442,11 @@ public final class Converters {
      * @return data of type E
      */
     public static <E extends Enum<E>> E enumValue(Object obj, Class<E> enumClass) {
-        return internalConvert(obj, enumClass);
+        return defaultConvert(obj, enumClass);
+    }
+
+    private static <T> T defaultConvert(Object obj, Class<T> clazz) {
+        return Converters.def().internalConvert(obj, clazz);
     }
 
     /**
@@ -444,12 +458,12 @@ public final class Converters {
      * @throws ppl.common.utils.config.ConvertException, if the specified object couldn't be converted.
      * @return data of type T.
      */
-    public static <T> T convert(Object obj, Class<T> clazz) {
+    public <T> T convert(Object obj, Class<T> clazz) {
         return internalConvert(obj, clazz);
     }
 
-    private static <T> T internalConvert(Object obj, Class<T> clazz) {
-        Converter<T> converter = Converters.getInstance().getConverter(clazz);
+    private <T> T internalConvert(Object obj, Class<T> clazz) {
+        Converter<T> converter = getConverter(clazz);
         assert converter != null : "No converter to " + clazz.getName();
         return converter.convert(obj, clazz);
     }

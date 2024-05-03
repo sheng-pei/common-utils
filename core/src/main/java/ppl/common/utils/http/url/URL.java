@@ -67,12 +67,15 @@ public class URL {
         this.queries = queries;
     }
 
-    private static Pair<String, Integer> scheme(char[] chars, int start) {
+    private static Pair<String, Integer> scheme(char[] chars, int start, boolean strict) {
         String scheme = DEFAULT_PROTOCOL;
         int skip;
         if (chars[start] == '/') {//Starts with '//' i.e. authority. Use default scheme: http.
             skip = start + 2;
         } else if (chars[start] == '[') {//Maybe starts with ip-literal, compatible url.
+            if (strict) {
+                throw new IllegalArgumentException("No scheme and not starts with '//'");
+            }
             skip = start;
         } else {
             SubstringFinder finder = new SundaySubstringFinder("://");
@@ -81,6 +84,9 @@ public class URL {
                 skip = substring.start() + 3;
                 scheme = new String(chars, start, substring.start());
             } else {
+                if (strict) {
+                    throw new IllegalArgumentException("No scheme and not starts with '//'");
+                }
                 skip = start;//It does not start with scheme and '//'. Maybe compatible url.
             }
         }
@@ -101,17 +107,17 @@ public class URL {
                 a.getSecond());
     }
 
-    private static Pair<String, Integer> path(char[] chars, int start) {
+    private static Pair<String, Integer> path(char[] chars, int start, boolean strict) {
         Pair<String, Integer> p = next(chars, start, "?#");
-        if (!PATH_PATTERN.matcher(p.getFirst()).matches()) {
+        if (strict && !PATH_PATTERN.matcher(p.getFirst()).matches()) {
             throw new IllegalArgumentException("Invalid path.");
         }
         return p;
     }
 
-    private static Pair<String, Integer> query(char[] chars, int start) {
+    private static Pair<String, Integer> query(char[] chars, int start, boolean strict) {
         Pair<String, Integer> q = next(chars, start, "#");
-        if (q.getFirst() != null && !QUERY_AND_FRAGMENT_PATTERN.matcher(q.getFirst()).matches()) {
+        if (strict && q.getFirst() != null && !QUERY_AND_FRAGMENT_PATTERN.matcher(q.getFirst()).matches()) {
             throw new IllegalArgumentException("Invalid query.");
         }
         return Pair.create(
@@ -119,9 +125,9 @@ public class URL {
                 q.getSecond());
     }
 
-    private static Pair<String, Integer> fragment(char[] chars, int start) {
+    private static Pair<String, Integer> fragment(char[] chars, int start, boolean strict) {
         Pair<String, Integer> f = next(chars, start, "");
-        if (f.getFirst() != null && !QUERY_AND_FRAGMENT_PATTERN.matcher(f.getFirst()).matches()) {
+        if (strict && f.getFirst() != null && !QUERY_AND_FRAGMENT_PATTERN.matcher(f.getFirst()).matches()) {
             throw new IllegalArgumentException("Invalid fragment.");
         }
         return Pair.create(
@@ -205,6 +211,10 @@ public class URL {
     }
 
     public static URL create(String url) {
+        return create(url, false);
+    }
+
+    public static URL create(String url, boolean strict) {
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("Url is required.");
         }
@@ -222,7 +232,7 @@ public class URL {
             throw new IllegalArgumentException("Incomplete http url which starts with path.");
         }
 
-        Pair<String, Integer> scheme = scheme(chars, 0);
+        Pair<String, Integer> scheme = scheme(chars, 0, strict);
         if (!isHttp(scheme.getFirst())) {
             throw new IllegalArgumentException("Scheme is not http(s).");
         }
@@ -231,9 +241,9 @@ public class URL {
         char[] authChars = authority.getFirst().toCharArray();
         Pair<String, Integer> host = host(authChars, 0);
         Pair<Integer, Integer> port = port(authChars, host.getSecond());
-        Pair<String, Integer> path = path(chars, authority.getSecond());
-        Pair<String, Integer> query = query(chars, path.getSecond());
-        Pair<String, Integer> fragment = fragment(chars, query.getSecond());
+        Pair<String, Integer> path = path(chars, authority.getSecond(), strict);
+        Pair<String, Integer> query = query(chars, path.getSecond(), strict);
+        Pair<String, Integer> fragment = fragment(chars, query.getSecond(), strict);
         return new URL(
                 scheme.getFirst(),
                 host.getFirst(),
@@ -401,9 +411,9 @@ public class URL {
             ret += query + QUERY_DELIMITER;
         }
         if (dynamicQueries.length != 0) {
-            query = ret + String.join(QUERY_DELIMITER, dynamicQueries);
+            ret = ret + String.join(QUERY_DELIMITER, dynamicQueries);
         }
-        return query;
+        return ret;
     }
 
 }

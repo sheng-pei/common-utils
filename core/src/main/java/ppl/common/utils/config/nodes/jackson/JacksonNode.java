@@ -190,7 +190,7 @@ public class JacksonNode extends AbstractNode {
         if (json.isContainerNode()) {
             throw new ConvertException("Jackson container node.");
         }
-        return Converters.convert(json, enumClass);
+        return Converters.def().convert(json, enumClass);
     }
 
 }
