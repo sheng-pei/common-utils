@@ -15,10 +15,13 @@ package ppl.common.utils;
 //import ppl.common.utils.reflect.resolvable.ParameterizedResolvable;
 //import ppl.common.utils.reflect.resolvable.ParameterizedResolvable;
 import ppl.common.utils.reflect.resolvable.ClassResolvable;
-        import ppl.common.utils.reflect.resolvable.Resolvable;
+import ppl.common.utils.reflect.resolvable.Resolvable;
+import ppl.common.utils.reflect.resolvable.Resolvables;
 
-        import java.io.IOException;
-        import java.util.concurrent.ExecutionException;
+import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class Main {
 //    private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -47,29 +50,26 @@ public class Main {
 //        System.out.println(command.get("host"));
 //        System.out.println(command.get("config"));
 
-        Resolvable resolvable = ClassResolvable.getClassResolvable(Integer.class);
-        resolvable.resolve();
-//        System.out.println(((Class<?>) ((ParameterizedType)C.class.getGenericSuperclass()).getRawType()).getGenericSuperclass().equals(((Class<?>) ((ParameterizedType)D.class.getGenericSuperclass()).getRawType()).getGenericSuperclass()));
+//        Resolvable resolvable = Resolvables.getClassResolvable(D.class);
+        System.out.println(((ParameterizedType) A.C.class.getGenericSuperclass()).getOwnerType());
     }
 
-    public static class A {
+    public static class A<Y> {
+        public class III extends A {
+
+        }
+
+        public class B<X> extends III {
+
+        }
+
+        public class C<P> extends B<P> {
+
+        }
+
+        public class D<T, V extends C<T>> extends C<B<C<T>>> {
+
+        }
     }
-
-    public static class III extends A {
-
-    }
-
-    public static class B extends III {
-
-    }
-
-    public static class C extends B {
-
-    }
-
-    public static class D extends C {
-
-    }
-
 
 }

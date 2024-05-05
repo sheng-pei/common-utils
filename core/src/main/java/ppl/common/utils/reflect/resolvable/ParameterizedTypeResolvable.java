@@ -3,9 +3,8 @@ package ppl.common.utils.reflect.resolvable;
 import ppl.common.utils.exception.UnreachableCodeException;
 
 import java.lang.reflect.*;
-import java.util.concurrent.ExecutionException;
 
-public class ParameterizedResolvable implements Resolvable, InitializingResolvable {
+public class ParameterizedTypeResolvable implements Resolvable, InitializingResolvable {
 
     private final ClassResolvable raw;
     private final Resolvable[] generics;
@@ -13,14 +12,16 @@ public class ParameterizedResolvable implements Resolvable, InitializingResolvab
     private volatile Resolvable[] interfaces;
     private volatile Resolvable owner;
 
-    private ParameterizedResolvable(
+    private ParameterizedTypeResolvable(
             ClassResolvable raw,
-            Resolvable[] generics) {
+            Resolvable[] generics,
+            Resolvable owner) {
         this.raw = raw;
         this.generics = generics;
+        this.owner = owner;
     }
 
-    public static ParameterizedResolvable createParameterizedResolvable(ParameterizedType parameterizedType) {
+    public static ParameterizedTypeResolvable createParameterizedResolvable(ParameterizedType parameterizedType) {
         Class<?> clazz = (Class<?>) parameterizedType.getRawType();
         ClassResolvable raw = Resolvables.getClassResolvable(clazz);
 
@@ -31,9 +32,9 @@ public class ParameterizedResolvable implements Resolvable, InitializingResolvab
             if (actualArgument instanceof Class) {
                 generics[i] = Resolvables.getClassResolvable((Class<?>) actualArgument);
             } else if (actualArgument instanceof ParameterizedType) {
-                generics[i] = Resolvables.getParameterizedResolvable((ParameterizedType) actualArgument);
+                generics[i] = Resolvables.getParameterizedTypeResolvable((ParameterizedType) actualArgument);
             } else if (actualArgument instanceof TypeVariable) {
-                generics[i] = Resolvables.getVariableResolvable((TypeVariable<?>) actualArgument);
+                generics[i] = Resolvables.getTypeVariableResolvable((TypeVariable<?>) actualArgument);
             } else if (actualArgument instanceof WildcardType) {
 
             } else if (actualArgument instanceof GenericArrayType) {
@@ -42,7 +43,17 @@ public class ParameterizedResolvable implements Resolvable, InitializingResolvab
                 throw new UnreachableCodeException("Unsupported actual argument of parameterized type.");
             }
         }
-        return new ParameterizedResolvable(raw, generics);
+
+        Resolvable owner;
+        Type ownerType = parameterizedType.getOwnerType();
+        if (ownerType instanceof Class) {
+            owner = Resolvables.getClassResolvable((Class<?>) ownerType);
+        } else if (ownerType instanceof ParameterizedType) {
+            owner = Resolvables.getParameterizedTypeResolvable((ParameterizedType) ownerType);
+        } else {
+            throw new UnreachableCodeException("Unsupported owner type of parameterized type.");
+        }
+        return new ParameterizedTypeResolvable(raw, generics, owner);
     }
 
 //    private static Resolvable ownerType(Type owner) {
@@ -223,6 +234,7 @@ public class ParameterizedResolvable implements Resolvable, InitializingResolvab
 
     @Override
     public void init() {
+        Resolvable p = raw.getParent();
 
     }
 
