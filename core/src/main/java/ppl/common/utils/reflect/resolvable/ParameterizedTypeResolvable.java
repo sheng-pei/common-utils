@@ -1,9 +1,11 @@
 package ppl.common.utils.reflect.resolvable;
 
+import ppl.common.utils.exception.UnreachableCodeException;
+
 import java.lang.reflect.*;
 import java.util.concurrent.ExecutionException;
 
-public class ParameterizedResolvable implements Resolvable {
+public class ParameterizedResolvable implements Resolvable, InitializingResolvable {
 
     private final ClassResolvable raw;
     private final Resolvable[] generics;
@@ -18,27 +20,26 @@ public class ParameterizedResolvable implements Resolvable {
         this.generics = generics;
     }
 
-    public static ParameterizedResolvable getParameterizedResolvable(ParameterizedType parameterizedType) {
-        try {
-            return (ParameterizedResolvable) CACHE.get(parameterizedType,
-                    () -> createParameterizedResolvable(parameterizedType));
-        } catch (ExecutionException e) {
-            throw new IllegalArgumentException("Failed to create reflect class.", e.getCause());
-        }
-    }
-
-    private static ParameterizedResolvable createParameterizedResolvable(ParameterizedType parameterizedType) {
+    public static ParameterizedResolvable createParameterizedResolvable(ParameterizedType parameterizedType) {
         Class<?> clazz = (Class<?>) parameterizedType.getRawType();
-        ClassResolvable raw = ClassResolvable.getClassResolvable(clazz);
+        ClassResolvable raw = Resolvables.getClassResolvable(clazz);
 
         Type[] actualArguments = parameterizedType.getActualTypeArguments();
         Resolvable[] generics = new Resolvable[actualArguments.length];
         for (int i = 0; i < actualArguments.length; i++) {
             Type actualArgument = actualArguments[i];
             if (actualArgument instanceof Class) {
-                generics[i] = ClassResolvable.getClassResolvable((Class<?>) actualArgument);
+                generics[i] = Resolvables.getClassResolvable((Class<?>) actualArgument);
             } else if (actualArgument instanceof ParameterizedType) {
-                generics[i] = ParameterizedResolvable.getParameterizedResolvable((ParameterizedType) actualArgument);
+                generics[i] = Resolvables.getParameterizedResolvable((ParameterizedType) actualArgument);
+            } else if (actualArgument instanceof TypeVariable) {
+                generics[i] = Resolvables.getVariableResolvable((TypeVariable<?>) actualArgument);
+            } else if (actualArgument instanceof WildcardType) {
+
+            } else if (actualArgument instanceof GenericArrayType) {
+
+            } else {
+                throw new UnreachableCodeException("Unsupported actual argument of parameterized type.");
             }
         }
         return new ParameterizedResolvable(raw, generics);
@@ -221,6 +222,11 @@ public class ParameterizedResolvable implements Resolvable {
     }
 
     @Override
+    public void init() {
+
+    }
+
+    @Override
     public Resolvable resolve() {
         return null;
     }
@@ -233,6 +239,7 @@ public class ParameterizedResolvable implements Resolvable {
         } else {//rawParent instanceof ParameterizedResolvable
 
         }
+        return null;
 //        Resolvable[] generics = getGenerics();
 //        Resolvable[] newGenerics = new Resolvable[generics.length];
 //        for (int i = 0; i < generics.length; i++) {
