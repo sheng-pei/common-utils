@@ -14,6 +14,7 @@ package ppl.common.utils;
 
 //import ppl.common.utils.reflect.resolvable.ParameterizedResolvable;
 //import ppl.common.utils.reflect.resolvable.ParameterizedResolvable;
+import org.springframework.core.ResolvableType;
 import ppl.common.utils.reflect.resolvable.ClassResolvable;
 import ppl.common.utils.reflect.resolvable.Resolvable;
 import ppl.common.utils.reflect.resolvable.Resolvables;
@@ -51,25 +52,36 @@ public class Main {
 //        System.out.println(command.get("config"));
 
 //        Resolvable resolvable = Resolvables.getClassResolvable(D.class);
-        System.out.println(((ParameterizedType) A.C.class.getGenericSuperclass()).getOwnerType());
+//        A<String>.III<Object> iii = A.c;
+        System.out.println(((Class<?>) A.class.getDeclaredField("c").getGenericType()).getEnclosingClass());
     }
 
     public static class A<Y> {
-        public class III extends A {
-
+        public class II<I> {
         }
 
-        public class B<X> extends III {
+        public class III<I> extends II<I> {
+            public void a(I y) {
 
+            }
         }
 
-        public class C<P> extends B<P> {
+        public class B<X> extends III<Y> {
+            public void a(Y y) {
+
+            }
+        }
+
+        public class C<P> extends B {
 
         }
 
         public class D<T, V extends C<T>> extends C<B<C<T>>> {
 
         }
+
+        public static A<String> a = new A<>();
+        public static A.C c = a.new C<>();
     }
 
 }

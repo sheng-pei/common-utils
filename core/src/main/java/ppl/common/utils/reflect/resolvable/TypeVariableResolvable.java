@@ -8,7 +8,7 @@ public class TypeVariableResolvable implements Resolvable, InitializingResolvabl
 
     private final TypeVariable<?> type;
     private volatile Resolvable declaration;
-    private volatile BoundType boundType;
+    private volatile BoundKind boundKind;
     private volatile Resolvable[] bounds;
 
     private TypeVariableResolvable(TypeVariable<?> type) {
@@ -41,7 +41,7 @@ public class TypeVariableResolvable implements Resolvable, InitializingResolvabl
             throw new UnreachableCodeException("Unsupported type variable declaration.");
         }
         this.declaration = d;
-        this.boundType = BoundType.UPPER;
+        this.boundKind = BoundKind.UPPER;
         Type[] boundTypes = type.getBounds();
         if (boundTypes.length == 0) {
             this.bounds = Resolvables.ZERO_RESOLVABLE;

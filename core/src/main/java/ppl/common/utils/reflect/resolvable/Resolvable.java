@@ -6,6 +6,9 @@ import ppl.common.utils.cache.ReferenceType;
 
 import java.lang.reflect.Type;
 
+/**
+ *
+ */
 public interface Resolvable {
     void init();
 
