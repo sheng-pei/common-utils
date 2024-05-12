@@ -18,10 +18,13 @@ import org.springframework.core.ResolvableType;
 import ppl.common.utils.reflect.resolvable.ClassResolvable;
 import ppl.common.utils.reflect.resolvable.Resolvable;
 import ppl.common.utils.reflect.resolvable.Resolvables;
+import ppl.common.utils.reflect.type.InternalParameterizedType;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
-import java.util.List;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class Main {
@@ -51,37 +54,52 @@ public class Main {
 //        System.out.println(command.get("host"));
 //        System.out.println(command.get("config"));
 
-//        Resolvable resolvable = Resolvables.getClassResolvable(D.class);
-//        A<String>.III<Object> iii = A.c;
-        System.out.println(((Class<?>) A.class.getDeclaredField("c").getGenericType()).getEnclosingClass());
+        ParameterizedType cType = (ParameterizedType) LL.class.getDeclaredField("c").getGenericType();
+        ParameterizedType owner = (ParameterizedType) cType.getOwnerType();
+        System.out.println(owner);
+        Class<?> bType = (Class<?>) ((Class<?>) cType.getRawType()).getGenericSuperclass();
+        System.out.println(bType.getGenericSuperclass());
+//        System.out.println(bType.getRawType());
+//        if (bType.getActualTypeArguments()[0].equals(((Class<?>) cType.getRawType()).getTypeParameters()[0])) {
+//            System.out.println(cType.getActualTypeArguments()[0]);
+//        }
+
+
+//        ParameterizedType pt = (ParameterizedType) LL.A.III.class.getGenericSuperclass();
+//        System.out.println(LL.A.III.class.getGenericSuperclass());
+//        System.out.println(LL.A.II.class.getEnclosingClass().getTypeParameters()[0]);
+//        System.out.println(LL.A.II.class.getEnclosingClass().getTypeParameters()[0].equals(((ParameterizedType) pt.getOwnerType()).getActualTypeArguments()[0]));
+//        System.out.println(((ParameterizedType) LL.A.III.class.getGenericSuperclass()).getActualTypeArguments()[0].equals(LL.A.II.class.getTypeParameters()[0]));
     }
 
-    public static class A<Y> {
-        public class II<I> {
-        }
+    public static class LL<I> {
+        public class A<Y> {
+            public class II<I> {
+            }
 
-        public class III<I> extends II<I> {
-            public void a(I y) {
+            public class III<I> extends II<I> {
+                public void a(I y) {
+
+                }
+            }
+
+            public class B<X> extends III<Y> {
+                public void a(Y y) {
+
+                }
+            }
+
+            public class C<P> extends B {
 
             }
-        }
 
-        public class B<X> extends III<Y> {
-            public void a(Y y) {
+            public class D<T, V extends C<T>> extends C<B<C<T>>> {
 
             }
-        }
-
-        public class C<P> extends B {
 
         }
 
-        public class D<T, V extends C<T>> extends C<B<C<T>>> {
-
-        }
-
-        public static A<String> a = new A<>();
-        public static A.C c = a.new C<>();
+        public static LL<String>.A<String>.C<String> c;
     }
 
 }
