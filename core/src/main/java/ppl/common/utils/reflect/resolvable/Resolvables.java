@@ -19,14 +19,8 @@ public final class Resolvables {
 
     public static ClassResolvable getClassResolvable(Class<?> clazz) {
         try {
-            @SuppressWarnings("unchecked")
-            Reference<ClassResolvable> reference = (Reference<ClassResolvable>) CACHE.get(clazz, () ->
-                    new Reference<>(ClassResolvable.createClassResolvable(clazz)));
-            ClassResolvable ret = reference.get();
-            if (reference.isNew()) {
-                ret.init();
-            }
-            return ret;
+            return (ClassResolvable) CACHE.get(clazz, () ->
+                    ClassResolvable.createClassResolvable(clazz));
         } catch (ExecutionException e) {
             throw new IllegalArgumentException("Failed to resolve class: '" + clazz + "'.", e.getCause());
         }
@@ -34,14 +28,8 @@ public final class Resolvables {
 
     public static TypeVariableResolvable getTypeVariableResolvable(TypeVariable<?> variable) {
         try {
-            @SuppressWarnings("unchecked")
-            Reference<TypeVariableResolvable> reference = (Reference<TypeVariableResolvable>) CACHE.get(variable, () ->
-                    new Reference<>(TypeVariableResolvable.createVariableResolvable(variable)));
-            TypeVariableResolvable ret = reference.get();
-            if (reference.isNew()) {
-                ret.init();
-            }
-            return ret;
+            return (TypeVariableResolvable) CACHE.get(variable, () ->
+                    TypeVariableResolvable.createVariableResolvable(variable));
         } catch (ExecutionException e) {
             throw new IllegalArgumentException(String.format(
                     "Failed to resolve type variable: '%s' of '%s'.",
@@ -51,35 +39,10 @@ public final class Resolvables {
 
     public static ParameterizedTypeResolvable getParameterizedTypeResolvable(ParameterizedType parameterizedType) {
         try {
-            @SuppressWarnings("unchecked")
-            Reference<ParameterizedTypeResolvable> reference = (Reference<ParameterizedTypeResolvable>) CACHE.get(parameterizedType,
-                    () -> new Reference<>(ParameterizedTypeResolvable.createParameterizedResolvable(parameterizedType)));
-            ParameterizedTypeResolvable ret = reference.get();
-            if (reference.isNew()) {
-                ret.init();
-            }
-            return ret;
+            return (ParameterizedTypeResolvable) CACHE.get(parameterizedType,
+                    () -> ParameterizedTypeResolvable.createParameterizedResolvable(parameterizedType));
         } catch (ExecutionException e) {
             throw new IllegalArgumentException("Failed to create reflect class.", e.getCause());
         }
-    }
-
-    private static final class Reference<R> {
-        private final R ref;
-        private final AtomicBoolean newFlag;
-
-        public Reference(R ref) {
-            this.ref = ref;
-            this.newFlag = new AtomicBoolean(true);
-        }
-
-        public boolean isNew() {
-            return newFlag.compareAndSet(true, false);
-        }
-
-        public R get() {
-            return this.ref;
-        }
-
     }
 }

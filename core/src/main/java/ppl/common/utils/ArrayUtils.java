@@ -6,6 +6,7 @@ import ppl.common.utils.cache.ReferenceType;
 import ppl.common.utils.exception.UnreachableCodeException;
 
 import java.lang.reflect.Array;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public final class ArrayUtils {
@@ -47,9 +48,20 @@ public final class ArrayUtils {
         return array == null || array.length == 0;
     }
 
-    private static final Cache<Class<?>, Object> ZERO_CACHE = new ConcurrentReferenceValueCache<>(ReferenceType.WEAK);
+    private static final Object[] ZERO = new Object[0];
+    public static Object[] zero() {
+        return ZERO;
+    }
 
+    private static final Cache<Class<?>, Object> ZERO_CACHE = new ConcurrentReferenceValueCache<>(ReferenceType.WEAK);
     public static <T> T[] zero(Class<T> clazz) {
+        Objects.requireNonNull(clazz);
+        if (clazz.equals(Object.class)) {
+            @SuppressWarnings("unchecked")
+            T[] ret = (T[]) zero();
+            return ret;
+        }
+
         try {
             @SuppressWarnings("unchecked")
             T[] ret = (T[]) ZERO_CACHE.get(clazz, () -> Array.newInstance(clazz, 0));

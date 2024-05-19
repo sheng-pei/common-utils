@@ -16,14 +16,13 @@ package ppl.common.utils;
 //import ppl.common.utils.reflect.resolvable.ParameterizedResolvable;
 import org.springframework.core.ResolvableType;
 import ppl.common.utils.reflect.resolvable.ClassResolvable;
+import ppl.common.utils.reflect.resolvable.ParameterizedTypeResolvable;
 import ppl.common.utils.reflect.resolvable.Resolvable;
 import ppl.common.utils.reflect.resolvable.Resolvables;
 import ppl.common.utils.reflect.type.InternalParameterizedType;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -54,43 +53,52 @@ public class Main {
 //        System.out.println(command.get("host"));
 //        System.out.println(command.get("config"));
 
-        ParameterizedType cType = (ParameterizedType) LL.class.getDeclaredField("c").getGenericType();
-        ParameterizedType owner = (ParameterizedType) cType.getOwnerType();
-        System.out.println(owner);
-        Class<?> bType = (Class<?>) ((Class<?>) cType.getRawType()).getGenericSuperclass();
-        System.out.println(bType.getGenericSuperclass());
-//        System.out.println(bType.getRawType());
-//        if (bType.getActualTypeArguments()[0].equals(((Class<?>) cType.getRawType()).getTypeParameters()[0])) {
-//            System.out.println(cType.getActualTypeArguments()[0]);
-//        }
+//        Field field = LL.class.getDeclaredField("c");
+//        ParameterizedType pt = (ParameterizedType) field.getGenericType();
+//
+        ParameterizedType pt = (ParameterizedType) LL.A.C.class.getGenericSuperclass();
+        pt = (ParameterizedType) pt.getActualTypeArguments()[0];
+        pt = (ParameterizedType) pt.getOwnerType();
+        pt = (ParameterizedType) pt.getOwnerType();
+        System.out.println(((TypeVariable) pt.getActualTypeArguments()[0]).getGenericDeclaration());
 
+//        ResolvableType rt = ResolvableType.forField(field);
+//        System.out.println(rt.getSuperType().getGeneric(0).getSuperType().resolve());
+//        System.out.println(rt.getSuperType().getGeneric(0).getSuperType().getGeneric(0).resolve());
 
-//        ParameterizedType pt = (ParameterizedType) LL.A.III.class.getGenericSuperclass();
-//        System.out.println(LL.A.III.class.getGenericSuperclass());
-//        System.out.println(LL.A.II.class.getEnclosingClass().getTypeParameters()[0]);
-//        System.out.println(LL.A.II.class.getEnclosingClass().getTypeParameters()[0].equals(((ParameterizedType) pt.getOwnerType()).getActualTypeArguments()[0]));
-//        System.out.println(((ParameterizedType) LL.A.III.class.getGenericSuperclass()).getActualTypeArguments()[0].equals(LL.A.II.class.getTypeParameters()[0]));
+//        ParameterizedTypeResolvable ptr = Resolvables.getParameterizedTypeResolvable(pt);
+//        ParameterizedTypeResolvable pptr = (ParameterizedTypeResolvable) ptr.getParent();
+//        ParameterizedTypeResolvable ppptr = (ParameterizedTypeResolvable) pptr.getParent();
+//        System.out.println(((ClassResolvable) ((ParameterizedTypeResolvable) (((ParameterizedTypeResolvable) pptr.getGeneric(0)).getOwner())).getGeneric(0)).getType());
+//        System.out.println(((ClassResolvable) ppptr.getGeneric(0)).getType());
+
+//        LL<Object>.A<String>.II<String> ii = LL.c.a(LL.iii);
     }
 
     public static class LL<I> {
         public class A<Y> {
+
             public class II<I> {
             }
 
-            public class III<I> extends II<I> {
-                public void a(I y) {
-
+            public class III<X> extends II<I> {
+                private I i;
+                public I b() {
+                    return i;
                 }
             }
 
-            public class B<X> extends III<Y> {
-                public void a(Y y) {
+            public class B<X> extends III<X> {
 
+                public B() {
+                }
+
+                public X a(X y) {
+                    return null;
                 }
             }
 
-            public class C<P> extends B {
-
+            public class C<X> extends B<III<Y>> {
             }
 
             public class D<T, V extends C<T>> extends C<B<C<T>>> {
@@ -99,7 +107,11 @@ public class Main {
 
         }
 
-        public static LL<String>.A<String>.C<String> c;
+        public static LL<Object> ll = new LL<>();
+        public static LL<Object>.A<String> s = ll.new A<>();
+        public static LL<Object>.A<Integer> a = ll.new A<>();
+        public static LL<Object>.A<String>.III<String> iii = s.new III<>();
+        public static LL<Object>.A<Integer>.C<String> c = a.new C<String>();
     }
 
 }

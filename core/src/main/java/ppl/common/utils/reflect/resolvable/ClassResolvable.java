@@ -7,16 +7,19 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 
-public class ClassResolvable implements Resolvable, InitializingResolvable {
+public class ClassResolvable implements Resolvable {
 
     private final Class<?> type;
-    private volatile Resolvable[] variables;
+    private final TypeVariableResolvable[] variables;
     private volatile Resolvable parent;
     private volatile Resolvable[] interfaces;
     private volatile Resolvable owner;
 
     private ClassResolvable(Class<?> type) {
         this.type = type;
+        this.variables = Arrays.stream(type.getTypeParameters())
+                .map(TypeVariableResolvable::createVariableResolvable)
+                .toArray(TypeVariableResolvable[]::new);
     }
 
     static ClassResolvable createClassResolvable(Class<?> clazz) {
@@ -35,6 +38,10 @@ public class ClassResolvable implements Resolvable, InitializingResolvable {
     }
 
     public Resolvable getParent() {
+        Type base = type.getGenericSuperclass();
+        if (base instanceof ParameterizedType) {
+            return Resolvables.getParameterizedTypeResolvable((ParameterizedType) base);
+        }
         return this.parent;
     }
 
@@ -59,62 +66,20 @@ public class ClassResolvable implements Resolvable, InitializingResolvable {
 //        return null;
 //    }
 
-    private static int index(Class<?> rawClass, TypeVariable<?> src) {
-        TypeVariable<?>[] parameters = rawClass.getTypeParameters();
-        for (int i = 0; i < parameters.length; i++) {
-            if (parameters[i].getName().equals(src.getName())) {
+    public int index(TypeVariableResolvable variable) {
+        for (int i = 0; i < variables.length; i++) {
+            if (variables[i].equals(variable)) {
                 return i;
             }
         }
         return -1;
     }
 
-    @Override
-    public void init() {
-        this.variables = Arrays.stream(type.getTypeParameters())
-                .map(Resolvables::getTypeVariableResolvable)
-                .toArray(Resolvable[]::new);
-        ClassResolvable owner = ownerType(type.getEnclosingClass());
-        Resolvable parent = inheritedType(type.getGenericSuperclass());
-        Resolvable[] interfaces = Arrays.stream(type.getGenericInterfaces())
-                .map(ClassResolvable::inheritedType)
-                .toArray(Resolvable[]::new);
-        this.parent = parent;
-        this.interfaces = interfaces;
-        this.owner = owner;
-    }
-
-    private static ClassResolvable ownerType(Class<?> owner) {
-        ClassResolvable ret = null;
-        if (owner != null) {
-            ret = Resolvables.getClassResolvable(owner);
-        }
-        return ret;
-    }
-
-    private static Resolvable inheritedType(Type type) {
-        Resolvable ret = null;
-        if (type != null) {
-            if (type instanceof ParameterizedType) {
-                ret = Resolvables.getParameterizedTypeResolvable((ParameterizedType) type);
-            } else if (type instanceof Class) {
-                ret = Resolvables.getClassResolvable((Class<?>) type).resolve();
-            } else {
-                throw new UnreachableCodeException("Unsupported inherited type.");
-            }
-        }
-        return ret;
-    }
-
-    @Override
-    public Resolvable resolve() {
-//        TypeVariable<?>[] parameters = type.getTypeParameters();
-//        Resolvable[] generics = Arrays.stream(parameters)
-//                .map(TypeVariableResolvable::getVariableResolvable)
+//    @Override
+//    public void init() {
+//        this.variables = Arrays.stream(type.getTypeParameters())
+//                .map(Resolvables::getTypeVariableResolvable)
 //                .toArray(Resolvable[]::new);
-//        Arrays.stream(generics).forEach(Resolvable::resolve);
-//
-//
 //        ClassResolvable owner = ownerType(type.getEnclosingClass());
 //        Resolvable parent = inheritedType(type.getGenericSuperclass());
 //        Resolvable[] interfaces = Arrays.stream(type.getGenericInterfaces())
@@ -123,14 +88,32 @@ public class ClassResolvable implements Resolvable, InitializingResolvable {
 //        this.parent = parent;
 //        this.interfaces = interfaces;
 //        this.owner = owner;
-//        return this;
-        return null;
-    }
+//    }
 
-
+//    private static ClassResolvable ownerType(Class<?> owner) {
+//        ClassResolvable ret = null;
+//        if (owner != null) {
+//            ret = Resolvables.getClassResolvable(owner);
+//        }
+//        return ret;
+//    }
+//
+//    private static Resolvable inheritedType(Type type) {
+//        Resolvable ret = null;
+//        if (type != null) {
+//            if (type instanceof ParameterizedType) {
+//                ret = Resolvables.getParameterizedTypeResolvable((ParameterizedType) type);
+//            } else if (type instanceof Class) {
+//                ret = Resolvables.getClassResolvable((Class<?>) type).resolve();
+//            } else {
+//                throw new UnreachableCodeException("Unsupported inherited type.");
+//            }
+//        }
+//        return ret;
+//    }
 
     @Override
-    public Resolvable resolveVariables(VariableResolver<Resolvable> variableResolver) {
+    public Resolvable[] resolveGenerics(VariableResolver variableResolver) {
         throw new UnsupportedOperationException();
     }
 

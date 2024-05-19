@@ -3,14 +3,15 @@ package ppl.common.utils.reflect.resolvable;
 import ppl.common.utils.exception.UnreachableCodeException;
 
 import java.lang.reflect.*;
+import java.util.Arrays;
 
-public class ParameterizedTypeResolvable implements Resolvable, InitializingResolvable {
+public class ParameterizedTypeResolvable implements Resolvable {
 
     private final ClassResolvable raw;
     private final Resolvable[] generics;
+    private final Resolvable owner;
     private volatile Resolvable parent;
     private volatile Resolvable[] interfaces;
-    private volatile Resolvable owner;
 
     private ParameterizedTypeResolvable(
             ClassResolvable raw,
@@ -21,7 +22,11 @@ public class ParameterizedTypeResolvable implements Resolvable, InitializingReso
         this.owner = owner;
     }
 
-    public static ParameterizedTypeResolvable createParameterizedResolvable(ParameterizedType parameterizedType) {
+    static ParameterizedTypeResolvable createParameterizedResolvable(ClassResolvable raw, Resolvable[] generics, Resolvable owner) {
+        return new ParameterizedTypeResolvable(raw, generics, owner);
+    }
+
+    static ParameterizedTypeResolvable createParameterizedResolvable(ParameterizedType parameterizedType) {
         Class<?> clazz = (Class<?>) parameterizedType.getRawType();
         ClassResolvable raw = Resolvables.getClassResolvable(clazz);
 
@@ -46,7 +51,9 @@ public class ParameterizedTypeResolvable implements Resolvable, InitializingReso
 
         Resolvable owner;
         Type ownerType = parameterizedType.getOwnerType();
-        if (ownerType instanceof Class) {
+        if (ownerType == null) {
+            owner = null;
+        } else if (ownerType instanceof Class) {
             owner = Resolvables.getClassResolvable((Class<?>) ownerType);
         } else if (ownerType instanceof ParameterizedType) {
             owner = Resolvables.getParameterizedTypeResolvable((ParameterizedType) ownerType);
@@ -187,8 +194,20 @@ public class ParameterizedTypeResolvable implements Resolvable, InitializingReso
 //        }
 //    }
 
+    public ClassResolvable getRaw() {
+        return raw;
+    }
+
     public Resolvable getParent() {
-        return parent;
+        Resolvable parent = raw.getParent();
+        if (parent instanceof ClassResolvable) {
+
+        } else if (parent instanceof ParameterizedTypeResolvable) {
+            ParameterizedTypeResolvable ppt = (ParameterizedTypeResolvable) parent;
+            Resolvable[] generics = ppt.resolveGenerics(new DefaultVariableResolver(this, owner));
+            return ParameterizedTypeResolvable.createParameterizedResolvable(ppt.getRaw(), generics, owner);
+        }
+        return null;
     }
 
     public Resolvable[] getInterfaces() {
@@ -199,27 +218,12 @@ public class ParameterizedTypeResolvable implements Resolvable, InitializingReso
         return owner;
     }
 
-    public Resolvable getGeneric(TypeVariable<?> variable) {
-        Class<?> rawClass = raw.getType();
-        if (!variable.getGenericDeclaration().equals(rawClass)) {
-            return null;
-        }
-
-        int idx = index(rawClass, variable);
+    public Resolvable getGeneric(TypeVariableResolvable variable) {
+        int idx = raw.index(variable);
         if (idx >= 0) {
             return generics[idx];
         }
-        return null;
-    }
-
-    private static int index(Class<?> rawClass, TypeVariable<?> src) {
-        TypeVariable<?>[] parameters = rawClass.getTypeParameters();
-        for (int i = 0; i < parameters.length; i++) {
-            if (parameters[i].getName().equals(src.getName())) {
-                return i;
-            }
-        }
-        return -1;
+        return variable;
     }
 
     public Resolvable getGeneric(int idx) {
@@ -233,25 +237,11 @@ public class ParameterizedTypeResolvable implements Resolvable, InitializingReso
     }
 
     @Override
-    public void init() {
-        Resolvable p = raw.getParent();
-
-    }
-
-    @Override
-    public Resolvable resolve() {
-        return null;
-    }
-
-    @Override
-    public Resolvable resolveVariables(VariableResolver<Resolvable> variableResolver) {
-        Resolvable rawParent = raw.getParent();
-        if (rawParent instanceof ClassResolvable) {
-            parent = rawParent;
-        } else {//rawParent instanceof ParameterizedResolvable
-
-        }
-        return null;
+    public Resolvable[] resolveGenerics(VariableResolver variableResolver) {
+        Resolvable[] generics = this.generics;
+        return Arrays.stream(generics)
+                .map(variableResolver::resolve)
+                .toArray(Resolvable[]::new);
 //        Resolvable[] generics = getGenerics();
 //        Resolvable[] newGenerics = new Resolvable[generics.length];
 //        for (int i = 0; i < generics.length; i++) {

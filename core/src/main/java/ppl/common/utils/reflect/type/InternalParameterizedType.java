@@ -19,23 +19,23 @@ public class InternalParameterizedType implements ParameterizedType {
         this.owner = owner;
     }
 
-//    private InternalParameterizedType(ParameterizedType parameterizedType) {
-//        this.raw = (Class<?>) parameterizedType.getRawType();
-//        this.actualTypeArguments = parameterizedType.getActualTypeArguments();
-//        this.owner = parameterizedType.getOwnerType();
-//    }
+    private InternalParameterizedType(ParameterizedType parameterizedType) {
+        this.raw = (Class<?>) parameterizedType.getRawType();
+        this.actualTypeArguments = parameterizedType.getActualTypeArguments();
+        this.owner = parameterizedType.getOwnerType();
+    }
 
     public static InternalParameterizedType create(Class<?> raw, Type owner) {
         return new InternalParameterizedType(raw, owner);
     }
 
-//    public static InternalParameterizedType create(ParameterizedType parameterizedType) {
-//        if (parameterizedType instanceof InternalParameterizedType) {
-//            return (InternalParameterizedType) parameterizedType;
-//        } else {
-//            return new InternalParameterizedType(parameterizedType);
-//        }
-//    }
+    public static InternalParameterizedType create(ParameterizedType parameterizedType) {
+        if (parameterizedType instanceof InternalParameterizedType) {
+            return (InternalParameterizedType) parameterizedType;
+        } else {
+            return new InternalParameterizedType(parameterizedType);
+        }
+    }
 
     @Override
     public Type[] getActualTypeArguments() {
