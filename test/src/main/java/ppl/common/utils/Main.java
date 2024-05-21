@@ -15,6 +15,10 @@ package ppl.common.utils;
 //import ppl.common.utils.reflect.resolvable.ParameterizedResolvable;
 //import ppl.common.utils.reflect.resolvable.ParameterizedResolvable;
 
+import ppl.common.utils.reflect.resolvable.GenericResolvable;
+import ppl.common.utils.reflect.resolvable.ParameterizedTypeResolvable;
+import ppl.common.utils.reflect.resolvable.Resolvables;
+
 import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
@@ -49,14 +53,26 @@ public class Main {
 
         Field field = LL.class.getDeclaredField("c");
         ParameterizedType pt = (ParameterizedType) field.getGenericType();
-        System.out.println(((ParameterizedType)((ParameterizedType)pt.getOwnerType()).getOwnerType()).getOwnerType());
-//        ParameterizedTypeResolvable ptr = Resolvables.getParameterizedTypeResolvable(pt);
-//        ParameterizedTypeResolvable pptr = (ParameterizedTypeResolvable) ptr.getParent();
-//        ParameterizedTypeResolvable pptr1 = (ParameterizedTypeResolvable) ptr.getParent();
-//        ParameterizedTypeResolvable a = (ParameterizedTypeResolvable) pptr.getGeneric(0);
-//        System.out.println(((ClassResolvable) a.getGeneric(0)).getType());
-//        System.out.println(((ClassResolvable) ((ParameterizedTypeResolvable) a.getOwner()).getGeneric(0)).getType());
-//        System.out.println(((ClassResolvable) ((ParameterizedTypeResolvable) (((ParameterizedTypeResolvable) ((ParameterizedTypeResolvable) a.getOwner())).getOwner())).getGeneric(0)).getType());
+        ParameterizedTypeResolvable ptr = Resolvables.getParameterizedTypeResolvable(pt);
+        System.out.println(((GenericResolvable) ptr.getGeneric(0)).getType());
+
+        ParameterizedTypeResolvable pptr = (ParameterizedTypeResolvable) ptr.getParent();
+        GenericResolvable g = (GenericResolvable) pptr.getGeneric(0);
+        System.out.println(g.getType());
+        System.out.println(((GenericResolvable) g.getParent()).getType());
+        System.out.println(((GenericResolvable) ((GenericResolvable) g.getParent()).getGeneric(0)).getType());
+        System.out.println(((GenericResolvable) g.getOwner()).getType());
+        System.out.println(((GenericResolvable) ((GenericResolvable) g.getOwner()).getGeneric(0)).getType());
+
+        ParameterizedTypeResolvable owner = (ParameterizedTypeResolvable) pptr.getOwner();
+        System.out.println(owner.getType());
+        System.out.println(((GenericResolvable) owner.getGeneric(0)).getType());
+
+        ParameterizedTypeResolvable pptr1 = (ParameterizedTypeResolvable) ptr.getParent();
+        ParameterizedTypeResolvable a = (ParameterizedTypeResolvable) pptr.getGeneric(0);
+        System.out.println(((GenericResolvable) a.getGeneric(0)).getType());
+        System.out.println(((GenericResolvable) ((ParameterizedTypeResolvable) a.getOwner()).getGeneric(0)).getType());
+        System.out.println(((GenericResolvable) ((ParameterizedTypeResolvable) (((ParameterizedTypeResolvable) ((ParameterizedTypeResolvable) a.getOwner())).getOwner())).getGeneric(0)).getType());
     }
 
     public static class LL<I> {
@@ -91,7 +107,7 @@ public class Main {
                 }
             }
 
-            public class C<Y> extends B<III> {
+            public class C<X> extends B<III> {
             }
 
             public class D<T, V extends C<T>> extends C<B<C<T>>> {
@@ -100,11 +116,11 @@ public class Main {
 
         }
 
-        public static LL<Object> ll = new LL<>();
-        public static LL<Object>.A<String> s = ll.new A<>();
-        public static LL<Object>.A<Integer> a = ll.new A<>();
-        public static LL<Object>.A<String>.III<String> iii = s.new III<>();
-        public static LL<Object>.A<Integer>.C<String> c = a.new C<String>();
+        public static LL<Number> ll = new LL<>();
+        public static LL<Number>.A<String> s = ll.new A<>();
+        public static LL<Number>.A<Integer> a = ll.new A<>();
+        public static LL<Number>.A<String>.III<String> iii = s.new III<>();
+        public static LL<Number>.A<Integer>.C<String> c = a.new C<String>();
     }
 
 }

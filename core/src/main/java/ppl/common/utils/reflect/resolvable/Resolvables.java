@@ -27,18 +27,18 @@ public final class Resolvables {
         }
     }
 
-    public static Resolvable getClassResolvable(Class<?> clazz) {
+    public static ClassResolvable getClassResolvable(Class<?> clazz) {
         try {
-            return (Resolvable) CACHE.get(clazz, () ->
-                    ParameterizedTypeResolvable.createResolvable(clazz));
+            return (ClassResolvable) CACHE.get(clazz, () ->
+                    ClassResolvable.createResolvable(clazz));
         } catch (ExecutionException e) {
             throw new IllegalArgumentException("Failed to resolve class: '" + clazz + "'.", e.getCause());
         }
     }
 
-    public static Resolvable getTypeVariableResolvable(TypeVariable<?> variable) {
+    public static TypeVariableResolvable getTypeVariableResolvable(TypeVariable<?> variable) {
         try {
-            return (Resolvable) CACHE.get(variable, () ->
+            return (TypeVariableResolvable) CACHE.get(variable, () ->
                     TypeVariableResolvable.createResolvable(variable));
         } catch (ExecutionException e) {
             throw new IllegalArgumentException(String.format(
@@ -47,9 +47,9 @@ public final class Resolvables {
         }
     }
 
-    public static Resolvable getParameterizedTypeResolvable(ParameterizedType parameterizedType) {
+    public static ParameterizedTypeResolvable getParameterizedTypeResolvable(ParameterizedType parameterizedType) {
         try {
-            return (Resolvable) CACHE.get(parameterizedType,
+            return (ParameterizedTypeResolvable) CACHE.get(parameterizedType,
                     () -> ParameterizedTypeResolvable.createResolvable(parameterizedType));
         } catch (ExecutionException e) {
             throw new IllegalArgumentException("Failed to create reflect class.", e.getCause());

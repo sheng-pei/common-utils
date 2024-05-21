@@ -1,30 +1,33 @@
 package ppl.common.utils.reflect.resolvable;
 
 public final class DefaultVariableResolver implements VariableResolver {
-    private final ParameterizedTypeResolvable core;
+    private final GenericResolvable core;
     private final Resolvable owner;
 
-    public DefaultVariableResolver(ParameterizedTypeResolvable core, Resolvable owner) {
+    public DefaultVariableResolver(GenericResolvable core, Resolvable owner) {
         this.core = core;
         this.owner = owner;
     }
 
     @Override
     public Resolvable resolve(Resolvable resolvable) {
-        Resolvable ret = resolvable;
+        Resolvable ret = null;
         if (resolvable instanceof TypeVariableResolvable) {
-            ParameterizedTypeResolvable core = this.core;
-            ret = core.getGeneric((TypeVariableResolvable) ret);
+            GenericResolvable core = this.core;
+            ret = core.getGeneric((TypeVariableResolvable) resolvable);
 
             Resolvable owner = this.owner;
-            while (owner instanceof ParameterizedTypeResolvable && ret.equals(resolvable)) {
-                ParameterizedTypeResolvable o = (ParameterizedTypeResolvable) owner;
-                ret = o.getGeneric((TypeVariableResolvable) ret);
+            while (owner instanceof GenericResolvable && ret == null) {
+                GenericResolvable o = (GenericResolvable) owner;
+                ret = o.getGeneric((TypeVariableResolvable) resolvable);
                 owner = o.getOwner();
             }
-        } else if (resolvable instanceof ParameterizedTypeResolvable) {
-            ParameterizedTypeResolvable r = (ParameterizedTypeResolvable) resolvable;
-            return r.resolve(this);
+            if (ret == null) {
+                ret = resolvable;
+            }
+        } else if (resolvable instanceof GenericResolvable) {
+            GenericResolvable r = (GenericResolvable) resolvable;
+            ret = r.resolve(this);
         }
         return ret;
     }
