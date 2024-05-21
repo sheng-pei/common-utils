@@ -8,28 +8,38 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Resolvables {
 
     private static final Cache<Type, Object> CACHE = new ConcurrentReferenceValueCache<>(ReferenceType.WEAK);
-    public static final Resolvable[] ZERO_RESOLVABLE = new Resolvable[0];
 
     private Resolvables() {}
 
-    public static ClassResolvable getClassResolvable(Class<?> clazz) {
+    public static Resolvable getResolvable(Type type) {
+        if (type instanceof Class) {
+            return getClassResolvable((Class<?>) type);
+        } else if (type instanceof ParameterizedType) {
+            return getParameterizedTypeResolvable((ParameterizedType) type);
+        } else if (type instanceof TypeVariable) {
+            return getTypeVariableResolvable((TypeVariable<?>) type);
+        } else {
+            throw new IllegalArgumentException("Unsupported type.");
+        }
+    }
+
+    public static Resolvable getClassResolvable(Class<?> clazz) {
         try {
-            return (ClassResolvable) CACHE.get(clazz, () ->
-                    ClassResolvable.createClassResolvable(clazz));
+            return (Resolvable) CACHE.get(clazz, () ->
+                    ParameterizedTypeResolvable.createResolvable(clazz));
         } catch (ExecutionException e) {
             throw new IllegalArgumentException("Failed to resolve class: '" + clazz + "'.", e.getCause());
         }
     }
 
-    public static TypeVariableResolvable getTypeVariableResolvable(TypeVariable<?> variable) {
+    public static Resolvable getTypeVariableResolvable(TypeVariable<?> variable) {
         try {
-            return (TypeVariableResolvable) CACHE.get(variable, () ->
-                    TypeVariableResolvable.createVariableResolvable(variable));
+            return (Resolvable) CACHE.get(variable, () ->
+                    TypeVariableResolvable.createResolvable(variable));
         } catch (ExecutionException e) {
             throw new IllegalArgumentException(String.format(
                     "Failed to resolve type variable: '%s' of '%s'.",
@@ -37,10 +47,10 @@ public final class Resolvables {
         }
     }
 
-    public static ParameterizedTypeResolvable getParameterizedTypeResolvable(ParameterizedType parameterizedType) {
+    public static Resolvable getParameterizedTypeResolvable(ParameterizedType parameterizedType) {
         try {
-            return (ParameterizedTypeResolvable) CACHE.get(parameterizedType,
-                    () -> ParameterizedTypeResolvable.createParameterizedResolvable(parameterizedType));
+            return (Resolvable) CACHE.get(parameterizedType,
+                    () -> ParameterizedTypeResolvable.createResolvable(parameterizedType));
         } catch (ExecutionException e) {
             throw new IllegalArgumentException("Failed to create reflect class.", e.getCause());
         }

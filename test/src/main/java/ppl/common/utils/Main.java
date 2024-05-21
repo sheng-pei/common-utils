@@ -14,12 +14,6 @@ package ppl.common.utils;
 
 //import ppl.common.utils.reflect.resolvable.ParameterizedResolvable;
 //import ppl.common.utils.reflect.resolvable.ParameterizedResolvable;
-import org.springframework.core.ResolvableType;
-import ppl.common.utils.reflect.resolvable.ClassResolvable;
-import ppl.common.utils.reflect.resolvable.ParameterizedTypeResolvable;
-import ppl.common.utils.reflect.resolvable.Resolvable;
-import ppl.common.utils.reflect.resolvable.Resolvables;
-import ppl.common.utils.reflect.type.InternalParameterizedType;
 
 import java.io.IOException;
 import java.lang.reflect.*;
@@ -53,32 +47,31 @@ public class Main {
 //        System.out.println(command.get("host"));
 //        System.out.println(command.get("config"));
 
-//        Field field = LL.class.getDeclaredField("c");
-//        ParameterizedType pt = (ParameterizedType) field.getGenericType();
-//
-        ParameterizedType pt = (ParameterizedType) LL.A.C.class.getGenericSuperclass();
-        pt = (ParameterizedType) pt.getActualTypeArguments()[0];
-        pt = (ParameterizedType) pt.getOwnerType();
-        pt = (ParameterizedType) pt.getOwnerType();
-        System.out.println(((TypeVariable) pt.getActualTypeArguments()[0]).getGenericDeclaration());
-
-//        ResolvableType rt = ResolvableType.forField(field);
-//        System.out.println(rt.getSuperType().getGeneric(0).getSuperType().resolve());
-//        System.out.println(rt.getSuperType().getGeneric(0).getSuperType().getGeneric(0).resolve());
-
+        Field field = LL.class.getDeclaredField("c");
+        ParameterizedType pt = (ParameterizedType) field.getGenericType();
+        System.out.println(((ParameterizedType)((ParameterizedType)pt.getOwnerType()).getOwnerType()).getOwnerType());
 //        ParameterizedTypeResolvable ptr = Resolvables.getParameterizedTypeResolvable(pt);
 //        ParameterizedTypeResolvable pptr = (ParameterizedTypeResolvable) ptr.getParent();
-//        ParameterizedTypeResolvable ppptr = (ParameterizedTypeResolvable) pptr.getParent();
-//        System.out.println(((ClassResolvable) ((ParameterizedTypeResolvable) (((ParameterizedTypeResolvable) pptr.getGeneric(0)).getOwner())).getGeneric(0)).getType());
-//        System.out.println(((ClassResolvable) ppptr.getGeneric(0)).getType());
-
-//        LL<Object>.A<String>.II<String> ii = LL.c.a(LL.iii);
+//        ParameterizedTypeResolvable pptr1 = (ParameterizedTypeResolvable) ptr.getParent();
+//        ParameterizedTypeResolvable a = (ParameterizedTypeResolvable) pptr.getGeneric(0);
+//        System.out.println(((ClassResolvable) a.getGeneric(0)).getType());
+//        System.out.println(((ClassResolvable) ((ParameterizedTypeResolvable) a.getOwner()).getGeneric(0)).getType());
+//        System.out.println(((ClassResolvable) ((ParameterizedTypeResolvable) (((ParameterizedTypeResolvable) ((ParameterizedTypeResolvable) a.getOwner())).getOwner())).getGeneric(0)).getType());
     }
 
     public static class LL<I> {
-        public class A<Y> {
+        public void ll(I i) {
 
-            public class II<I> {
+        }
+
+        public class A<Y> {
+            public Y y;
+            public void a(Y y) {
+
+            }
+            public class II<K> {
+                public void ii(K k) {
+                }
             }
 
             public class III<X> extends II<I> {
@@ -98,7 +91,7 @@ public class Main {
                 }
             }
 
-            public class C<X> extends B<III<Y>> {
+            public class C<Y> extends B<III> {
             }
 
             public class D<T, V extends C<T>> extends C<B<C<T>>> {

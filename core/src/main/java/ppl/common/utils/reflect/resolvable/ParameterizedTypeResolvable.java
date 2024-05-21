@@ -7,28 +7,26 @@ import java.util.Arrays;
 
 public class ParameterizedTypeResolvable implements Resolvable {
 
-    private final ClassResolvable raw;
+    private final Class<?> type;
     private final Resolvable[] generics;
     private final Resolvable owner;
+
     private volatile Resolvable parent;
-    private volatile Resolvable[] interfaces;
+    private final Resolvable[] interfaces;
 
     private ParameterizedTypeResolvable(
-            ClassResolvable raw,
+            Class<?> type,
             Resolvable[] generics,
             Resolvable owner) {
-        this.raw = raw;
+        this.type = type;
         this.generics = generics;
         this.owner = owner;
+        Type[] interfaces = type.getGenericInterfaces();
+        this.interfaces = new Resolvable[interfaces.length];
     }
 
-    static ParameterizedTypeResolvable createParameterizedResolvable(ClassResolvable raw, Resolvable[] generics, Resolvable owner) {
-        return new ParameterizedTypeResolvable(raw, generics, owner);
-    }
-
-    static ParameterizedTypeResolvable createParameterizedResolvable(ParameterizedType parameterizedType) {
+    static ParameterizedTypeResolvable createResolvable(ParameterizedType parameterizedType) {
         Class<?> clazz = (Class<?>) parameterizedType.getRawType();
-        ClassResolvable raw = Resolvables.getClassResolvable(clazz);
 
         Type[] actualArguments = parameterizedType.getActualTypeArguments();
         Resolvable[] generics = new Resolvable[actualArguments.length];
@@ -60,171 +58,87 @@ public class ParameterizedTypeResolvable implements Resolvable {
         } else {
             throw new UnreachableCodeException("Unsupported owner type of parameterized type.");
         }
-        return new ParameterizedTypeResolvable(raw, generics, owner);
+        return new ParameterizedTypeResolvable(clazz, generics, owner);
     }
 
-//    private static Resolvable ownerType(Type owner) {
-//        Resolvable ret = null;
-//        if (owner != null) {
-//            if (owner instanceof Class) {
-//                ret = ClassResolvable.getRawResolvable((Class<?>) owner);
-//            } else if (owner instanceof ParameterizedType) {
-//                ret = ParameterizedResolvable.getParameterizedResolvable((ParameterizedType) owner);
-//            } else {
-//                throw new UnreachableCodeException("Owner type must be Class or ParameterizedType.");
-//            }
-//        }
-//        return ret;
-//    }
-//
-//    private static Variable getVariable(ParameterizedResolvable parameterizedResolvable, TypeVariable<?> variable) {
-//        try {
-//            return (Variable) cache.get(variable, () -> parameterizedResolvable.new Variable(variable));
-//        } catch (ExecutionException e) {
-//            throw new IllegalArgumentException("Failed to create reflect class.", e);
-//        }
-//    }
-//
-//    private static Resolvable boundType(Type bound, VariableResolver<Resolvable> variableResolver) {
-//        if (bound instanceof Class) {
-//            return getReflectClass((Class<?>) bound);
-//        } else if (bound instanceof ParameterizedType) {
-//            return getReflectClass((ParameterizedType) bound);
-//        } else if (bound instanceof TypeVariable) {
-//            return variableResolver.resolve((TypeVariable<?>) bound);
-//        } else {
-//            throw new UnreachableCodeException("Bound type must be ParameterizedType or TypeVariable or Class.");
-//        }
-//    }
-//    private static void resolve(Type[] actualParameters, Object[] generics) {
-//        for (int i = 0; i < generics.length; i++) {
-//            Type t = actualParameters[i];
-//            if (t instanceof Class) {
-//                generics[i] = create((Class<?>) t);
-//            } else if (t instanceof TypeVariable) {
-//                generics[i] = (Function<VariableResolver<Resolvable>, Resolvable>)
-//                        vr -> vr.resolve((TypeVariable<?>) t);
-//            } else if (t instanceof ParameterizedType) {
-//                generics[i] = create((ParameterizedType) t);
-//            } else if (t instanceof GenericArrayType) {
-//                generics[i] = (Function<VariableResolver<Resolvable>, Resolvable>)
-//                        vr -> create((GenericArrayType) t, vr);
-//            } else if (t instanceof WildcardType) {
-//                generics[i] = (Function<VariableResolver<Resolvable>, Resolvable>)
-//                        vr -> create((WildcardType) t, vr);
-//            } else {
-//                throw new UnreachableCodeException("Unknown reflect type: '" + t.getClass() + "'.");
-//            }
-//        }
-//    }
-//
-    //final
-//    public static ParameterizedResolvable create(Class<?> clazz) {
-//        ParameterizedResolvable ret = getReflectClass(clazz);
-//
-//        VariableResolver<Resolvable> variableResolver =
-//                new DefaultVariableResolver(ret,
-//                        Modifier.isStatic(clazz.getModifiers()) ? null : ret.ownerReflectClass);
-//        TypeVariable<?>[] parameters = clazz.getTypeParameters();
-//        if (parameters.length != 0) {
-//            ret.init(Arrays.stream(parameters)
-//                    .map(p -> ret.new Variable(p, variableResolver))
-//                    .toArray(Resolvable[]::new));//init
-//        }
-//        return ret;
-//    }
-//
-//    public static WildcardResolvable create(WildcardType wildcardType, VariableResolver<Resolvable> variableResolver) {
-//        BoundedType boundedType = null;
-//        Resolvable bound = null;
-//        Type[] uppers = wildcardType.getUpperBounds();
-//        Type[] lowers = wildcardType.getLowerBounds();
-//        if (uppers.length != 0) {
-//            boundedType = BoundedType.UPPER;
-//            bound = boundType(uppers[0], variableResolver);
-//        }
-//        if (lowers.length != 0) {
-//            boundedType = BoundedType.LOWER;
-//            bound = boundType(lowers[0], variableResolver);
-//        }
-//        return boundedType == null ? WildcardResolvable.ANY : new WildcardResolvable(bound, boundedType);
-//    }
-//
-//    private static Resolvable boundType(Type bound, VariableResolver<Resolvable> variableResolver) {
-//        if (bound instanceof Class) {
-//            return create((Class<?>) bound);
-//        } else if (bound instanceof ParameterizedType) {
-//            return create((ParameterizedType) bound, variableResolver);
-//        } else if (bound instanceof TypeVariable) {
-//            return variableResolver.resolve((TypeVariable<?>) bound);
-//        } else {
-//            throw new UnreachableCodeException("Bound type must be ParameterizedType or TypeVariable or Class.");
-//        }
-//    }
-//
-//    public static ParameterizedResolvable create(ParameterizedType parameterizedType, VariableResolver<Resolvable> variableResolver) {
-//        return create(parameterizedType).apply(variableResolver);
-//    }
-//
-//    private static Function<VariableResolver<Resolvable>, ParameterizedResolvable> create(ParameterizedType parameterizedType) {
-//        Class<?> c = (Class<?>) parameterizedType.getRawType();
-//        ParameterizedResolvable rawClass = getReflectClass(c);
-//
-//        Type[] actual = parameterizedType.getActualTypeArguments();
-//        Object[] generics = new Object[actual.length];
-//        resolve(actual, generics);//init
-//        return vr -> {
-//            rawClass.init(GenericsResolver.DEFAULT.apply(vr, generics));//init
-//            return rawClass;
-//        };
-//    }
-//
-//    public static ResolvableArray create(GenericArrayType genericArrayType, VariableResolver<Resolvable> variableResolver) {
-//        Type type = genericArrayType.getGenericComponentType();
-//        return new ResolvableArray(componentType(type, variableResolver));
-//    }
-//
-//    private static Resolvable componentType(Type bound, VariableResolver<Resolvable> variableResolver) {
-//        if (bound instanceof ParameterizedType) {
-//            return create((ParameterizedType) bound, variableResolver);
-//        } else if (bound instanceof TypeVariable) {
-//            return variableResolver.resolve((TypeVariable<?>) bound);
-//        } else {
-//            throw new UnreachableCodeException("Component type must be ParameterizedType or TypeVariable.");
-//        }
-//    }
+    static ParameterizedTypeResolvable createResolvable(Class<?> clazz) {
+        TypeVariable<?>[] variables = clazz.getTypeParameters();
+        Resolvable[] generics = new Resolvable[variables.length];
+        for (int i = 0; i < variables.length; i++) {
+            TypeVariable<?> variable = variables[i];
+            generics[i] = Resolvables.getTypeVariableResolvable(variable);
+        }
 
-    public ClassResolvable getRaw() {
-        return raw;
+        Resolvable owner;
+        Class<?> ownerType = clazz.getEnclosingClass();
+        if (ownerType == null) {
+            owner = null;
+        } else {
+            owner = Resolvables.getClassResolvable(ownerType);
+        }
+        return new ParameterizedTypeResolvable(clazz, generics, owner);
+    }
+
+    public Class<?> getType() {
+        return type;
     }
 
     public Resolvable getParent() {
-        Resolvable parent = raw.getParent();
-        if (parent instanceof ClassResolvable) {
-
-        } else if (parent instanceof ParameterizedTypeResolvable) {
-            ParameterizedTypeResolvable ppt = (ParameterizedTypeResolvable) parent;
-            Resolvable[] generics = ppt.resolveGenerics(new DefaultVariableResolver(this, owner));
-            return ParameterizedTypeResolvable.createParameterizedResolvable(ppt.getRaw(), generics, owner);
+        Resolvable parent = this.parent;
+        if (parent == null) {
+            Type pType = type.getGenericSuperclass();
+            if (pType instanceof Class) {
+                parent = Resolvables.getClassResolvable((Class<?>) pType);
+            } else if (pType instanceof ParameterizedType) {
+                parent = Resolvables.getParameterizedTypeResolvable((ParameterizedType) pType);
+            } else {
+                throw new UnreachableCodeException("Unsupported type for 'extends ?'.");
+            }
+            parent = parent.resolve(new DefaultVariableResolver(this, owner));
+            this.parent = parent;
         }
-        return null;
+        return parent;
     }
 
     public Resolvable[] getInterfaces() {
-        return interfaces;
+//        Resolvable[] ret = new Resolvable[this.interfaces.length];
+//        for (int i = 0; i < ret.length; i++) {
+//            ret[i] = getInterface(i);
+//        }
+//        return ret;
+        return null;
     }
+
+//    private Resolvable getInterface(int i) {
+//        Resolvable r = this.interfaces[i];
+//        if (r == null) {
+//            r = resolve(raw.getInterfaces()[i]);
+//            this.interfaces[i] = r;
+//        }
+//        return r;
+//    }
+//
+//    private Resolvable resolve(Resolvable resolvable) {
+//        if (resolvable instanceof ParameterizedTypeResolvable) {
+//            ParameterizedTypeResolvable ppt = (ParameterizedTypeResolvable) resolvable;
+//            resolvable = ppt.resolve(new DefaultVariableResolver(this, owner));
+//        } else {
+//            throw new UnreachableCodeException("Unsupported type for 'implements ?'.");
+//        }
+//        return resolvable;
+//    }
 
     public Resolvable getOwner() {
         return owner;
     }
 
-    public Resolvable getGeneric(TypeVariableResolvable variable) {
-        int idx = raw.index(variable);
-        if (idx >= 0) {
-            return generics[idx];
-        }
-        return variable;
-    }
+//    public Resolvable getGeneric(TypeVariableResolvable variable) {
+//        int idx = raw.index(variable);
+//        if (idx >= 0) {
+//            return generics[idx];
+//        }
+//        return variable;
+//    }
 
     public Resolvable getGeneric(int idx) {
         return generics[idx];
@@ -237,164 +151,17 @@ public class ParameterizedTypeResolvable implements Resolvable {
     }
 
     @Override
-    public Resolvable[] resolveGenerics(VariableResolver variableResolver) {
+    public Resolvable resolve(VariableResolver variableResolver) {
+        return new ParameterizedTypeResolvable(type,
+                resolveGenerics(variableResolver),
+                getOwner().resolve(variableResolver));
+    }
+
+    private Resolvable[] resolveGenerics(VariableResolver variableResolver) {
         Resolvable[] generics = this.generics;
         return Arrays.stream(generics)
                 .map(variableResolver::resolve)
                 .toArray(Resolvable[]::new);
-//        Resolvable[] generics = getGenerics();
-//        Resolvable[] newGenerics = new Resolvable[generics.length];
-//        for (int i = 0; i < generics.length; i++) {
-//            Resolvable o = generics[i];
-//            if (t instanceof Class) {
-//                generics[i] = ClassResolvable.getRawResolvable((Class<?>) t);
-//                //variable resolver
-//                generics[i].resolveVariables(null);
-//            } else if (t instanceof TypeVariable) {
-//                generics[i] = variableResolver.resolve((TypeVariable<?>) t);
-//                //
-//                generics[i].resolveVariables(null);
-//            } else if (t instanceof ParameterizedType) {
-//                generics[i] = getParameterizedResolvable((ParameterizedType) t);
-//                generics[i].resolveVariables(variableResolver);
-//            }
-//            else if (t instanceof GenericArrayType) {
-//                generics[i] = (Function<VariableResolver<Resolvable>, Resolvable>)
-//                        vr -> create((GenericArrayType) t, vr);
-//            } else if (t instanceof WildcardType) {
-//                generics[i] = (Function<VariableResolver<Resolvable>, Resolvable>)
-//                        vr -> create((WildcardType) t, vr);
-//            }
-//            else {
-//                throw new UnreachableCodeException("Unknown reflect type: '" + t.getClass() + "'.");
-//            }
-//        }
     }
-
-//    private static final class GenericsResolver implements BiFunction<VariableResolver<Resolvable>, Object[], Resolvable[]> {
-//
-//        public static final GenericsResolver DEFAULT = new GenericsResolver();
-//
-//        @Override
-//        public Resolvable[] apply(VariableResolver<Resolvable> variableResolver, Object[] objects) {
-//            Resolvable[] ret = new Resolvable[objects.length];
-//            for (int i = 0; i < objects.length; i++) {
-//                Object object = objects[i];
-//                if (object instanceof Function) {
-//                    @SuppressWarnings("unchecked")
-//                    Function<VariableResolver<Resolvable>, Resolvable> func =
-//                            (Function<VariableResolver<Resolvable>, Resolvable>) object;
-//                    ret[i] = func.apply(variableResolver);
-//                } else if (object instanceof Resolvable) {
-//                    ret[i] = (Resolvable) object;
-//                } else {
-//                    throw new UnreachableCodeException();
-//                }
-//            }
-//            return ret;
-//        }
-//    }
-//
-//
-//    private static final class OnOwnerVariableResolver implements BiFunction<ParameterizedResolvable, TypeVariable<?>, Resolvable> {
-//
-//        public static final BiFunction<ParameterizedResolvable, TypeVariable<?>, ? extends Resolvable> DEFAULT = new OnOwnerVariableResolver();
-//
-//        @Override
-//        public Resolvable apply(ParameterizedResolvable parameterizedResolvable, TypeVariable<?> typeVariable) {
-//            ParameterizedResolvable current = parameterizedResolvable;
-//            while (current != null) {
-//                VariableResolver<Resolvable> variableResolver =
-//                        new DefaultVariableResolver(current,
-//                                Modifier.isStatic(current.raw.getModifiers()) ? null : current.ownerReflectClass);
-//                TypeVariable<?> v = getTypeVariable(current.raw.getTypeParameters(), typeVariable);
-//                if (v != null) {
-//                    return current.new Variable(v, variableResolver);
-//                }
-//                current = current.ownerReflectClass;
-//            }
-//            return null;
-//        }
-//    }
-//
-//    private static final class OnCoreVariableResolver implements BiFunction<ParameterizedResolvable, TypeVariable<?>, Resolvable> {
-//
-//        public static final BiFunction<ParameterizedResolvable, TypeVariable<?>, Resolvable> DEFAULT = new OnCoreVariableResolver();
-//
-//        @Override
-//        public Resolvable apply(ParameterizedResolvable parameterizedResolvable, TypeVariable<?> typeVariable) {
-//            VariableResolver<Resolvable> variableResolver =
-//                    new DefaultVariableResolver(parameterizedResolvable,
-//                            Modifier.isStatic(parameterizedResolvable.raw.getModifiers()) ? null : parameterizedResolvable.ownerReflectClass);
-//            TypeVariable<?> v = getTypeVariable(parameterizedResolvable.raw.getTypeParameters(), typeVariable);
-//            if (v != null) {
-//                return parameterizedResolvable.new Variable(v, variableResolver);
-//            }
-//            return null;
-//        }
-//    }
-//
-//    private static TypeVariable<?> getTypeVariable(TypeVariable<?>[] variables, TypeVariable<?> src) {
-//        return Arrays.stream(variables)
-//                .filter(v -> src.getName().equals(v.getName()))
-//                .findFirst()
-//                .orElse(null);
-//    }
-//
-//    private class Variable implements Resolvable {
-//        private final TypeVariable<?> variable;
-//        private volatile Resolvable[] bounds = ZERO_RESOLVABLE;
-//
-//        public Variable(TypeVariable<?> variable) {
-//            this.variable = variable;
-//        }
-//
-//        public void init(Resolvable[] bounds) {
-//            this.bounds = bounds;
-////                    Arrays.stream(variable.getBounds())
-////                    .filter(t -> !t.equals(Object.class))
-////                    .map(t -> boundType(t, variableResolver))
-////                    .peek(r -> Objects.requireNonNull(r, "Unknown bound type."))
-////                    .toArray(Resolvable[]::new);
-//        }
-//
-//        public ParameterizedResolvable getDeclaration() {
-//            return ParameterizedResolvable.this;
-//        }
-//
-//        @Override
-//        public Class<?> resolve() {
-//            TypeVariable<?>[] parameters = raw.getTypeParameters();
-//            for (int i = 0; i < parameters.length; i++) {
-//                if (parameters[i].getName().equals(variable.getName())) {
-//                    Resolvable resolvable = generics[i];
-//                    if (resolvable instanceof Variable) {
-//                        Variable variable = (Variable) resolvable;
-//                        if (variable.getDeclaration() == ParameterizedResolvable.this) {
-//                            if (bounds.length == 0) {
-//                                return Object.class;
-//                            } else {
-//                                return bounds[0].resolve();
-//                            }
-//                        } else {
-//                            return resolvable.resolve();
-//                        }
-//                    } else {
-//                        return resolvable.resolve();
-//                    }
-//                }
-//            }
-//            if (bounds.length == 0) {
-//                return Object.class;
-//            } else {
-//                return bounds[0].resolve();
-//            }
-//        }
-//
-//        @Override
-//        public Class<?> resolve(VariableResolver<ParameterizedResolvable> resolver) {
-//            return null;
-//        }
-//    }
 
 }

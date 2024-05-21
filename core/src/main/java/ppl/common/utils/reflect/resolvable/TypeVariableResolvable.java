@@ -1,9 +1,6 @@
 package ppl.common.utils.reflect.resolvable;
 
-import ppl.common.utils.exception.UnreachableCodeException;
-
 import java.lang.reflect.*;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class TypeVariableResolvable implements Resolvable {
@@ -16,7 +13,7 @@ public class TypeVariableResolvable implements Resolvable {
         this.type = type;
     }
 
-    static TypeVariableResolvable createVariableResolvable(TypeVariable<?> variable) {
+    static TypeVariableResolvable createResolvable(TypeVariable<?> variable) {
         return new TypeVariableResolvable(variable);
     }
 
@@ -71,8 +68,8 @@ public class TypeVariableResolvable implements Resolvable {
 //    }
 
     @Override
-    public Resolvable[] resolveGenerics(VariableResolver variableResolver) {
-        return new Resolvable[] {variableResolver.resolve(this)};
+    public Resolvable resolve(VariableResolver variableResolver) {
+        return variableResolver.resolve(this);
     }
 
     @Override
