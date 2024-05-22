@@ -4,6 +4,7 @@ import ppl.common.utils.reflect.resolvable.GenericResolvable;
 import ppl.common.utils.reflect.resolvable.Resolvable;
 import ppl.common.utils.reflect.resolvable.TypeVariableResolvable;
 
+//TODO, 优化解析，无变更则使用原引用
 public final class DefaultVariableResolver implements VariableResolver {
     private final GenericResolvable core;
     private final Resolvable owner;
@@ -26,6 +27,7 @@ public final class DefaultVariableResolver implements VariableResolver {
                 ret = o.getGeneric((TypeVariableResolvable) resolvable);
                 owner = o.getOwner();
             }
+
             if (ret == null) {
                 ret = resolvable;
             }

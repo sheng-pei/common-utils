@@ -70,6 +70,8 @@ public class Main {
         System.out.println(u.getType());
         System.out.println(((GenericResolvable) u.getOwner()).getType());
         System.out.println(((GenericResolvable) u.getOwner()).getOwner());
+
+        System.out.println(LL.class.getTypeParameters()[0].getBounds()[0]);
     }
 
     public interface U {
