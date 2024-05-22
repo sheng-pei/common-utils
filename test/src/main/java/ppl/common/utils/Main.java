@@ -61,18 +61,23 @@ public class Main {
         System.out.println(g.getType());
         System.out.println(((GenericResolvable) g.getParent()).getType());
         System.out.println(((GenericResolvable) ((GenericResolvable) g.getParent()).getGeneric(0)).getType());
-        System.out.println(((GenericResolvable) g.getOwner()).getType());
-        System.out.println(((GenericResolvable) ((GenericResolvable) g.getOwner()).getGeneric(0)).getType());
 
-        ParameterizedTypeResolvable owner = (ParameterizedTypeResolvable) pptr.getOwner();
-        System.out.println(owner.getType());
-        System.out.println(((GenericResolvable) owner.getGeneric(0)).getType());
-
-        ParameterizedTypeResolvable pptr1 = (ParameterizedTypeResolvable) ptr.getParent();
-        ParameterizedTypeResolvable a = (ParameterizedTypeResolvable) pptr.getGeneric(0);
+        GenericResolvable a = (GenericResolvable) g.getOwner();
+        System.out.println(a.getType());
         System.out.println(((GenericResolvable) a.getGeneric(0)).getType());
-        System.out.println(((GenericResolvable) ((ParameterizedTypeResolvable) a.getOwner()).getGeneric(0)).getType());
-        System.out.println(((GenericResolvable) ((ParameterizedTypeResolvable) (((ParameterizedTypeResolvable) ((ParameterizedTypeResolvable) a.getOwner())).getOwner())).getGeneric(0)).getType());
+
+        GenericResolvable u = (GenericResolvable) g.getInterfaces()[0];
+        System.out.println(u.getType());
+        System.out.println(((GenericResolvable) u.getOwner()).getType());
+        System.out.println(((GenericResolvable) u.getOwner()).getOwner());
+    }
+
+    public interface U {
+
+    }
+
+    public interface V extends U {
+
     }
 
     public static class LL<I> {
@@ -90,7 +95,7 @@ public class Main {
                 }
             }
 
-            public class III<X> extends II<I> {
+            public class III<X> extends II<I> implements V {
                 private I i;
                 public I b() {
                     return i;

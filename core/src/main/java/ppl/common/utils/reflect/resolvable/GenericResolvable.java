@@ -1,9 +1,12 @@
 package ppl.common.utils.reflect.resolvable;
 
 import ppl.common.utils.exception.UnreachableCodeException;
+import ppl.common.utils.reflect.resolvable.variableresolver.DefaultVariableResolver;
+import ppl.common.utils.reflect.resolvable.variableresolver.VariableResolver;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public abstract class GenericResolvable implements Resolvable {
 
@@ -11,7 +14,7 @@ public abstract class GenericResolvable implements Resolvable {
     private final Resolvable owner;
 
     private volatile Resolvable parent;
-    private final Resolvable[] interfaces;
+    private final AtomicReferenceArray<Resolvable> interfaces;
 
     protected GenericResolvable(
             Class<?> clazz,
@@ -19,7 +22,8 @@ public abstract class GenericResolvable implements Resolvable {
             Resolvable owner) {
         this.generics = generics;
         this.owner = owner;
-        this.interfaces = new Resolvable[clazz.getGenericInterfaces().length];
+        this.interfaces = new AtomicReferenceArray<>(
+                clazz.getGenericInterfaces().length);
     }
 
     public abstract Class<?> getType();
@@ -27,47 +31,44 @@ public abstract class GenericResolvable implements Resolvable {
     public Resolvable getParent() {
         Resolvable parent = this.parent;
         if (parent == null) {
-            Type pType = getType().getGenericSuperclass();
-            if (pType instanceof Class) {
-                parent = Resolvables.getClassResolvable((Class<?>) pType);
-            } else if (pType instanceof ParameterizedType) {
-                parent = Resolvables.getParameterizedTypeResolvable((ParameterizedType) pType);
-            } else {
-                throw new UnreachableCodeException("Unsupported type for 'extends ?'.");
-            }
-            parent = parent.resolve(new DefaultVariableResolver(this, owner));
+            parent = getAndResolveResolvable(getType().getGenericSuperclass());
             this.parent = parent;
         }
         return parent;
     }
 
     public Resolvable[] getInterfaces() {
-//        Resolvable[] ret = new Resolvable[this.interfaces.length];
-//        for (int i = 0; i < ret.length; i++) {
-//            ret[i] = getInterface(i);
-//        }
-//        return ret;
-        return null;
+        Type[] originInterfaces = getType().getInterfaces();
+        Resolvable[] ret = new Resolvable[this.interfaces.length()];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = getAndResolveResolvableInterface(i, originInterfaces[i]);
+        }
+        return ret;
     }
 
-//    private Resolvable getInterface(int i) {
-//        Resolvable r = this.interfaces[i];
-//        if (r == null) {
-//            r = resolve(raw.getInterfaces()[i]);
-//            this.interfaces[i] = r;
-//        }
-//        return r;
-//    }
-//
-//    private Resolvable resolve(Resolvable resolvable) {
-//        if (resolvable instanceof ParameterizedTypeResolvable) {
-//            ParameterizedTypeResolvable ppt = (ParameterizedTypeResolvable) resolvable;
-//            resolvable = ppt.resolve(new DefaultVariableResolver(this, owner));
-//        } else {
-//            throw new UnreachableCodeException("Unsupported type for 'implements ?'.");
-//        }
-//        return resolvable;
-//    }
+    private Resolvable getAndResolveResolvableInterface(int i, Type origin) {
+        Resolvable r = this.interfaces.get(i);
+        if (r == null) {
+            r = getAndResolveResolvable(origin);
+            this.interfaces.set(i, r);
+        }
+        return r;
+    }
+
+    private Resolvable getAndResolveResolvable(Type origin) {
+        Resolvable ret = null;
+        if (origin != null) {
+            if (origin instanceof Class) {
+                ret = Resolvables.getClassResolvable((Class<?>) origin);
+            } else if (origin instanceof ParameterizedType) {
+                ret = Resolvables.getParameterizedTypeResolvable((ParameterizedType) origin);
+            } else {
+                throw new UnreachableCodeException("Unsupported type for 'implements ?'.");
+            }
+            ret = ret.resolve(new DefaultVariableResolver(this, owner));
+        }
+        return ret;
+    }
 
     public Resolvable getOwner() {
         return owner;

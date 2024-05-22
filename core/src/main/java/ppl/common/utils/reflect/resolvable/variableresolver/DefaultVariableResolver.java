@@ -1,4 +1,8 @@
-package ppl.common.utils.reflect.resolvable;
+package ppl.common.utils.reflect.resolvable.variableresolver;
+
+import ppl.common.utils.reflect.resolvable.GenericResolvable;
+import ppl.common.utils.reflect.resolvable.Resolvable;
+import ppl.common.utils.reflect.resolvable.TypeVariableResolvable;
 
 public final class DefaultVariableResolver implements VariableResolver {
     private final GenericResolvable core;
