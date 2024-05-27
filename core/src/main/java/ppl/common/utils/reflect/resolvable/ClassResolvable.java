@@ -1,6 +1,7 @@
 package ppl.common.utils.reflect.resolvable;
 
 import java.lang.reflect.TypeVariable;
+import java.util.Objects;
 
 public class ClassResolvable extends GenericResolvable {
 
@@ -58,4 +59,16 @@ public class ClassResolvable extends GenericResolvable {
         return new ParameterizedTypeResolvable(this, generics, owner);
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        ClassResolvable that = (ClassResolvable) object;
+        return Objects.equals(type, that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type);
+    }
 }

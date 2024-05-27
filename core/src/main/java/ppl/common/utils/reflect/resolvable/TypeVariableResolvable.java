@@ -54,13 +54,13 @@ public class TypeVariableResolvable implements Resolvable {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         TypeVariableResolvable that = (TypeVariableResolvable) object;
-        return Objects.equals(type, that.type) && Arrays.equals(bounds, that.bounds);
+        return Objects.equals(type, that.type);// && Arrays.equals(bounds, that.bounds);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(type);
-        result = 31 * result + Arrays.hashCode(bounds);
+        //result = 31 * result + Arrays.hashCode(bounds);
         return result;
     }
 }

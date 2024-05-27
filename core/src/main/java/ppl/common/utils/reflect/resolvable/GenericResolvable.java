@@ -1,11 +1,14 @@
 package ppl.common.utils.reflect.resolvable;
 
+import ppl.common.utils.ArrayUtils;
 import ppl.common.utils.exception.UnreachableCodeException;
 import ppl.common.utils.reflect.resolvable.variableresolver.DefaultVariableResolver;
 import ppl.common.utils.reflect.resolvable.variableresolver.VariableResolver;
 
-import java.lang.reflect.*;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public abstract class GenericResolvable implements Resolvable {
@@ -20,7 +23,8 @@ public abstract class GenericResolvable implements Resolvable {
             Class<?> clazz,
             Resolvable[] generics,
             Resolvable owner) {
-        this.generics = generics;
+        this.generics = generics == null ?
+                ArrayUtils.zero(Resolvable.class) : generics;
         this.owner = owner;
         this.interfaces = new AtomicReferenceArray<>(
                 clazz.getGenericInterfaces().length);
@@ -87,8 +91,13 @@ public abstract class GenericResolvable implements Resolvable {
     }
 
     public Resolvable[] getGenerics() {
-        Resolvable[] ret = new Resolvable[this.generics.length];
-        System.arraycopy(this.generics, 0, ret, 0, this.generics.length);
+        Resolvable[] generics = this.generics;
+        if (generics.length == 0) {
+            return generics;
+        }
+
+        Resolvable[] ret = new Resolvable[generics.length];
+        System.arraycopy(generics, 0, ret, 0, generics.length);
         return ret;
     }
 
@@ -96,11 +105,20 @@ public abstract class GenericResolvable implements Resolvable {
 
     @Override
     public Resolvable resolve(VariableResolver variableResolver) {
-        Resolvable owner = getOwner();
+        Resolvable owner = this.owner;
         if (owner != null) {
             owner = owner.resolve(variableResolver);
         }
-        return create(resolveGenerics(variableResolver), owner);
+
+        Resolvable[] generics = this.generics;
+        if (generics.length != 0) {
+            generics = resolveGenerics(variableResolver);
+        }
+
+        if (Objects.equals(this.owner, owner) && Arrays.equals(this.generics, generics)) {
+            return this;
+        }
+        return create(generics, owner);
     }
 
     private Resolvable[] resolveGenerics(VariableResolver variableResolver) {
@@ -112,4 +130,18 @@ public abstract class GenericResolvable implements Resolvable {
 
     protected abstract Resolvable create(Resolvable[] generics, Resolvable owner);
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        GenericResolvable that = (GenericResolvable) object;
+        return Arrays.equals(generics, that.generics) && Objects.equals(owner, that.owner);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(owner);
+        result = 31 * result + Arrays.hashCode(generics);
+        return result;
+    }
 }

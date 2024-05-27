@@ -3,6 +3,7 @@ package ppl.common.utils.reflect.resolvable;
 import ppl.common.utils.exception.UnreachableCodeException;
 
 import java.lang.reflect.*;
+import java.util.Objects;
 
 public class ParameterizedTypeResolvable extends GenericResolvable {
 
@@ -63,5 +64,19 @@ public class ParameterizedTypeResolvable extends GenericResolvable {
     @Override
     protected Resolvable create(Resolvable[] generics, Resolvable owner) {
         return new ParameterizedTypeResolvable(raw, generics, owner);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        if (!super.equals(object)) return false;
+        ParameterizedTypeResolvable that = (ParameterizedTypeResolvable) object;
+        return Objects.equals(raw, that.raw);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), raw);
     }
 }
