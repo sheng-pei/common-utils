@@ -9,7 +9,11 @@ import java.util.Objects;
 public class TypeVariableResolvable implements Resolvable {
 
     private final TypeVariable<?> type;
-    private final Resolvable[] bounds;
+    private volatile Resolvable[] bounds;
+
+    private TypeVariableResolvable(TypeVariable<?> type) {
+        this.type = type;
+    }
 
     private TypeVariableResolvable(TypeVariable<?> type, Resolvable[] bounds) {
         this.type = type;
@@ -17,24 +21,27 @@ public class TypeVariableResolvable implements Resolvable {
     }
 
     static TypeVariableResolvable createResolvable(TypeVariable<?> variable) {
-        Type[] typeBounds = variable.getBounds();
-        Resolvable[] bounds;
-        if (typeBounds == null || typeBounds.length == 0) {
-            bounds = new Resolvable[1];
-            bounds[0] = Resolvables.getResolvable(Object.class);
-        } else {
-            bounds = Arrays.stream(typeBounds)
-                    .map(Resolvables::getResolvable)
-                    .toArray(Resolvable[]::new);
-        }
-        return new TypeVariableResolvable(variable, bounds);
+        return new TypeVariableResolvable(variable);
     }
 
     public Resolvable getBound(int idx) {
-        return bounds[idx];
+        return getBounds()[idx];
     }
 
     public Resolvable[] getBounds() {
+        Resolvable[] bounds = this.bounds;
+        if (bounds == null) {
+            Type[] typeBounds = type.getBounds();
+            if (typeBounds == null || typeBounds.length == 0) {
+                bounds = new Resolvable[1];
+                bounds[0] = Resolvables.getResolvable(Object.class);
+            } else {
+                bounds = Arrays.stream(typeBounds)
+                        .map(Resolvables::getResolvable)
+                        .toArray(Resolvable[]::new);
+            }
+            this.bounds = bounds;
+        }
         Resolvable[] ret = new Resolvable[bounds.length];
         System.arraycopy(bounds, 0, ret, 0, ret.length);
         return ret;
@@ -42,11 +49,14 @@ public class TypeVariableResolvable implements Resolvable {
 
     @Override
     public Resolvable resolve(VariableResolver variableResolver) {
-        Resolvable ret = variableResolver.resolve(this);
-        if (ret == this) {
-
+        Resolvable[] s = getBounds();
+        Resolvable[] bounds = Arrays.stream(s)
+                .map(variableResolver::resolve)
+                .toArray(Resolvable[]::new);
+        if (Arrays.equals(s, bounds)) {
+            return this;
         }
-        return ret;
+        return new TypeVariableResolvable(type, bounds);
     }
 
     @Override
@@ -54,13 +64,13 @@ public class TypeVariableResolvable implements Resolvable {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         TypeVariableResolvable that = (TypeVariableResolvable) object;
-        return Objects.equals(type, that.type);// && Arrays.equals(bounds, that.bounds);
+        return Objects.equals(type, that.type) && Arrays.equals(getBounds(), that.getBounds());
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(type);
-        //result = 31 * result + Arrays.hashCode(bounds);
+        result = 31 * result + Arrays.hashCode(getBounds());
         return result;
     }
 }

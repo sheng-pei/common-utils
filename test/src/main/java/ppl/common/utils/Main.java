@@ -18,6 +18,7 @@ package ppl.common.utils;
 import ppl.common.utils.reflect.resolvable.GenericResolvable;
 import ppl.common.utils.reflect.resolvable.ParameterizedTypeResolvable;
 import ppl.common.utils.reflect.resolvable.Resolvables;
+import ppl.common.utils.reflect.resolvable.TypeVariableResolvable;
 
 import java.io.IOException;
 import java.lang.reflect.*;
@@ -51,83 +52,11 @@ public class Main {
 //        System.out.println(command.get("host"));
 //        System.out.println(command.get("config"));
 
-        Field field = LL.class.getDeclaredField("c");
-        ParameterizedType pt = (ParameterizedType) field.getGenericType();
-        ParameterizedTypeResolvable ptr = Resolvables.getParameterizedTypeResolvable(pt);
-        System.out.println(((GenericResolvable) ptr.getGeneric(0)).getType());
-
-        ParameterizedTypeResolvable pptr = (ParameterizedTypeResolvable) ptr.getParent();
-        GenericResolvable g = (GenericResolvable) pptr.getGeneric(0);
-        System.out.println(g.getType());
-        System.out.println(((GenericResolvable) g.getParent()).getType());
-        System.out.println(((GenericResolvable) ((GenericResolvable) g.getParent()).getGeneric(0)).getType());
-
-        GenericResolvable a = (GenericResolvable) g.getOwner();
-        System.out.println(a.getType());
-        System.out.println(((GenericResolvable) a.getGeneric(0)).getType());
-
-        GenericResolvable u = (GenericResolvable) g.getInterfaces()[0];
-        System.out.println(u.getType());
-        System.out.println(((GenericResolvable) u.getOwner()).getType());
-        System.out.println(((GenericResolvable) u.getOwner()).getOwner());
-
-        System.out.println(LL.class.getTypeParameters()[0].getBounds()[0]);
-    }
-
-    public interface U {
-
-    }
-
-    public interface V extends U {
-
-    }
-
-    public static class LL<I> {
-        public void ll(I i) {
-
-        }
-
-        public class A<Y> {
-            public Y y;
-            public void a(Y y) {
-
-            }
-            public class II<K> {
-                public void ii(K k) {
-                }
-            }
-
-            public class III<X> extends II<I> implements V {
-                private I i;
-                public I b() {
-                    return i;
-                }
-            }
-
-            public class B<X> extends III<X> {
-
-                public B() {
-                }
-
-                public X a(X y) {
-                    return null;
-                }
-            }
-
-            public class C<X> extends B<III> {
-            }
-
-            public class D<T, V extends C<T>> extends C<B<C<T>>> {
-
-            }
-
-        }
-
-        public static LL<Number> ll = new LL<>();
-        public static LL<Number>.A<String> s = ll.new A<>();
-        public static LL<Number>.A<Integer> a = ll.new A<>();
-        public static LL<Number>.A<String>.III<String> iii = s.new III<>();
-        public static LL<Number>.A<Integer>.C<String> c = a.new C<String>();
+//        Field field = LL.class.getDeclaredField("c");
+//        GenericResolvable gr = Resolvables.getParameterizedTypeResolvable((ParameterizedType) field.getGenericType());
+//        gr = (GenericResolvable) gr.getParent();
+//        System.out.println(gr.getType());
+//        System.out.println(((GenericResolvable) ((TypeVariableResolvable) gr.getGeneric(0)).getBound(0)).getType());
     }
 
 }

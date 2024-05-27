@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
-public final class Converters {
+public class Converters {
 
     private static final Logger logger = LoggerFactory.getLogger((Converters.class));
     private static final Map<Class<?>, Converter<?>> SYSTEM_CONVERTERS;
@@ -144,7 +144,7 @@ public final class Converters {
             } else if (o instanceof String) {
                 return (String) o;
             }
-            throw new IllegalArgumentException("Couldn't be represented as string.");
+            throw new IllegalArgumentException("Couldn't be represented as ppl.common.utils.string.");
         });
         systemConverters.put(String.class, stringConverter);
 
@@ -184,7 +184,12 @@ public final class Converters {
         SYSTEM_CONVERTERS = systemConverters;
     }
 
-    private static final Converters DEFAULT = new Converters();
+    private static final Converters DEFAULT = new Converters() {
+        @Override
+        public <T> void addConverter(Converter<T> converter) {
+            throw new UnsupportedOperationException("Failed to add custom converter.");
+        }
+    };
 
     private static final Set<Class<?>> INTEGER_TYPE = new HashSet<Class<?>>() {
         {
@@ -445,7 +450,7 @@ public final class Converters {
         return defaultConvert(obj, enumClass);
     }
 
-    private static <T> T defaultConvert(Object obj, Class<T> clazz) {
+    public static <T> T defaultConvert(Object obj, Class<T> clazz) {
         return Converters.def().internalConvert(obj, clazz);
     }
 

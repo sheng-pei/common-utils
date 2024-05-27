@@ -1,6 +1,5 @@
 package ppl.common.utils.filesystem.core;
 
-import ppl.common.utils.filesystem.ftp.FtpException;
 import ppl.common.utils.filesystem.path.Path;
 
 import java.io.File;
@@ -30,15 +29,15 @@ public interface Connection extends AutoCloseable {
 
     /**
      * Changes current working directory to the given working path.
-     * @param path
-     *        the working path string to which the current working directory is changed
+     *
+     * @param path the working path string to which the current working directory is changed
      */
     void cd(String path);
 
     /**
      * Changes current working directory to the given working path.
-     * @param path
-     *        the working path to which the current working directory is changed
+     *
+     * @param path the working path to which the current working directory is changed
      */
     void cd(Path path);
 
