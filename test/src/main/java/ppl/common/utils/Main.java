@@ -52,11 +52,26 @@ public class Main {
 //        System.out.println(command.get("host"));
 //        System.out.println(command.get("config"));
 
-//        Field field = LL.class.getDeclaredField("c");
+        Field field = Main.class.getDeclaredField("eNumber");
+        ParameterizedType pt = (ParameterizedType) field.getGenericType();
+        System.out.println(pt.getActualTypeArguments()[0].getClass());
 //        GenericResolvable gr = Resolvables.getParameterizedTypeResolvable((ParameterizedType) field.getGenericType());
 //        gr = (GenericResolvable) gr.getParent();
 //        System.out.println(gr.getType());
 //        System.out.println(((GenericResolvable) ((TypeVariableResolvable) gr.getGeneric(0)).getBound(0)).getType());
+
+    }
+
+    private static List<List<?>[]> eNumber;
+    private static List<? super Number> lNumber;
+    private static List<?> number;
+
+    private static List<? super Object> lObject;
+
+    private static List<? extends Object> eObject;
+
+    private static class A<U, V extends U, G> {
+        private List<? extends G> eNumber;
     }
 
 }

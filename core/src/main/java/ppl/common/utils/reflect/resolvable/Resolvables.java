@@ -4,9 +4,7 @@ import ppl.common.utils.cache.Cache;
 import ppl.common.utils.cache.ConcurrentReferenceValueCache;
 import ppl.common.utils.cache.ReferenceType;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 import java.util.concurrent.ExecutionException;
 
 public final class Resolvables {
@@ -17,13 +15,31 @@ public final class Resolvables {
 
     public static Resolvable getResolvable(Type type) {
         if (type instanceof Class) {
-            return getClassResolvable((Class<?>) type);
+            Class<?> clazz = (Class<?>) type;
+            if (!clazz.isArray()) {
+                return getClassResolvable(clazz);
+            } else {
+                return getArrayTypeResolvable(clazz);
+            }
         } else if (type instanceof ParameterizedType) {
             return getParameterizedTypeResolvable((ParameterizedType) type);
         } else if (type instanceof TypeVariable) {
             return getTypeVariableResolvable((TypeVariable<?>) type);
+        } else if (type instanceof WildcardType) {
+            return getWildcardTypeResolvable((WildcardType) type);
+        } else if (type instanceof GenericArrayType) {
+            return getGenericArrayTypeResolvable((GenericArrayType) type);
         } else {
             throw new IllegalArgumentException("Unsupported type.");
+        }
+    }
+
+    public static ArrayTypeResolvable getArrayTypeResolvable(Class<?> clazz) {
+        try {
+            return (ArrayTypeResolvable) CACHE.get(clazz, () ->
+                    ArrayTypeResolvable.createResolvable(clazz));
+        } catch (ExecutionException e) {
+            throw new IllegalArgumentException("Failed to resolve class: '" + clazz + "'.", e.getCause());
         }
     }
 
@@ -51,6 +67,24 @@ public final class Resolvables {
         try {
             return (ParameterizedTypeResolvable) CACHE.get(parameterizedType,
                     () -> ParameterizedTypeResolvable.createResolvable(parameterizedType));
+        } catch (ExecutionException e) {
+            throw new IllegalArgumentException("Failed to create reflect class.", e.getCause());
+        }
+    }
+
+    public static WildcardTypeResolvable getWildcardTypeResolvable(WildcardType wildcardType) {
+        try {
+            return (WildcardTypeResolvable) CACHE.get(wildcardType,
+                    () -> WildcardTypeResolvable.createResolvable(wildcardType));
+        } catch (ExecutionException e) {
+            throw new IllegalArgumentException("Failed to create reflect class.", e.getCause());
+        }
+    }
+
+    public static ArrayTypeResolvable getGenericArrayTypeResolvable(GenericArrayType genericArrayType) {
+        try {
+            return (ArrayTypeResolvable) CACHE.get(genericArrayType,
+                    () -> ArrayTypeResolvable.createResolvable(genericArrayType));
         } catch (ExecutionException e) {
             throw new IllegalArgumentException("Failed to create reflect class.", e.getCause());
         }

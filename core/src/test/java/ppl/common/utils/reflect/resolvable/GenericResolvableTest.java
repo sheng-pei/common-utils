@@ -158,7 +158,7 @@ class GenericResolvableTest {
         GenericResolvable someRawParentGeneric = (GenericResolvable) someRawParent.getGeneric(0);
         Assertions.assertEquals(middleOwnerType, someRawParentGeneric.getOwner());
         GenericResolvable rawParent = (GenericResolvable) rawParentParameterizedType.getParent();
-        TypeVariableResolvable rawParentGeneric = (TypeVariableResolvable) rawParent.getGeneric(0);
+        BoundResolvable rawParentGeneric = (BoundResolvable) rawParent.getGeneric(0);
         GenericResolvable bound = (GenericResolvable) rawParentGeneric.getBound(0);
         Assertions.assertEquals(middleOwnerType, bound.getOwner());
     }

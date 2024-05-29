@@ -12,8 +12,9 @@ public class ClassResolvable extends GenericResolvable {
         this.type = type;
     }
 
-    static GenericResolvable createResolvable(Class<?> clazz) {
+    static ClassResolvable createResolvable(Class<?> clazz) {
         executableOwnerInnerClassNotAllowed(clazz);
+        checkArrayType(clazz);
 
         TypeVariable<?>[] variables = clazz.getTypeParameters();
         Resolvable[] generics = new Resolvable[variables.length];
@@ -35,6 +36,12 @@ public class ClassResolvable extends GenericResolvable {
     private static void executableOwnerInnerClassNotAllowed(Class<?> clazz) {
         if (clazz.getEnclosingMethod() != null || clazz.getEnclosingConstructor() != null) {
             throw new IllegalArgumentException("Executable owner inner class is not supported.");
+        }
+    }
+
+    private static void checkArrayType(Class<?> clazz) {
+        if (clazz.isArray()) {
+            throw new IllegalArgumentException("Array is not allowed.");
         }
     }
 

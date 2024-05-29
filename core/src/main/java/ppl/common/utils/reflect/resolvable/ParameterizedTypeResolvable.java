@@ -14,7 +14,7 @@ public class ParameterizedTypeResolvable extends GenericResolvable {
         this.raw = raw;
     }
 
-    static GenericResolvable createResolvable(ParameterizedType parameterizedType) {
+    static ParameterizedTypeResolvable createResolvable(ParameterizedType parameterizedType) {
         Class<?> clazz = (Class<?>) parameterizedType.getRawType();
         ClassResolvable raw = Resolvables.getClassResolvable(clazz);
 
@@ -23,17 +23,23 @@ public class ParameterizedTypeResolvable extends GenericResolvable {
         for (int i = 0; i < actualArguments.length; i++) {
             Type actualArgument = actualArguments[i];
             if (actualArgument instanceof Class) {
-                generics[i] = Resolvables.getClassResolvable((Class<?>) actualArgument);
+                Class<?> aClazz = (Class<?>) actualArgument;
+                if (!aClazz.isArray()) {
+                    generics[i] = Resolvables.getClassResolvable(aClazz);
+                } else {
+                    generics[i] = Resolvables.getArrayTypeResolvable(aClazz);
+                }
             } else if (actualArgument instanceof ParameterizedType) {
                 generics[i] = Resolvables.getParameterizedTypeResolvable((ParameterizedType) actualArgument);
             } else if (actualArgument instanceof TypeVariable) {
                 generics[i] = Resolvables.getTypeVariableResolvable((TypeVariable<?>) actualArgument);
             } else if (actualArgument instanceof WildcardType) {
-
+                generics[i] = Resolvables.getWildcardTypeResolvable((WildcardType) actualArgument);
             } else if (actualArgument instanceof GenericArrayType) {
 
             } else {
-                throw new UnreachableCodeException("Unsupported actual argument of parameterized type.");
+                throw new UnreachableCodeException("Unsupported actual argument of parameterized type. " +
+                        "Please check java reflect library.");
             }
         }
 
@@ -46,7 +52,8 @@ public class ParameterizedTypeResolvable extends GenericResolvable {
         } else if (ownerType instanceof ParameterizedType) {
             owner = Resolvables.getParameterizedTypeResolvable((ParameterizedType) ownerType);
         } else {
-            throw new UnreachableCodeException("Unsupported owner type of parameterized type.");
+            throw new UnreachableCodeException("Unsupported owner type of parameterized type. " +
+                    "Please check java reflect library.");
         }
         return new ParameterizedTypeResolvable(raw, generics, owner);
     }
