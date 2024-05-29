@@ -1,20 +1,14 @@
 package ppl.common.utils;
 
-import ppl.common.utils.command.Command;
 import ppl.common.utils.argument.argument.value.collector.ExCollectors;
-import ppl.common.utils.command.CommandArguments;
-import ppl.common.utils.command.PositionArgument;
-import ppl.common.utils.command.ToggleOptionArgument;
-import ppl.common.utils.command.ValueOptionArgument;
+import ppl.common.utils.command.*;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
+import java.util.Arrays;
 import java.util.function.Function;
 
 public class Main {
 
-    public static void main(String[] args) throws InterruptedException, IOException, NoSuchFieldException, InstantiationException, IllegalAccessException, ClassNotFoundException, ExecutionException {
+    public static void main(String[] args) {
         CommandArguments arguments = CommandArguments.newBuilder()
                 .addArgument(ValueOptionArgument.newBuilder("test", 't')
                         .split(s -> Arrays.stream(s.split(",")))

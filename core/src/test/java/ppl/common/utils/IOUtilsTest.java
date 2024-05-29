@@ -452,6 +452,7 @@ public class IOUtilsTest {
                 };
 
                 @Override
+                @SuppressWarnings("all")
                 public Object answer(InvocationOnMock invocation) throws Throwable {
                     if (addUp >= DATA.length) {
                         return -1;
@@ -470,6 +471,7 @@ public class IOUtilsTest {
     }
 
     @Test
+    @SuppressWarnings("all")
     public void testCopy() throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         IOUtils.copy(is, os,BUFFER_SIZE);

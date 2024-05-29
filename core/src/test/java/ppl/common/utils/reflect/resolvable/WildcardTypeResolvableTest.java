@@ -15,6 +15,7 @@ class WildcardTypeResolvableTest {
     private static List<?> any;
     private static List<? extends Number> extendsNumber;
     private static List<? super Number> superNumber;
+    @SuppressWarnings("all")
     private static List<? extends Object> extendsObject;
     private static List<? super Object> superObject;
 

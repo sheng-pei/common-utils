@@ -300,11 +300,13 @@ public class NodesTest {
         }
 
         @Override
+        @SuppressWarnings("all")
         public void serialize(JsonGenerator gen, SerializerProvider serializers) throws IOException {
 
         }
 
         @Override
+        @SuppressWarnings("all")
         public void serializeWithType(JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
 
         }

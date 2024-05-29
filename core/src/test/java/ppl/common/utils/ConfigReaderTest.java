@@ -45,6 +45,7 @@ public class ConfigReaderTest {
     }
 
     @Test
+    @SuppressWarnings("all")
     public void testMapIterator() {
         Node reader = Nodes.root(configs);
         Iterator<Node> itrMap = reader.iterator();

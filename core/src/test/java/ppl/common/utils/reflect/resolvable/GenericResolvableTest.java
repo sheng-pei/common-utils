@@ -48,6 +48,7 @@ class GenericResolvableTest {
 
         }
 
+        @SuppressWarnings("all")
         public static LL<Number, String> mostOuterInstanceOwner = new LL<>();
         public static LL<Number, String>.A<Integer> middleInstanceOwner = mostOuterInstanceOwner.new A<>();
         public static LL<Number, String>.A<Integer>.III<String> wholeParameterizedType = middleInstanceOwner.new III<>();

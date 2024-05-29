@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 public class EnumKeyTest {
     @ParameterizedTest
     @MethodSource("unwrapProvider")
+    @SuppressWarnings("all")
     public void testUnwrap(EnumKey key, Class<?> clazz, Object expected) {
         Assertions.assertEquals(expected, EnumKey.unwrap(key, clazz));
     }
@@ -44,6 +45,7 @@ public class EnumKeyTest {
 
     @ParameterizedTest
     @MethodSource("errorUnwrapProvider")
+    @SuppressWarnings("all")
     public void testErrorUnwrap(EnumKey key, Class<?> clazz) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> EnumKey.unwrap(key, clazz));
     }
@@ -80,12 +82,14 @@ public class EnumKeyTest {
 
     @ParameterizedTest
     @MethodSource("equalsProvider")
+    @SuppressWarnings("all")
     public void testHashCode(EnumKey key, EnumKey key1) {
         Assertions.assertEquals(key.hashCode(), key1.hashCode());
     }
 
     @ParameterizedTest
     @MethodSource("equalsProvider")
+    @SuppressWarnings("all")
     public void testEquals(EnumKey key, EnumKey key1) {
         Assertions.assertEquals(key, key1);
     }

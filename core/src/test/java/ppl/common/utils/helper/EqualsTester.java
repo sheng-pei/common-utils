@@ -43,6 +43,7 @@ public class EqualsTester {
         Assertions.assertNotEquals(null, o1, o1 + " must not be equals to null.");
     }
 
+    @SuppressWarnings("all")
     private void testEqualsToItself(Object o1) {
         Assertions.assertEquals(o1, o1, o1 + " must be equals to itself.");
         Assertions.assertEquals(o1.hashCode(), o1.hashCode(), "The hashCode of " + o1 + " must be consistent.");
