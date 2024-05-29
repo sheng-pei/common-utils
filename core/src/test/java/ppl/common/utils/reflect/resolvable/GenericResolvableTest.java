@@ -37,9 +37,11 @@ class GenericResolvableTest {
                 }
             }
 
+            @SuppressWarnings("rawtypes")
             public class C<X> extends B<III> {
             }
 
+            @SuppressWarnings("rawtypes")
             public class D<X> extends IV {
 
             }
