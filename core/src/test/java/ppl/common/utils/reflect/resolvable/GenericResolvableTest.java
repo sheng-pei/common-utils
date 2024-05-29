@@ -14,6 +14,7 @@ class GenericResolvableTest {
     public interface V extends U {
     }
 
+    @SuppressWarnings("unused")
     public static class LL<I, J> {
 
         public class A<Y> {

@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.math.BigInteger;
 import java.util.stream.Stream;
 
 public class EnumUtilsTest {
@@ -14,11 +13,13 @@ public class EnumUtilsTest {
         U((byte) 1);
 
         private final byte code;
+
         ByteEnum(byte code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private byte getCode() {
             return this.code;
         }
@@ -28,11 +29,13 @@ public class EnumUtilsTest {
         U((short) 1);
 
         private final short code;
+
         ShortEnum(short code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private short getCode() {
             return this.code;
         }
@@ -42,11 +45,13 @@ public class EnumUtilsTest {
         U(1);
 
         private final int code;
+
         IntEnum(int code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private int getCode() {
             return this.code;
         }
@@ -56,11 +61,13 @@ public class EnumUtilsTest {
         U(1L);
 
         private final long code;
+
         LongEnum(long code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private long getCode() {
             return this.code;
         }
@@ -70,11 +77,13 @@ public class EnumUtilsTest {
         U('c');
 
         private final char code;
+
         CharEnum(char code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private char getCode() {
             return this.code;
         }
@@ -84,11 +93,13 @@ public class EnumUtilsTest {
         U("c");
 
         private final String code;
+
         StringEnum(String code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private String getCode() {
             return this.code;
         }
@@ -98,11 +109,13 @@ public class EnumUtilsTest {
         U((byte) 1);
 
         private final Byte code;
+
         WByteEnum(Byte code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private Byte getCode() {
             return this.code;
         }
@@ -112,11 +125,13 @@ public class EnumUtilsTest {
         U((short) 1);
 
         private final Short code;
+
         WShortEnum(Short code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private Short getCode() {
             return this.code;
         }
@@ -126,11 +141,13 @@ public class EnumUtilsTest {
         U(1);
 
         private final Integer code;
+
         WIntEnum(Integer code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private Integer getCode() {
             return this.code;
         }
@@ -140,11 +157,13 @@ public class EnumUtilsTest {
         U(1L);
 
         private final Long code;
+
         WLongEnum(Long code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private Long getCode() {
             return this.code;
         }
@@ -154,11 +173,13 @@ public class EnumUtilsTest {
         U('c');
 
         private final Character code;
+
         WCharEnum(Character code) {
             this.code = code;
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         private Character getCode() {
             return this.code;
         }
@@ -169,7 +190,7 @@ public class EnumUtilsTest {
         Assertions.assertThrows(UnknownEnumException.class, () -> EnumUtils.enumOf(IntEnum.class, 2));
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     @ParameterizedTest
     @MethodSource("enumOfProvider")
     public void testEnumOf(Class<? extends Enum> clazz, Object key, Enum e) {

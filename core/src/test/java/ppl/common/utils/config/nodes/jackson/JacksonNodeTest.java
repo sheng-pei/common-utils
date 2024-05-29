@@ -188,7 +188,7 @@ class JacksonNodeTest {
     }
 
     private enum Standard {
-        A, B, C;
+        A, B, C
     }
 
     @Test

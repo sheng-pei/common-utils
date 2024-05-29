@@ -36,7 +36,7 @@ public class ParameterizedTypeResolvable extends GenericResolvable {
             } else if (actualArgument instanceof WildcardType) {
                 generics[i] = Resolvables.getWildcardTypeResolvable((WildcardType) actualArgument);
             } else if (actualArgument instanceof GenericArrayType) {
-
+                generics[i] = Resolvables.getGenericArrayTypeResolvable((GenericArrayType) actualArgument);
             } else {
                 throw new UnreachableCodeException("Unsupported actual argument of parameterized type. " +
                         "Please check java reflect library.");

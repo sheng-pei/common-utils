@@ -26,6 +26,7 @@ public class WildcardTypeResolvable extends BoundResolvable {
     private WildcardTypeResolvable() {
         super(BoundKind.UPPER, new Resolvable[]{Resolvables.getClassResolvable(Object.class)});
         class B {
+            @SuppressWarnings("unused")
             private List<?> list;
         }
 

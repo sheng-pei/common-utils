@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 class MaskCharPredicateTest {
     @ParameterizedTest(name = "[{index}] {3}.")
     @MethodSource("testProvider")
-    void test(MaskCharPredicate predicate, Character c, boolean expected, String display) {
+    void test(MaskCharPredicate predicate, Character c, boolean expected, @SuppressWarnings("unused") String display) {
         Assertions.assertEquals(expected, predicate.test(c));
     }
 

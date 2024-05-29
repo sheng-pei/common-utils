@@ -14,6 +14,7 @@ import java.util.function.Predicate;
  * Please don't publish a connection to two or more thread
  * at the same time.</p>
  */
+@SuppressWarnings("unused")
 public interface Connection extends AutoCloseable {
 
     String actualPath(String path);

@@ -450,6 +450,7 @@ public class IOUtilsTest {
                         428, 83, 995, 1024, 444,
                         455, 932, 283
                 };
+
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
                     if (addUp >= DATA.length) {

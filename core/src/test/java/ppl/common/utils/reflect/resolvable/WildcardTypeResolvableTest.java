@@ -10,6 +10,7 @@ import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 class WildcardTypeResolvableTest {
     private static List<?> any;
     private static List<? extends Number> extendsNumber;

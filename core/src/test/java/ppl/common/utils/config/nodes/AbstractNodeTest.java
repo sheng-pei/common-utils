@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 public class AbstractNodeTest {
+    @SuppressWarnings("unused")
     private static final class KeyNode extends AbstractNode {
 
         public KeyNode(String path) {

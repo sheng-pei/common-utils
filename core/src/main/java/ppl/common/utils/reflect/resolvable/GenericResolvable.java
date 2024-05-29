@@ -41,6 +41,7 @@ public abstract class GenericResolvable implements Resolvable {
         return parent;
     }
 
+    @SuppressWarnings("unused")
     public Resolvable[] getInterfaces() {
         Type[] originInterfaces = getType().getInterfaces();
         Resolvable[] ret = new Resolvable[this.interfaces.length()];

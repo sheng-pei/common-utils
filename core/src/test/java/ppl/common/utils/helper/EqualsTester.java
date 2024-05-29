@@ -36,32 +36,25 @@ public class EqualsTester {
     }
 
     private void testNotEqualsToIncompatibleObject(Object o1) {
-        Assertions.assertFalse(o1.equals(IncompatibleObject.OBJECT),
-                o1 + " must not be equals to incompatible object.");
+        Assertions.assertNotEquals(o1, IncompatibleObject.OBJECT, o1 + " must not be equals to incompatible object.");
     }
 
     private void testNotEqualsToNull(Object o1) {
-        Assertions.assertFalse(o1.equals(null),
-                o1 + " must not be equals to null.");
+        Assertions.assertNotEquals(null, o1, o1 + " must not be equals to null.");
     }
 
     private void testEqualsToItself(Object o1) {
-        Assertions.assertTrue(o1.equals(o1),
-                o1 + " must be equals to itself.");
-        Assertions.assertTrue(o1.hashCode() == o1.hashCode(),
-                "The hashCode of " + o1 + " must be consistent.");
+        Assertions.assertEquals(o1, o1, o1 + " must be equals to itself.");
+        Assertions.assertEquals(o1.hashCode(), o1.hashCode(), "The hashCode of " + o1 + " must be consistent.");
     }
 
     private void testPairEqual(Object o1, Object o2) {
-        Assertions.assertTrue(o1.equals(o2),
-                o1 + " and " + o2 + " must be equal.");
-        Assertions.assertTrue(o1.hashCode() == o2.hashCode(),
-                "The hashCode of " + o1 + " and " + o2 + " must be equal.");
+        Assertions.assertEquals(o1, o2, o1 + " and " + o2 + " must be equal.");
+        Assertions.assertEquals(o1.hashCode(), o2.hashCode(), "The hashCode of " + o1 + " and " + o2 + " must be equal.");
     }
 
     private void testPairNotEqual(Object o1, Object o2) {
-        Assertions.assertFalse(o1.equals(o2),
-                o1 + " and " + o2 + " must not be equal.");
+        Assertions.assertNotEquals(o1, o2, o1 + " and " + o2 + " must not be equal.");
     }
 
     private enum IncompatibleObject {

@@ -52,6 +52,7 @@ public class ArrayTypeResolvable implements Resolvable {
         }
     }
 
+    @SuppressWarnings("unused")
     public Resolvable getComponent() {
         return component;
     }

@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 class MaskTest {
     @ParameterizedTest(name = "[{index}] {3}.")
     @MethodSource("bitNotProvider")
-    void bitNot(Mask mask, char c, boolean expected, String display) {
+    void bitNot(Mask mask, char c, boolean expected, @SuppressWarnings("unused") String display) {
         Assertions.assertEquals(expected, mask.bitNot().isSet(c));
     }
 
@@ -32,7 +32,7 @@ class MaskTest {
 
     @ParameterizedTest(name = "[{index}] {4}.")
     @MethodSource("bitOrProvider")
-    void bitOr(Mask m1, Mask m2, char c, boolean expected, String display) {
+    void bitOr(Mask m1, Mask m2, @SuppressWarnings("unused") char c, boolean expected, @SuppressWarnings("unused") String display) {
         Assertions.assertEquals(expected, m1.bitOr(m2).isSet('^'));
         Assertions.assertEquals(expected, m2.bitOr(m1).isSet('^'));
         Assertions.assertEquals(m1.bitOr(m2).hashCode(), m2.bitOr(m1).hashCode());
@@ -50,7 +50,7 @@ class MaskTest {
 
     @ParameterizedTest(name = "[{index}] {4}.")
     @MethodSource("bitAndProvider")
-    void bitAnd(Mask m1, Mask m2, char c, boolean expected, String display) {
+    void bitAnd(Mask m1, Mask m2, char c, boolean expected, @SuppressWarnings("unused") String display) {
         Assertions.assertEquals(expected, m1.bitAnd(m2).isSet(c));
         Assertions.assertEquals(expected, m2.bitAnd(m1).isSet(c));
         Assertions.assertEquals(m1.bitOr(m2).hashCode(), m2.bitOr(m1).hashCode());
@@ -89,7 +89,7 @@ class MaskTest {
 
     @ParameterizedTest(name = "[{index}] {3}.")
     @MethodSource("isSetProvider")
-    void isSet(Mask mask, char c, boolean expected, String display) {
+    void isSet(Mask mask, char c, boolean expected, @SuppressWarnings("unused") String display) {
         Assertions.assertEquals(expected, mask.isSet(c));
     }
 

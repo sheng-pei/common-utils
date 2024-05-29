@@ -68,7 +68,7 @@ class ConvertersTest {
 
     @ParameterizedTest(name = "convert {1}({0}) to byte")
     @MethodSource("integerProvider")
-    void byteValue(Class<?> sourceType, Object source) {
+    void byteValue(@SuppressWarnings("unused") Class<?> sourceType, Object source) {
         Assertions.assertEquals((byte) 1, Converters.byteValue(source));
     }
 
@@ -85,7 +85,7 @@ class ConvertersTest {
 
     @ParameterizedTest(name = "could not to convert {1}({0}) to byte")
     @MethodSource("outOfByteProvider")
-    void byteValueException(Class<?> sourceType, Object source) {
+    void byteValueException(@SuppressWarnings("unused") Class<?> sourceType, Object source) {
         Assertions.assertThrows(ConvertException.class, () -> Converters.byteValue(source));
     }
 
@@ -96,7 +96,7 @@ class ConvertersTest {
 
     @ParameterizedTest(name = "convert {1}({0}) to short")
     @MethodSource("integerProvider")
-    void shortValue(Class<?> sourceType, Object source) {
+    void shortValue(@SuppressWarnings("unused") Class<?> sourceType, Object source) {
         Assertions.assertEquals((short) 1, Converters.shortValue(source));
     }
 
@@ -111,7 +111,7 @@ class ConvertersTest {
 
     @ParameterizedTest(name = "could not to convert {1}({0}) to short")
     @MethodSource("outOfShortProvider")
-    void shortValueException(Class<?> sourceType, Object source) {
+    void shortValueException(@SuppressWarnings("unused") Class<?> sourceType, Object source) {
         Assertions.assertThrows(ConvertException.class, () -> Converters.shortValue(source));
     }
 
@@ -122,7 +122,7 @@ class ConvertersTest {
 
     @ParameterizedTest(name = "convert {1}({0}) to int")
     @MethodSource("integerProvider")
-    void intValue(Class<?> sourceType, Object source) {
+    void intValue(@SuppressWarnings("unused") Class<?> sourceType, Object source) {
         Assertions.assertEquals(1, Converters.intValue(source));
     }
 
@@ -135,7 +135,7 @@ class ConvertersTest {
 
     @ParameterizedTest(name = "could not to convert {1}({0}) to int")
     @MethodSource("outOfIntProvider")
-    void intValueException(Class<?> sourceType, Object source) {
+    void intValueException(@SuppressWarnings("unused") Class<?> sourceType, Object source) {
         Assertions.assertThrows(ConvertException.class, () -> Converters.intValue(source));
     }
 
@@ -146,7 +146,7 @@ class ConvertersTest {
 
     @ParameterizedTest(name = "convert {1}({0}) to long")
     @MethodSource("integerProvider")
-    void longValue(Class<?> sourceType, Object source) {
+    void longValue(@SuppressWarnings("unused") Class<?> sourceType, Object source) {
         Assertions.assertEquals(1L, Converters.longValue(source));
     }
 
@@ -175,7 +175,7 @@ class ConvertersTest {
 
     @ParameterizedTest(name = "convert {1}({0}) to double")
     @MethodSource("floatProvider")
-    void doubleValue(Class<?> sourceType, Object source) {
+    void doubleValue(@SuppressWarnings("unused") Class<?> sourceType, Object source) {
         Assertions.assertEquals(1.0, Converters.doubleValue(source));
     }
 
@@ -210,7 +210,7 @@ class ConvertersTest {
     }
 
     private enum Standard {
-        A, B, C;
+        A, B, C
     }
 
     private enum Coder {
@@ -225,6 +225,7 @@ class ConvertersTest {
         }
 
         @EnumEncoder
+        @SuppressWarnings("unused")
         public int getCode() {
             return code;
         }
