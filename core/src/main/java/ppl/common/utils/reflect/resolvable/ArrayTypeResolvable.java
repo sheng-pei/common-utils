@@ -59,7 +59,11 @@ public class ArrayTypeResolvable implements Resolvable {
 
     @Override
     public Resolvable resolve(VariableResolver variableResolver) {
-        return new ArrayTypeResolvable(component.resolve(variableResolver));
+        Resolvable resolvable = component.resolve(variableResolver);
+        if (resolvable.equals(component)) {
+            return this;
+        }
+        return new ArrayTypeResolvable(resolvable);
     }
 
     @Override
