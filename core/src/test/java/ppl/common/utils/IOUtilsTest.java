@@ -474,7 +474,7 @@ public class IOUtilsTest {
     @SuppressWarnings("all")
     public void testCopy() throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        IOUtils.copy(is, os,BUFFER_SIZE);
+        IOUtils.copy(is, os, BUFFER_SIZE);
         Assertions.assertArrayEquals(DATA, os.toByteArray());
     }
 
