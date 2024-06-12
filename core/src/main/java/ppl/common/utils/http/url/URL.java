@@ -408,10 +408,10 @@ public class URL {
     private String concatQuery(String query, String[] dynamicQueries) {
         String ret = "";
         if (query != null && !query.isEmpty()) {
-            ret += query + QUERY_DELIMITER;
+            ret += query;
         }
         if (dynamicQueries.length != 0) {
-            ret = ret + String.join(QUERY_DELIMITER, dynamicQueries);
+            ret = ret + QUERY_DELIMITER + String.join(QUERY_DELIMITER, dynamicQueries);
         }
         return ret;
     }
