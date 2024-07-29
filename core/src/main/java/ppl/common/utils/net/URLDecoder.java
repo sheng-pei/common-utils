@@ -1,6 +1,6 @@
 package ppl.common.utils.net;
 
-import ppl.common.utils.HexUtils;
+import ppl.common.utils.bytes.Bytes;
 import ppl.common.utils.character.ascii.AsciiGroup;
 
 import java.nio.ByteBuffer;
@@ -23,7 +23,7 @@ public final class URLDecoder {
                 if (chars.length - i > 2 &&
                         AsciiGroup.HEX_DIGIT.test(chars[i+1]) &&
                         AsciiGroup.HEX_DIGIT.test(chars[i+2])) {
-                    byteBuffer.put(HexUtils.aByte(chars[i+1], chars[i+2]));
+                    byteBuffer.put(Bytes.oneFromHex(chars[i+1], chars[i+2]));
                     i += 3;
                 } else {
                     throw new IllegalArgumentException("Illegal escaped pattern.");

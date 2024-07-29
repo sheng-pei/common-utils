@@ -383,15 +383,26 @@ public final class Strings {
 	public static String format(String formatString, Object... parameters) {
 		Objects.requireNonNull(formatString, "The specified formatString is null.");
 		PositionalArguments arguments = new ToStringArguments(parameters);
-		return pFormat(formatString, arguments);
+		return pFormat(formatString, true, arguments);
+	}
+
+	public static String format(String formatString, boolean errIfArgumentsInsufficient, Object... parameters) {
+		Objects.requireNonNull(formatString, "The specified formatString is null.");
+		PositionalArguments arguments = new ToStringArguments(parameters);
+		return pFormat(formatString, errIfArgumentsInsufficient, arguments);
 	}
 
 	public static String format(String formatString, PositionalArguments arguments) {
 		Objects.requireNonNull(formatString, "The specified formatString is null.");
-		return pFormat(formatString, arguments);
+		return pFormat(formatString, true, arguments);
 	}
 
-	private static String pFormat(String formatString, PositionalArguments arguments) {
+	public static String format(String formatString, boolean errIfArgumentsInsufficient, PositionalArguments arguments) {
+		Objects.requireNonNull(formatString, "The specified formatString is null.");
+		return pFormat(formatString, errIfArgumentsInsufficient, arguments);
+	}
+
+	private static String pFormat(String formatString, boolean errIfArgumentsInsufficient, PositionalArguments arguments) {
 		char[] formatCharacters = formatString.toCharArray();
 		SundaySubstringFinder finder = new SundaySubstringFinder(REFERENCE);
 
@@ -404,17 +415,19 @@ public final class Strings {
 		StringBuilder res = new StringBuilder();
 		do {
 			int len = lengthOfTheLongestEscapeSuffix(formatString, start, substring.start());
-			if ((len & 1) == 0 && !arguments.available()) {
-				throw new IllegalArgumentException("Arguments are not enough.");
-			}
-
 			res.append(formatCharacters, start, substring.start() - start - len);
 			int maintainEscape = len >> 1;
 			if ((len & 1) == 1) {
 				res.append(formatCharacters, substring.start() - maintainEscape, substring.length() + maintainEscape);
 			} else {
-				res.append(formatCharacters, substring.start() - len, maintainEscape);
-				res.append(arguments.consume());
+				if (arguments.available()) {
+					res.append(formatCharacters, substring.start() - len, maintainEscape);
+					res.append(arguments.consume());
+				} else if (errIfArgumentsInsufficient) {
+					throw new IllegalArgumentException("Arguments are not enough.");
+				} else {
+					res.append(formatCharacters, substring.start() - len, maintainEscape);
+				}
 			}
 			start = substring.end();
 			substring = finder.find(formatCharacters, start);

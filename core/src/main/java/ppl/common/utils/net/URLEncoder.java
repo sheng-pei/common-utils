@@ -1,6 +1,6 @@
 package ppl.common.utils.net;
 
-import ppl.common.utils.HexUtils;
+import ppl.common.utils.bytes.Bytes;
 import ppl.common.utils.character.ascii.AsciiGroup;
 import ppl.common.utils.exception.UnreachableCodeException;
 import ppl.common.utils.string.Strings;
@@ -49,7 +49,7 @@ public class URLEncoder {
                 stream.write(bytes[i]);
             } else {
                 stream.write('%');
-                stream.write(HexUtils.hex(bytes[i]).getBytes(), 0, 2);
+                stream.write(Bytes.hex(bytes[i]).getBytes(), 0, 2);
             }
         }
         try {

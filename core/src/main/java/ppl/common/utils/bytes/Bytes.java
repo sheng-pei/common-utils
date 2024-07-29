@@ -1,8 +1,12 @@
-package ppl.common.utils;
+package ppl.common.utils.bytes;
 
+import ppl.common.utils.ArrayUtils;
 import ppl.common.utils.string.Strings;
 
-public class HexUtils {
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
+public class Bytes {
     private static final byte[] HEX;
 
     static {
@@ -10,10 +14,14 @@ public class HexUtils {
         HEX = base.getBytes();
     }
 
-    public static byte[] bytes(String hex) {
-        if (Strings.isEmpty(hex)) {
-            return new byte[0];
+    public static byte[] fromHex(String hex) {
+        if (hex == null) {
+            return null;
         }
+        if (hex.isEmpty()) {
+            return ArrayUtils.zeroByte();
+        }
+
         hex = hex.toUpperCase();
         if ((hex.length() & 1) != 0) {
             hex = "0" + hex;
@@ -26,11 +34,11 @@ public class HexUtils {
         return res;
     }
 
-    public static byte aByte(char high, char low) {
+    public static byte oneFromHex(char high, char low) {
         return unsafeByte(Character.toUpperCase(high), Character.toUpperCase(low));
     }
 
-    public static byte aByte(String hex) {
+    public static byte oneFromHex(String hex) {
         if (hex == null || hex.length() != 1 && hex.length() != 2) {
             throw new IllegalArgumentException("One or two hex digit is required for one byte.");
         }
@@ -63,6 +71,10 @@ public class HexUtils {
     }
 
     public static String hex(byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+
         StringBuilder builder = new StringBuilder();
         for (byte b : bytes) {
             builder.append(hex(b));
@@ -77,5 +89,27 @@ public class HexUtils {
         bytes[0] = HEX[higher];
         bytes[1] = HEX[lower];
         return new String(bytes);
+    }
+
+    public static String base64(byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        return new String(Base64.getEncoder().encode(bytes),
+                StandardCharsets.ISO_8859_1);
+    }
+
+    public static byte[] fromBase64(String base64) {
+        if (base64 == null) {
+            return null;
+        }
+        return Base64.getDecoder().decode(base64);
+    }
+
+    public static byte[] fromBase64(byte[] base64) {
+        if (base64 == null) {
+            return null;
+        }
+        return Base64.getDecoder().decode(base64);
     }
 }
