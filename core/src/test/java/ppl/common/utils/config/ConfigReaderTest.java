@@ -1,4 +1,4 @@
-package ppl.common.utils;
+package ppl.common.utils.config;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

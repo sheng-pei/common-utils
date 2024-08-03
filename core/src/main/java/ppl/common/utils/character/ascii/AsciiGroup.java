@@ -9,15 +9,15 @@ public enum AsciiGroup implements MaskCharPredicate {
     DIGIT('0', '9'),
     ALPHA(UP_ALPHA, LOW_ALPHA),
     ALPHA_NUM(ALPHA, DIGIT),
-    UP_HEX_DIGIT(DIGIT, Mask.mask('A', 'F').predicate()),
-    LOW_HEX_DIGIT(DIGIT, Mask.mask('a', 'f').predicate()),
+    UP_HEX_DIGIT(DIGIT, Mask.asciiMask('A', 'F').predicate()),
+    LOW_HEX_DIGIT(DIGIT, Mask.asciiMask('a', 'f').predicate()),
     HEX_DIGIT(UP_HEX_DIGIT, LOW_HEX_DIGIT),
     ALL('\000', '\177');
 
     private final Mask mask;
 
     AsciiGroup(MaskCharPredicate... predicates) {
-        Mask mask = Mask.mask("");
+        Mask mask = Mask.asciiMask("");
         for (MaskCharPredicate p : predicates) {
             mask = mask.bitOr(p.mask());
         }
@@ -25,11 +25,11 @@ public enum AsciiGroup implements MaskCharPredicate {
     }
 
     AsciiGroup(String string) {
-        this.mask = Mask.mask(string);
+        this.mask = Mask.asciiMask(string);
     }
 
     AsciiGroup(char begin, char end) {
-        this.mask = Mask.mask(begin, end);
+        this.mask = Mask.asciiMask(begin, end);
     }
 
     @Override

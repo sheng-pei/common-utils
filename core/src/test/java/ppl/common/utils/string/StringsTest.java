@@ -130,9 +130,14 @@ class StringsTest {
     }
 
     @Test
-    public void testFormatWithNotEnoughArguments() {
+    public void testEnoughFormatWithNotEnoughArguments() {
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Strings.format("{}abc\\\\{}\\\\\\{}aaa{}", "ab", "cd"));
+                () -> Strings.enoughFormat("{}abc\\\\{}\\\\\\{}aaa{}", "ab", "cd"));
+    }
+
+    @Test
+    public void testFormatWithNotEnoughArguments() {
+        Assertions.assertEquals("ababc\\cd\\{}aaa", Strings.format("{}abc\\\\{}\\\\\\{}aaa{}", "ab", "cd"));
     }
 
     @ParameterizedTest

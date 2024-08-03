@@ -57,30 +57,29 @@ public class SecureRandom {
     }
 
     public java.security.SecureRandom sr() {
-        int cnt = count.incrementAndGet();
-        if (cnt % reseed == 0) {
-            return reseed();
-        } else {
-            return sr;
-        }
+        return reseed();
     }
 
     private java.security.SecureRandom reseed() {
+        int cnt = count.incrementAndGet();
         if (strong) {
             synchronized (this) {
-                return pReseed();
+                return pReseed(cnt);
             }
         } else {
-            return pReseed();
+            return pReseed(cnt);
         }
     }
 
-    private java.security.SecureRandom pReseed() {
+    private java.security.SecureRandom pReseed(int count) {
         java.security.SecureRandom sr = this.sr;
-        try {
-            this.sr = java.security.SecureRandom.getInstance(sr.getAlgorithm(), sr.getProvider());
-        } catch (NoSuchAlgorithmException e) {
-            throw new UnreachableCodeException("Reseed SecureRandom from existing instance.", e);
+        if (count % reseed == 0) {
+            try {
+                sr = java.security.SecureRandom.getInstance(sr.getAlgorithm(), sr.getProvider());
+            } catch (NoSuchAlgorithmException e) {
+                throw new UnreachableCodeException("Reseed SecureRandom from existing instance.", e);
+            }
+            this.sr = sr;
         }
         return sr;
     }

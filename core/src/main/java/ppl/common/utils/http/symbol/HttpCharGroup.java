@@ -21,27 +21,27 @@ public enum HttpCharGroup implements MaskCharPredicate {
     HT("\t"),
     BS("\\"),
     WS(SP, HT),
-    CTL(Mask.mask('\000', '\037').predicate(),
-            Mask.mask("\177").predicate()),
+    CTL(Mask.asciiMask('\000', '\037').predicate(),
+            Mask.asciiMask("\177").predicate()),
     NON_CTL_OCTET(OCTET.mask().bitAnd(CTL.mask().bitNot()).predicate()),
     TOKEN(AsciiGroup.ALPHA_NUM,
-            Mask.mask("!#$%&'*+-.^_`|~").predicate()),
-    SEPARATORS(SP, HT, Mask.mask("()<>@,;:\\\"/[]?={}").predicate()),
+            Mask.asciiMask("!#$%&'*+-.^_`|~").predicate()),
+    SEPARATORS(SP, HT, Mask.asciiMask("()<>@,;:\\\"/[]?={}").predicate()),
     L_COMMENT("("),
     R_COMMENT(")"),
     CTEXT(SP, HT, OBS_TEXT,
-            VCHAR.mask.bitAnd(Mask.mask("()\\").bitNot()).predicate()),
+            VCHAR.mask.bitAnd(Mask.asciiMask("()\\").bitNot()).predicate()),
     QM("\""),
     QDTEXT(SP, HT, OBS_TEXT,
-            VCHAR.mask.bitAnd(Mask.mask("\\\"").bitNot()).predicate()),
+            VCHAR.mask.bitAnd(Mask.asciiMask("\\\"").bitNot()).predicate()),
     QUOTED_TEXT(SP, HT, VCHAR, OBS_TEXT),
     CL_TOKEN(AsciiGroup.ALPHA_NUM,
-             Mask.mask("-").predicate());
+             Mask.asciiMask("-").predicate());
 
     private final Mask mask;
 
     HttpCharGroup(MaskCharPredicate... predicates) {
-        Mask mask = Mask.mask("");
+        Mask mask = Mask.asciiMask("");
         for (MaskCharPredicate p : predicates) {
             mask = mask.bitOr(p.mask());
         }
@@ -49,7 +49,7 @@ public enum HttpCharGroup implements MaskCharPredicate {
     }
 
     HttpCharGroup(String string)  {
-        this.mask = Mask.mask(string);
+        this.mask = Mask.asciiMask(string);
     }
 
     @Override

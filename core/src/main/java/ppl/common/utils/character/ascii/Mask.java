@@ -73,19 +73,25 @@ public final class Mask {
                 Objects.equals(nonAscii, mask.nonAscii);
     }
 
-    public static Mask mask(char begin, char end) {
+    public static Mask asciiMask(char begin, char end) {
+        if (begin > end || end > '\177') {
+            throw new IllegalArgumentException("Illegal ascii range.");
+        }
         return new Mask(lowMask(begin, end), highMask(begin, end));
     }
 
-    public static Mask mask(String string) {
-        return new Mask(lowMask(string), highMask(string));
+    public static Mask asciiMask(String string) {
+        Objects.requireNonNull(string, "Mask string is required.");
+        char[] chars = string.toCharArray();
+        for (char c : chars) {
+            if (c > '\177') {
+                throw new IllegalArgumentException("Illegal ascii mask string.");
+            }
+        }
+        return new Mask(lowMask(chars), highMask(chars));
     }
 
     private static long lowMask(char begin, char end) {
-        if (begin > end) {
-            throw new IllegalArgumentException("Illegal range.");
-        }
-
         if (begin > 63) {
             return 0L;
         }
@@ -98,10 +104,6 @@ public final class Mask {
     }
 
     private static long highMask(char begin, char end) {
-        if (begin > end) {
-            throw new IllegalArgumentException("Illegal range.");
-        }
-
         if (end < 64 || begin > 127) {
             return 0L;
         }
@@ -115,9 +117,8 @@ public final class Mask {
         return res;
     }
 
-    private static long lowMask(String string) {
+    private static long lowMask(char[] chars) {
         long res = 0L;
-        char[] chars = string.toCharArray();
         for (char c : chars) {
             if (c < 64) {
                 res |= (1L << c);
@@ -126,9 +127,8 @@ public final class Mask {
         return res;
     }
 
-    private static long highMask(String string) {
+    private static long highMask(char[] chars) {
         long res = 0L;
-        char[] chars = string.toCharArray();
         for (char c : chars) {
             if (c >= 64 && c < 128) {
                 res |= (1L << (c - 64));

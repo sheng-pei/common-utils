@@ -1,6 +1,5 @@
 package ppl.common.utils.http.url;
 
-import ppl.common.utils.character.ascii.AsciiGroup;
 import ppl.common.utils.character.ascii.Mask;
 import ppl.common.utils.net.URLDecoder;
 import ppl.common.utils.net.URLEncoder;
@@ -16,7 +15,6 @@ import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -156,7 +154,7 @@ public class URL {
         if (e < 0) {
             throw new IllegalArgumentException("Invalid authority, invalid ip literal, no matching ].");
         }
-        if (chars.length == e + 1 || Mask.mask(":/?#").predicate().test(chars[e + 1])) {
+        if (chars.length == e + 1 || Mask.asciiMask(":/?#").predicate().test(chars[e + 1])) {
             String ipv6 = new String(chars, start + 1, e - start - 1);
             if (IPV6ADDRESS_PATTERN.matcher(ipv6).matches()) {
                 return Pair.create(ipv6, e + 1);
@@ -203,7 +201,7 @@ public class URL {
     }
 
     private static Pair<String, Integer> next(char[] chars, int start, String s) {
-        int e = Strings.indexOf(Mask.mask(s).predicate(), chars, start, chars.length);
+        int e = Strings.indexOf(Mask.asciiMask(s).predicate(), chars, start, chars.length);
         if (e < 0) {
             e = chars.length;
         }
@@ -385,12 +383,12 @@ public class URL {
     public static final String NV_SEPARATOR = "=";
     private static final URLEncoder DYNAMIC_QUERY_NAME_ENCODER = URLEncoder.builder()
             .setPercentEncodingReserved(true)
-            .or(Mask.mask("$'()*+,;:@/?-").predicate())
+            .or(Mask.asciiMask("$'()*+,;:@/?-").predicate())
             .or(Mask.NON_OCTET.predicate())
             .build();
     private static final URLEncoder DYNAMIC_QUERY_VALUE_ENCODER = URLEncoder.builder()
             .setPercentEncodingReserved(true)
-            .or(Mask.mask("$'()*+=,;:@/?-").predicate())
+            .or(Mask.asciiMask("$'()*+=,;:@/?-").predicate())
             .or(Mask.NON_OCTET.predicate())
             .build();
 

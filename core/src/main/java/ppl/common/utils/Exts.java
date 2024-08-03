@@ -1,15 +1,12 @@
 package ppl.common.utils;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Exts {
     private final Set<String> exts;
     private final int max;
 
-    public Exts(Collection<String> exts) {
+    private Exts(Collection<String> exts) {
         Set<String> tmp = new HashSet<>(exts);
         int max = 0;
         for (String ext : tmp) {
@@ -33,7 +30,7 @@ public class Exts {
         return cnt;
     }
 
-    private Exts.Builder builder() {
+    public static Exts.Builder builder() {
         return new Builder();
     }
 
@@ -90,6 +87,19 @@ public class Exts {
 
         public String getExt() {
             return ext;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Ext ext1 = (Ext) o;
+            return known == ext1.known && Objects.equals(ext, ext1.ext);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(known, ext);
         }
 
         @Override

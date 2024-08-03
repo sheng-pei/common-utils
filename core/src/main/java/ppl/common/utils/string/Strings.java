@@ -383,23 +383,23 @@ public final class Strings {
 	public static String format(String formatString, Object... parameters) {
 		Objects.requireNonNull(formatString, "The specified formatString is null.");
 		PositionalArguments arguments = new ToStringArguments(parameters);
-		return pFormat(formatString, true, arguments);
-	}
-
-	public static String format(String formatString, boolean errIfArgumentsInsufficient, Object... parameters) {
-		Objects.requireNonNull(formatString, "The specified formatString is null.");
-		PositionalArguments arguments = new ToStringArguments(parameters);
-		return pFormat(formatString, errIfArgumentsInsufficient, arguments);
+			return pFormat(formatString, false, arguments);
 	}
 
 	public static String format(String formatString, PositionalArguments arguments) {
 		Objects.requireNonNull(formatString, "The specified formatString is null.");
+		return pFormat(formatString, false, arguments);
+	}
+
+	public static String enoughFormat(String formatString, Object... parameters) {
+		Objects.requireNonNull(formatString, "The specified formatString is null.");
+		PositionalArguments arguments = new ToStringArguments(parameters);
 		return pFormat(formatString, true, arguments);
 	}
 
-	public static String format(String formatString, boolean errIfArgumentsInsufficient, PositionalArguments arguments) {
+	public static String enoughFormat(String formatString, PositionalArguments arguments) {
 		Objects.requireNonNull(formatString, "The specified formatString is null.");
-		return pFormat(formatString, errIfArgumentsInsufficient, arguments);
+		return pFormat(formatString, true, arguments);
 	}
 
 	private static String pFormat(String formatString, boolean errIfArgumentsInsufficient, PositionalArguments arguments) {

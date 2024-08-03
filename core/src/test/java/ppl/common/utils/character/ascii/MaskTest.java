@@ -13,6 +13,15 @@ import java.util.List;
 import java.util.stream.Stream;
 
 class MaskTest {
+    @Test
+    void errorAsciiMask() {
+        Assertions.assertThrows(RuntimeException.class, () -> Mask.asciiMask("中"));
+        Assertions.assertThrows(RuntimeException.class, () -> Mask.asciiMask("\200"));
+        Assertions.assertThrows(RuntimeException.class, () -> Mask.asciiMask('a', '中'));
+        Assertions.assertThrows(RuntimeException.class, () -> Mask.asciiMask('a', '\200'));
+        Assertions.assertThrows(RuntimeException.class, () -> Mask.asciiMask('\200', '中'));
+    }
+
     @ParameterizedTest(name = "[{index}] {3}.")
     @MethodSource("bitNotProvider")
     void bitNot(Mask mask, char c, boolean expected, @SuppressWarnings("unused") String display) {
@@ -21,9 +30,9 @@ class MaskTest {
 
     private static Stream<Arguments> bitNotProvider() {
         return Stream.of(
-                Arguments.of(Mask.mask('a', 'z'), '中', true, "The character '中' is in 'not a~z'"),
-                Arguments.of(Mask.mask('a', 'z'), 'a', false, "The character 'a' is not in 'not a~z'"),
-                Arguments.of(Mask.mask('a', 'z'), 'A', true, "The character 'A' is in 'not a~z'"),
+                Arguments.of(Mask.asciiMask('a', 'z'), '中', true, "The character '中' is in 'not a~z'"),
+                Arguments.of(Mask.asciiMask('a', 'z'), 'a', false, "The character 'a' is not in 'not a~z'"),
+                Arguments.of(Mask.asciiMask('a', 'z'), 'A', true, "The character 'A' is in 'not a~z'"),
                 Arguments.of(Mask.OCTET, 'a', false, "The character 'a' is not in 'not OCTET'"),
                 Arguments.of(Mask.OCTET, '\277', false, "The character '\\277' is not in 'not OCTET'"),
                 Arguments.of(Mask.OCTET, '中', true, "The character '中' is in 'not OCTET'")
@@ -41,10 +50,10 @@ class MaskTest {
 
     private static Stream<Arguments> bitOrProvider() {
         return Stream.of(
-                Arguments.of(Mask.mask('A', 'Z'), Mask.mask('a', 'z'), '^', false, "The character '^' is not in 'A~Z | a~z'"),
-                Arguments.of(Mask.mask('A', 'b'), Mask.mask('a', 'z'), '^', true, "The character '^' is in 'A~Z | a~z'"),
-                Arguments.of(Mask.OCTET, Mask.mask('a', 'z'), 'b', true, "The character 'b' is in 'OCTET | a~z'"),
-                Arguments.of(Mask.OCTET, Mask.mask('a', 'z'), '\277', true, "The character '\\277' is in 'OCTET | a~z'")
+                Arguments.of(Mask.asciiMask('A', 'Z'), Mask.asciiMask('a', 'z'), '^', false, "The character '^' is not in 'A~Z | a~z'"),
+                Arguments.of(Mask.asciiMask('A', 'b'), Mask.asciiMask('a', 'z'), '^', true, "The character '^' is in 'A~Z | a~z'"),
+                Arguments.of(Mask.OCTET, Mask.asciiMask('a', 'z'), 'b', true, "The character 'b' is in 'OCTET | a~z'"),
+                Arguments.of(Mask.OCTET, Mask.asciiMask('a', 'z'), '\277', true, "The character '\\277' is in 'OCTET | a~z'")
         );
     }
 
@@ -60,31 +69,10 @@ class MaskTest {
 
     private static Stream<Arguments> bitAndProvider() {
         return Stream.of(
-                Arguments.of(Mask.mask('A', 'Z'), Mask.mask('a', 'z'), 'b', false, "The character 'b' is not in 'A~Z & a~z'"),
-                Arguments.of(Mask.mask('A', 'b'), Mask.mask('a', 'z'), 'b', true, "The character 'b' is in 'A~b & a~z'"),
-                Arguments.of(Mask.OCTET, Mask.mask('a', 'z'), 'b', true, "The character 'b' is in 'OCTET & a~z'")
+                Arguments.of(Mask.asciiMask('A', 'Z'), Mask.asciiMask('a', 'z'), 'b', false, "The character 'b' is not in 'A~Z & a~z'"),
+                Arguments.of(Mask.asciiMask('A', 'b'), Mask.asciiMask('a', 'z'), 'b', true, "The character 'b' is in 'A~b & a~z'"),
+                Arguments.of(Mask.OCTET, Mask.asciiMask('a', 'z'), 'b', true, "The character 'b' is in 'OCTET & a~z'")
         );
-    }
-
-    @Test
-    void isNonOctet() {
-        Assertions.assertFalse(Mask.NON_OCTET.isSet('a'));
-        Assertions.assertFalse(Mask.NON_OCTET.isSet('\277'));
-        Assertions.assertTrue(Mask.NON_OCTET.isSet('中'));
-    }
-
-    @Test
-    void isNonAscii() {
-        Assertions.assertFalse(Mask.NON_ASCII.isSet('a'));
-        Assertions.assertTrue(Mask.NON_ASCII.isSet('\277'));
-        Assertions.assertTrue(Mask.NON_ASCII.isSet('中'));
-    }
-
-    @Test
-    void isOctet() {
-        Assertions.assertTrue(Mask.OCTET.isSet('a'));
-        Assertions.assertTrue(Mask.OCTET.isSet('\277'));
-        Assertions.assertFalse(Mask.OCTET.isSet('中'));
     }
 
     @ParameterizedTest(name = "[{index}] {3}.")
@@ -94,64 +82,43 @@ class MaskTest {
     }
 
     private static Stream<Arguments> isSetProvider() {
-        Object[][] arguments = new Object[][]{
-                {"\\000 ~ \\077", "\\000", true},
-                {"\\000 ~ \\077", " ", true},
-                {"\\000 ~ \\077", "\\100", false},
-                {"\\000 ~ \\077", "a", false},
-                {"\\000 ~ \\077", "中", false},
-                {"\\100 ~ \\177", "\\000", false},
-                {"\\100 ~ \\177", " ", false},
-                {"\\100 ~ \\177", "\\100", true},
-                {"\\100 ~ \\177", "a", true},
-                {"\\100 ~ \\177", "中", false},
-                {"\\200 ~ 中", "\\000", false},
-                {"\\200 ~ 中", " ", false},
-                {"\\200 ~ 中", "\\100", false},
-                {"\\200 ~ 中", "a", false},
-                {"\\200 ~ 中", "中", false},
-                {"\\000 ~ \\177", "\\000", true},
-                {"\\000 ~ \\177", " ", true},
-                {"\\000 ~ \\177", "\\100", true},
-                {"\\000 ~ \\177", "a", true},
-                {"\\000 ~ \\177", "中", false},
-                {"\\000 ~ 中", "\\000", true},
-                {"\\000 ~ 中", " ", true},
-                {"\\000 ~ 中", "\\100", true},
-                {"\\000 ~ 中", "a", true},
-                {"\\000 ~ 中", "中", false},
-                {"\\100 ~ 中", "\\000", false},
-                {"\\100 ~ 中", " ", false},
-                {"\\100 ~ 中", "\\100", true},
-                {"\\100 ~ 中", "a", true},
-                {"\\100 ~ 中", "中", false},
-                {"\\000\\077\\177a 中", "\\000", true},
-                {"\\000\\077\\177a 中", "\\077", true},
-                {"\\000\\077\\177a 中", "\\177", true},
-                {"\\000\\077\\177a 中", "a", true},
-                {"\\000\\077\\177a 中", " ", true},
-                {"\\000\\077\\177a 中", "A", false},
-                {"\\000\\077\\177a 中", "中", false}
-        };
-        List<Arguments> list = new ArrayList<>();
-        for (Object[] argument : arguments) {
-            Mask mask;
-            String[] s = Strings.split((String) argument[0], "~");
-            if (s.length == 2) {
-                char begin = Characters.parse(s[0].trim()).charAt(0);
-                char end = Characters.parse(s[1].trim()).charAt(0);
-                mask = Mask.mask(begin, end);
-            } else {
-                mask = Mask.mask(Characters.parse(s[0]));
-            }
-
-            char c = Characters.parse((String) argument[1]).charAt(0);
-            list.add(Arguments.of(mask, c, argument[2],
-                    "The character '" + argument[1] + "' is " +
-                            ((boolean) argument[2] ? "" : "not ") + "in " + argument[0]));
-        }
-
-        return Stream.of(list.toArray(new Arguments[0]));
+        return Stream.of(
+                Arguments.of(Mask.asciiMask('\0', '\077'), '\0', true, "The character '\\000' is in '\\000 ~ \\077'."),
+                Arguments.of(Mask.asciiMask('\0', '\077'), ' ', true, "The character ' ' is in '\\000 ~ \\077'."),
+                Arguments.of(Mask.asciiMask('\0', '\077'), '\100', false, "The character '\\100' is not in '\\000 ~ \\077'."),
+                Arguments.of(Mask.asciiMask('\0', '\077'), 'a', false, "The character 'a' is not in '\\000 ~ \\077'."),
+                Arguments.of(Mask.asciiMask('\0', '\077'), '\200', false, "The character '\\200' is not in '\\000 ~ \\077'."),
+                Arguments.of(Mask.asciiMask('\0', '\077'), '中', false, "The character '中' is not in '\\000 ~ \\077'."),
+                Arguments.of(Mask.asciiMask('\100', '\177'), '\0', false, "The character '\\000' is not in '\\100 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\100', '\177'), ' ', false, "The character ' ' is not in '\\100 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\100', '\177'), '\100', true, "The character '\\100' is in '\\100 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\100', '\177'), 'a', true, "The character 'a' is in '\\100 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\100', '\177'), '\200', false, "The character '\\200' is not in '\\100 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\100', '\177'), '中', false, "The character '中' is not in '\\100 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\000', '\177'), '\0', true, "The character '\\000' is in '\\000 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\000', '\177'), ' ', true, "The character ' ' is in '\\000 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\000', '\177'), '\100', true, "The character '\\100' is in '\\000 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\000', '\177'), 'a', true, "The character 'a' is in '\\000 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\000', '\177'), '\200', false, "The character '\\200' is not in '\\000 ~ \\177'."),
+                Arguments.of(Mask.asciiMask('\000', '\177'), '中', false, "The character '中' is not in '\\000 ~ \\177'."),
+                Arguments.of(Mask.asciiMask("\0\077\177 a"), '\0', true, "The character '\\000' is in '\\000\\077\\177 a'."),
+                Arguments.of(Mask.asciiMask("\0\077\177 a"), '\077', true, "The character '\\077' is in '\\000\\077\\177 a'."),
+                Arguments.of(Mask.asciiMask("\0\077\177 a"), '\177', true, "The character '\\177' is in '\\000\\077\\177 a'."),
+                Arguments.of(Mask.asciiMask("\0\077\177 a"), ' ', true, "The character ' ' is in '\\000\\077\\177 a'."),
+                Arguments.of(Mask.asciiMask("\0\077\177 a"), 'a', true, "The character 'a' is in '\\000\\077\\177 a'."),
+                Arguments.of(Mask.asciiMask("\0\077\177 a"), 'A', false, "The character 'A' is not in '\\000\\077\\177 a'."),
+                Arguments.of(Mask.asciiMask("\0\077\177 a"), '\200', false, "The character '\\200' is not in '\\000\\077\\177 a'."),
+                Arguments.of(Mask.asciiMask("\0\077\177 a"), '中', false, "The character '中' is not in '\\000\\077\\177 a'."),
+                Arguments.of(Mask.NON_ASCII, 'a', false, "The character 'a' is ASCII."),
+                Arguments.of(Mask.NON_ASCII, '\200', true, "The character '\200' is NON-ASCII."),
+                Arguments.of(Mask.NON_ASCII, '中', true, "The character '中' is NON-ASCII."),
+                Arguments.of(Mask.NON_OCTET, 'a', false, "The character 'a' is OCTET."),
+                Arguments.of(Mask.NON_OCTET, '\200', false, "The character '\200' is OCTET."),
+                Arguments.of(Mask.NON_OCTET, '中', true, "The character '中' is NON-OCTET."),
+                Arguments.of(Mask.OCTET, 'a', true, "The character 'a' is OCTET."),
+                Arguments.of(Mask.OCTET, '\200', true, "The character 'a' is OCTET."),
+                Arguments.of(Mask.OCTET, '中', false, "The character 'a' is NON-OCTET.")
+        );
     }
 
 }
