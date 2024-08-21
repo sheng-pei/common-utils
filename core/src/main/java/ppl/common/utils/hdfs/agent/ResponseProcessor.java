@@ -19,7 +19,7 @@ import ppl.common.utils.http.header.value.mediatype.Mime;
 import ppl.common.utils.http.response.Response;
 import ppl.common.utils.http.response.ResponseCode;
 import ppl.common.utils.json.JsonException;
-import ppl.common.utils.json.JsonUtils;
+import ppl.common.utils.json.jackson.JsonUtils;
 
 import java.io.*;
 import java.util.concurrent.TimeUnit;

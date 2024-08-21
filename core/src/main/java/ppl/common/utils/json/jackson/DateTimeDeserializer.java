@@ -1,4 +1,4 @@
-package ppl.common.utils.json;
+package ppl.common.utils.json.jackson;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

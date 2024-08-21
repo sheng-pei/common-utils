@@ -1,24 +1,17 @@
-package ppl.common.utils.enumerate.jackson;
+package ppl.common.utils.json.jackson;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.module.SimpleSerializers;
+import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import ppl.common.utils.enumerate.EnumUtils;
 
 import java.io.IOException;
 
-@SuppressWarnings("unused")
-public class EnumSerializers extends SimpleSerializers {
-    private static final EnumSerializers INSTANCE = new EnumSerializers();
-
-    public static EnumSerializers getInstance() {
-        return INSTANCE;
-    }
-
+public class EnumSerializerModifier extends BeanSerializerModifier {
     @Override
-    public JsonSerializer<?> findSerializer(SerializationConfig config, JavaType type, BeanDescription beanDesc) {
-        Class<?> raw = type.getRawClass();
-        if (type.getRawClass().isEnum()) {
+    public JsonSerializer<?> modifyEnumSerializer(SerializationConfig config, JavaType valueType, BeanDescription beanDesc, JsonSerializer<?> serializer) {
+        Class<?> raw = valueType.getRawClass();
+        if (raw.isEnum()) {
             @SuppressWarnings("unchecked")
             Class<? extends Enum<?>> eClass = (Class<? extends Enum<?>>) raw;
             if (EnumUtils.isEncodeSupport(eClass)) {
@@ -37,6 +30,6 @@ public class EnumSerializers extends SimpleSerializers {
                 };
             }
         }
-        return super.findSerializer(config, type, beanDesc);
+        return super.modifyEnumSerializer(config, valueType, beanDesc, serializer);
     }
 }

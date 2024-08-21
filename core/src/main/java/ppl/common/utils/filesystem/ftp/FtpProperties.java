@@ -80,7 +80,7 @@ public class FtpProperties implements FileSystemProperties {
         private boolean autoCreateWorking;
         private Charset charset;
 
-        public Builder withHost(String host) {
+        public Builder setHost(String host) {
             host = (host == null ? "" : host.trim());
             if (host.isEmpty()) {
                 host = DEFAULT_HOST;
@@ -89,7 +89,7 @@ public class FtpProperties implements FileSystemProperties {
             return this;
         }
 
-        public Builder withPort(Integer port) {
+        public Builder setPort(Integer port) {
             port = (port == null ? DEFAULT_PORT : port);
             if (port < 0 || port >65535) {
                 throw new IllegalArgumentException("Invalid tcp port: '" + port + "'.");
@@ -98,22 +98,22 @@ public class FtpProperties implements FileSystemProperties {
             return this;
         }
 
-        public Builder withUsername(String username) {
+        public Builder setUsername(String username) {
             this.username = (username == null ? "" : username.trim());
             return this;
         }
 
-        public Builder withPassword(String password) {
+        public Builder setPassword(String password) {
             this.password = (password == null ? "" : password);
             return this;
         }
 
-        public Builder withActive(Boolean active) {
+        public Builder setActive(Boolean active) {
             this.active = (active == null ? DEFAULT_ACTIVE : active);
             return this;
         }
 
-        public Builder withWorking(String working) {
+        public Builder setWorking(String working) {
             working = (working == null ? "" : working);
             if (working.isEmpty()) {
                 working = DEFAULT_WORKING;
@@ -122,18 +122,18 @@ public class FtpProperties implements FileSystemProperties {
             return this;
         }
 
-        public Builder withAutoCreateWorking(Boolean autoCreateWorking) {
+        public Builder setAutoCreateWorking(Boolean autoCreateWorking) {
             this.autoCreateWorking = (autoCreateWorking == null ? DEFAULT_AUTO_CREATE_WORKING : autoCreateWorking);
             return this;
         }
 
-        public Builder withCharset(String charset) {
+        public Builder setCharset(String charset) {
             charset = (charset == null ? "" : charset.trim());
             this.charset = charset.isEmpty() ? DEFAULT_CHARSET : Charset.forName(charset);
             return this;
         }
 
-        public Builder withCharset(Charset charset) {
+        public Builder setCharset(Charset charset) {
             this.charset = (charset == null ? DEFAULT_CHARSET : charset);
             return this;
         }

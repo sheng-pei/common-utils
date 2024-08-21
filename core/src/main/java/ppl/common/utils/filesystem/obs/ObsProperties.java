@@ -57,7 +57,7 @@ public class ObsProperties implements FileSystemProperties {
         private boolean autoCreateWorking;
         private String working;
 
-        public Builder withEndpoint(String endpoint) {
+        public Builder setEndpoint(String endpoint) {
             endpoint = (endpoint == null ? "" : endpoint.trim());
             if (endpoint.isEmpty()) {
                 throw new IllegalArgumentException("Endpoint is required.");
@@ -66,7 +66,7 @@ public class ObsProperties implements FileSystemProperties {
             return this;
         }
 
-        public Builder withAk(String ak) {
+        public Builder setAk(String ak) {
             ak = (ak == null ? "" : ak.trim());
             if (ak.isEmpty()) {
                 throw new IllegalArgumentException("Ak is required.");
@@ -75,7 +75,7 @@ public class ObsProperties implements FileSystemProperties {
             return this;
         }
 
-        public Builder withSk(String sk) {
+        public Builder setSk(String sk) {
             sk = (sk == null ? "" : sk.trim());
             if (sk.isEmpty()) {
                 throw new IllegalArgumentException("Sk is required.");
@@ -84,7 +84,7 @@ public class ObsProperties implements FileSystemProperties {
             return this;
         }
 
-        public Builder withBucket(String bucket) {
+        public Builder setBucket(String bucket) {
             bucket = (bucket == null ? "" : bucket.trim());
             if (bucket.isEmpty()) {
                 throw new IllegalArgumentException("Bucket is required.");
@@ -93,12 +93,12 @@ public class ObsProperties implements FileSystemProperties {
             return this;
         }
 
-        public Builder withAutoCreateWorking(Boolean autoCreateWorking) {
+        public Builder setAutoCreateWorking(Boolean autoCreateWorking) {
             this.autoCreateWorking = (autoCreateWorking == null ? DEFAULT_AUTO_CREATE_WORKING : autoCreateWorking);
             return this;
         }
 
-        public Builder withWorking(String working) {
+        public Builder setWorking(String working) {
             working = (working == null ? "" : working);
             if (working.isEmpty()) {
                 working = DEFAULT_WORKING;

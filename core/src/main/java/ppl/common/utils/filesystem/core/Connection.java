@@ -3,6 +3,8 @@ package ppl.common.utils.filesystem.core;
 import ppl.common.utils.filesystem.path.Path;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Predicate;
@@ -44,7 +46,11 @@ public interface Connection extends AutoCloseable {
 
     void store(String remote, File local);
 
+    void store(String remote, InputStream is);
+
     void download(String remote, File local);
+
+    void download(String remote, OutputStream os);
 
     void mkdir(Path path);
 

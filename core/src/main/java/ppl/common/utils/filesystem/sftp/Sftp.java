@@ -243,13 +243,27 @@ public class Sftp implements FileSystem, AutoCloseable {
         @Override
         public void store(String remote, File local) {
             Sftp.this.checkShutdown();
-            Path path = Paths.get(remote);
-            Path[] ps = lockedCheckPath(path.getParent());
-            lockedMkdirs(ps[0], ps[1]);
+            ensurePath(remote);
             readLocked(() -> {
                 sftp.store(remote, local);
                 return null;
             });
+        }
+
+        @Override
+        public void store(String remote, InputStream is) {
+            Sftp.this.checkShutdown();
+            ensurePath(remote);
+            readLocked(() -> {
+                sftp.store(remote, is);
+                return null;
+            });
+        }
+
+        private void ensurePath(String remote) {
+            Path path = Paths.get(remote);
+            Path[] ps = lockedCheckPath(path.getParent());
+            lockedMkdirs(ps[0], ps[1]);
         }
 
         @Override
@@ -319,6 +333,17 @@ public class Sftp implements FileSystem, AutoCloseable {
             lockedCheckPath(remotePath);
             readLocked(() -> {
                 sftp.download(remote, local);
+                return null;
+            });
+        }
+
+        @Override
+        public void download(String remote, OutputStream os) {
+            Sftp.this.checkShutdown();
+            Path remotePath = Paths.get(remote);
+            lockedCheckPath(remotePath);
+            readLocked(() -> {
+                sftp.download(remote, os);
                 return null;
             });
         }
@@ -439,6 +464,15 @@ public class Sftp implements FileSystem, AutoCloseable {
             }
         }
 
+        public void store(String remote, InputStream is) {
+            try {
+                sftp.put(is, remote);
+            } catch (com.jcraft.jsch.SftpException e) {
+                throw new SftpException(String.format(
+                        "Failed to store file to remote: %s", remote), e);
+            }
+        }
+
         public void mkdirs(Path path) {
             Path pwd = pwd();
             Path an = pwd.resolve(path).normalize();
@@ -513,6 +547,15 @@ public class Sftp implements FileSystem, AutoCloseable {
             } catch (com.jcraft.jsch.SftpException e) {
                 throw new SftpException(String.format(
                         "Failed to download file: %s to local: %s", remote, local.getPath()), e);
+            }
+        }
+
+        public void download(String remote, OutputStream os) {
+            try {
+                sftp.get(remote, os);
+            } catch (com.jcraft.jsch.SftpException e) {
+                throw new SftpException(String.format(
+                        "Failed to download file: %s.", remote), e);
             }
         }
 

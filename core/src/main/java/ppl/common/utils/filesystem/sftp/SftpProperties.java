@@ -102,7 +102,7 @@ public class SftpProperties implements FileSystemProperties {
         private int coreSession;
         private int maxChannel;
 
-        public SftpProperties.Builder withHost(String host) {
+        public SftpProperties.Builder setHost(String host) {
             host = (host == null ? "" : host.trim());
             if (host.isEmpty()) {
                 host = DEFAULT_HOST;
@@ -111,7 +111,7 @@ public class SftpProperties implements FileSystemProperties {
             return this;
         }
 
-        public SftpProperties.Builder withPort(Integer port) {
+        public SftpProperties.Builder setPort(Integer port) {
             port = (port == null ? DEFAULT_PORT : port);
             if (port < 0 || port >65535) {
                 throw new IllegalArgumentException("Invalid tcp port: '" + port + "'.");
@@ -120,17 +120,17 @@ public class SftpProperties implements FileSystemProperties {
             return this;
         }
 
-        public SftpProperties.Builder withUsername(String username) {
+        public SftpProperties.Builder setUsername(String username) {
             this.username = (username == null ? "" : username.trim());
             return this;
         }
 
-        public SftpProperties.Builder withPassword(String password) {
+        public SftpProperties.Builder setPassword(String password) {
             this.password = (password == null ? "" : password);
             return this;
         }
 
-        public SftpProperties.Builder withWorking(String working) {
+        public SftpProperties.Builder setWorking(String working) {
             working = (working == null ? "" : working);
             if (working.isEmpty()) {
                 working = DEFAULT_WORKING;
@@ -139,28 +139,28 @@ public class SftpProperties implements FileSystemProperties {
             return this;
         }
 
-        public SftpProperties.Builder withAutoCreateWorking(Boolean autoCreateWorking) {
+        public SftpProperties.Builder setAutoCreateWorking(Boolean autoCreateWorking) {
             this.autoCreateWorking = (autoCreateWorking == null ? DEFAULT_AUTO_CREATE_WORKING : autoCreateWorking);
             return this;
         }
 
-        public SftpProperties.Builder withCharset(String charset) {
+        public SftpProperties.Builder setCharset(String charset) {
             charset = (charset == null ? "" : charset.trim());
             this.charset = charset.isEmpty() ? DEFAULT_CHARSET : Charset.forName(charset);
             return this;
         }
 
-        public SftpProperties.Builder withCharset(Charset charset) {
+        public SftpProperties.Builder setCharset(Charset charset) {
             this.charset = (charset == null ? DEFAULT_CHARSET : charset);
             return this;
         }
 
-        public SftpProperties.Builder withChannelFirst(Boolean channelFirst) {
+        public SftpProperties.Builder setChannelFirst(Boolean channelFirst) {
             this.channelFirst = (channelFirst == null ? DEFAULT_CHANNEL_FIRST : channelFirst);
             return this;
         }
 
-        public SftpProperties.Builder withCoreSession(Integer coreSession) {
+        public SftpProperties.Builder setCoreSession(Integer coreSession) {
             coreSession = (coreSession == null ? DEFAULT_CORE_SESSION : coreSession);
             if (coreSession < 1) {
                 throw new IllegalArgumentException("The amount of core sessions must be positive.");
@@ -169,7 +169,7 @@ public class SftpProperties implements FileSystemProperties {
             return this;
         }
 
-        public SftpProperties.Builder withMaxChannel(Integer maxChannel) {
+        public SftpProperties.Builder setMaxChannel(Integer maxChannel) {
             maxChannel = (maxChannel == null ? DEFAULT_MAX_CHANNEL : maxChannel);
             if (maxChannel < 1) {
                 throw new IllegalArgumentException("The max amount of channels per session must be positive.");

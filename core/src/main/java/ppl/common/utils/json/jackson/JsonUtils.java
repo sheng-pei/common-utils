@@ -1,34 +1,22 @@
-package ppl.common.utils.json;
+package ppl.common.utils.json.jackson;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.module.SimpleDeserializers;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.module.SimpleSerializers;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ppl.common.utils.IOUtils;
-import ppl.common.utils.enumerate.EnumUtils;
-import ppl.common.utils.enumerate.jackson.EnumDeserializers;
-import ppl.common.utils.enumerate.jackson.EnumSerializers;
+import ppl.common.utils.json.JsonException;
 
-import java.io.*;
-import java.util.Date;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class JsonUtils {
     private static final ObjectMapper OBJECT_MAPPER;
 
     static {
-        SimpleModule module = new SimpleModule();
-        module.setSerializers(new EnumSerializers());
-        module.setDeserializers(new EnumDeserializers());
-        module.addDeserializer(Date.class, new DateTimeDeserializer());
-        module.addSerializer(Date.class, new DateTimeSerializer());
         ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(module);
+        mapper.registerModule(new CommonModule());
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         OBJECT_MAPPER = mapper;
     }

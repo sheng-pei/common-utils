@@ -195,6 +195,19 @@ public class Ftp implements FileSystem, AutoCloseable {
         }
 
         @Override
+        public void store(String remote, InputStream is) {
+            Ftp.this.checkShutdown();
+            Path r = Paths.get(remote);
+            Path[] ps = lockedCheckPath(r);
+            lockedMkdirs(ps[0], ps[1]);
+            readLocked(() -> {
+                ftp.setFileType(FTP.BINARY_FILE_TYPE);
+                ftp.store(remote, is);
+                return null;
+            });
+        }
+
+        @Override
         public void mkdir(Path path) {
             Ftp.this.checkShutdown();
             lockedCheckPath(path);
@@ -265,6 +278,17 @@ public class Ftp implements FileSystem, AutoCloseable {
             lockedCheckPath(remotePath);
             readLocked(() -> {
                 ftp.download(remote, local);
+                return null;
+            });
+        }
+
+        @Override
+        public void download(String remote, OutputStream os) {
+            Ftp.this.checkShutdown();
+            Path remotePath = Paths.get(remote);
+            lockedCheckPath(remotePath);
+            readLocked(() -> {
+                ftp.download(remote, os);
                 return null;
             });
         }
@@ -437,9 +461,23 @@ public class Ftp implements FileSystem, AutoCloseable {
             }
         }
 
+        public void store(String remote, InputStream is) {
+            if (!pStore(remote, is)) {
+                throw new FtpException("Failed to store file: " + remote);
+            }
+        }
+
         private boolean pStore(String remote, File local) {
             try (final InputStream input = Files.newInputStream(local.toPath())) {
                 return ftp.storeFile(remote, input);
+            } catch (IOException e) {
+                throw new FtpException("Failed to store file: " + remote, e);
+            }
+        }
+
+        private boolean pStore(String remote, InputStream is) {
+            try {
+                return ftp.storeFile(remote, is);
             } catch (IOException e) {
                 throw new FtpException("Failed to store file: " + remote, e);
             }
@@ -512,12 +550,28 @@ public class Ftp implements FileSystem, AutoCloseable {
             }
         }
 
+        public void download(String remote, OutputStream os) {
+            if (!pDownload(remote, os)) {
+                throw new FtpException(String.format(
+                        "Failed to download file: %s.", remote));
+            }
+        }
+
         private boolean pDownload(String remote, File local) {
             try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(local.toPath()))) {
                 return ftp.retrieveFile(remote, os);
             } catch (IOException e) {
                 throw new FtpException(String.format(
                         "Failed to download file: %s to local: %s", remote, local.getPath()), e);
+            }
+        }
+
+        private boolean pDownload(String remote, OutputStream os) {
+            try {
+                return ftp.retrieveFile(remote, os);
+            } catch (IOException e) {
+                throw new FtpException(String.format(
+                        "Failed to download file: %s.", remote), e);
             }
         }
 

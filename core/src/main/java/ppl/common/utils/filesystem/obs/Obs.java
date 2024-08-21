@@ -10,10 +10,7 @@ import ppl.common.utils.filesystem.path.Path;
 import ppl.common.utils.filesystem.path.Paths;
 import ppl.common.utils.filesystem.sftp.SftpException;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -144,12 +141,30 @@ public class Obs implements FileSystem {
         }
 
         @Override
+        public void store(String remote, InputStream is) {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            Path path = Paths.get(remote);
+            Path t = checkPath(this.working, path);
+            obs.store(t, is);
+        }
+
+        @Override
         public void download(String remote, File local) {
             Obs.this.checkShutdown();
             checkShutdown();
             Path path = Paths.get(remote);
             Path t = checkPath(this.working, path);
             obs.download(t, local);
+        }
+
+        @Override
+        public void download(String remote, OutputStream os) {
+            Obs.this.checkShutdown();
+            checkShutdown();
+            Path path = Paths.get(remote);
+            Path t = checkPath(this.working, path);
+            obs.download(t, os);
         }
 
         @Override
@@ -238,9 +253,26 @@ public class Obs implements FileSystem {
             }
         }
 
+        public void store(Path path, InputStream is) {
+            PutObjectRequest request = new PutObjectRequest();
+            request.setBucketName(bucket);
+            request.setObjectKey(Paths.get(Path.C_ROOT_DIR).relativize(path).toString());
+            request.setInput(is);
+            try {
+                obsClient.putObject(request);
+            } catch (com.obs.services.exception.ObsException e) {
+                throw new ObsException("Failed to store file: " + path, e);
+            }
+        }
+
         public void download(Path path, File local) {
             ObsObject obsObject = openForRead(path);
             readIn(obsObject, local);
+        }
+
+        public void download(Path path, OutputStream os) {
+            ObsObject obsObject = openForRead(path);
+            readIn(obsObject, os);
         }
 
         private ObsObject openForRead(Path p) {
@@ -256,6 +288,16 @@ public class Obs implements FileSystem {
                  BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(localFile.toPath()))) {
                 if (content != null) {
                     IOUtils.copy(content, bos);
+                }
+            } catch (IOException e) {
+                throw new ObsException("Failed to download file from obs", e);
+            }
+        }
+
+        private void readIn(ObsObject obsObject, OutputStream os) {
+            try (InputStream content = obsObject.getObjectContent()) {
+                if (content != null) {
+                    IOUtils.copy(content, os);
                 }
             } catch (IOException e) {
                 throw new ObsException("Failed to download file from obs", e);
