@@ -118,7 +118,7 @@ public final class Strings {
 	}
 
 	public static boolean isEmpty(String string) {
-		return string == null || string.length() == 0;
+		return string == null || string.isEmpty();
 	}
 
 	public static boolean isNotEmpty(String string) {
@@ -130,7 +130,8 @@ public final class Strings {
 			return true;
 		}
 
-		int idx = indexOf(WHITESPACE.negate(), string);
+		char[] chars = string.toCharArray();
+		int idx = indexOf(WHITESPACE.negate(), chars, 0, chars.length);
 		return idx < 0;
 	}
 

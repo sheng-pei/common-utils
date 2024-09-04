@@ -5,7 +5,9 @@ import ppl.common.utils.character.ascii.Mask;
 import ppl.common.utils.character.ascii.MaskCharPredicate;
 
 public enum URICharGroup implements MaskCharPredicate {
-    RESERVED(":/?#[]@!$&'()*+,;="),
+    GEN_DELIMS(":/?#[]@"),
+    SUB_DELIMS("!$&'()*+,;="),
+    RESERVED(GEN_DELIMS, SUB_DELIMS),
     UNRESERVED(AsciiGroup.ALPHA_NUM, Mask.asciiMask("-_.~").predicate());
 
     private final Mask mask;

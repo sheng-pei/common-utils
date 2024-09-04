@@ -5,22 +5,24 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
 import java.util.Date;
 
-public class DateTimeDeserializer extends JsonDeserializer<Date> {
+public class DateDeserializer extends JsonDeserializer<Date> {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER;
+    private static final String DEFAULT_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss";
 
-    static {
-        DateTimeFormatterBuilder formatterBuilder = new DateTimeFormatterBuilder();
-        formatterBuilder.appendPattern("yyyy-MM-dd'T'HH:mm:ss");
-        formatterBuilder.appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true);
-        formatterBuilder.appendZoneId();
-        DATE_TIME_FORMATTER = formatterBuilder.toFormatter();
+    private final DateTimeFormatter formatter;
+
+    public DateDeserializer() {
+        this(DEFAULT_FORMAT_STRING);
+    }
+
+    public DateDeserializer(String format) {
+        this.formatter = DateTimeFormatter.ofPattern(format);
     }
 
     @Override
@@ -30,7 +32,9 @@ public class DateTimeDeserializer extends JsonDeserializer<Date> {
             return null;
         }
 
-        return Date.from(ZonedDateTime.parse(text, DATE_TIME_FORMATTER).toInstant());
+        LocalDateTime localDateTime = LocalDateTime.parse(text, formatter);
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+        return Date.from(zonedDateTime.toInstant());
     }
 
     @Override

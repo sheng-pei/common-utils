@@ -5,19 +5,28 @@ import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
-public class CommonModule extends SimpleModule {
+public class JavaTimeModule extends SimpleModule {
+    private final com.fasterxml.jackson.datatype.jsr310.JavaTimeModule module;
+
+    public JavaTimeModule() {
+        this.module = new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule();
+    }
 
     @Override
     public void setupModule(SetupContext context) {
+        module.setupModule(context);
         DelegateBeanSerializerModifier delegateBeanSerializerModifier = new DelegateBeanSerializerModifier();
-        delegateBeanSerializerModifier.addSerializerModifier(new EnumSerializerModifier());
         delegateBeanSerializerModifier.addSerializerModifier(new BeanSerializerModifier() {
             @Override
             public JsonSerializer<?> modifySerializer(SerializationConfig config, BeanDescription beanDesc, JsonSerializer<?> serializer) {
-                if (beanDesc.getBeanClass().equals(Date.class)) {
-                    return new DateSerializer();
+                if (beanDesc.getBeanClass().equals(ZonedDateTime.class)) {
+                    return new ZonedDateTimeSerializer();
+                }
+                if (beanDesc.getBeanClass().equals(LocalDateTime.class)) {
+                    return new LocalDateTimeSerializer();
                 }
                 return super.modifySerializer(config, beanDesc, serializer);
             }
@@ -26,12 +35,14 @@ public class CommonModule extends SimpleModule {
         setSerializerModifier(delegateBeanSerializerModifier);
 
         DelegateBeanDeserializerModifier delegateBeanDeserializerModifier = new DelegateBeanDeserializerModifier();
-        delegateBeanDeserializerModifier.addDeserializerModifier(new EnumDeserializerModifier());
         delegateBeanDeserializerModifier.addDeserializerModifier(new BeanDeserializerModifier() {
             @Override
             public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config, BeanDescription beanDesc, JsonDeserializer<?> deserializer) {
-                if (beanDesc.getBeanClass().equals(Date.class)) {
-                    return new DateDeserializer();
+                if (beanDesc.getBeanClass().equals(ZonedDateTime.class)) {
+                    return new ZonedDateTimeDeserializer();
+                }
+                if (beanDesc.getBeanClass().equals(LocalDateTime.class)) {
+                    return new LocalDateTimeDeserializer();
                 }
                 return super.modifyDeserializer(config, beanDesc, deserializer);
             }

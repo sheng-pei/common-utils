@@ -4,6 +4,7 @@ import ppl.common.utils.cache.Cache;
 import ppl.common.utils.cache.ConcurrentReferenceValueCache;
 import ppl.common.utils.cache.ReferenceType;
 import ppl.common.utils.exception.UnreachableCodeException;
+import ppl.common.utils.reflect.TypeUtils;
 
 import java.lang.reflect.Array;
 import java.util.Objects;
@@ -48,29 +49,22 @@ public final class ArrayUtils {
         return array == null || array.length == 0;
     }
 
-    private static final Object[] ZERO = new Object[0];
-    public static Object[] zero() {
-        return ZERO;
-    }
-
     private static final Cache<Class<?>, Object> ZERO_CACHE = new ConcurrentReferenceValueCache<>(ReferenceType.WEAK);
+
     public static <T> T[] zero(Class<T> clazz) {
         Objects.requireNonNull(clazz);
-        if (clazz.equals(Object.class)) {
-            @SuppressWarnings("unchecked")
-            T[] ret = (T[]) zero();
-            return ret;
-        }
-
+        Class<?> retClass = TypeUtils.box(clazz);
+        //TODO, 若父类已缓冲，使用父类对象返回
         try {
             @SuppressWarnings("unchecked")
-            T[] ret = (T[]) ZERO_CACHE.get(clazz, () -> Array.newInstance(clazz, 0));
+            T[] ret = (T[]) ZERO_CACHE.get(retClass, () -> Array.newInstance(retClass, 0));
             return ret;
         } catch (ExecutionException e) {
             throw new UnreachableCodeException(e);
         }
     }
 
+    private static final Object[] ZERO = new Object[0];
     private static final int[] ZERO_INT_ARRAY = new int[0];
     private static final byte[] ZERO_BYTE_ARRAY = new byte[0];
     private static final short[] ZERO_SHORT_ARRAY = new short[0];
@@ -79,6 +73,20 @@ public final class ArrayUtils {
     private static final char[] ZERO_CHAR_ARRAY = new char[0];
     private static final float[] ZERO_FLOAT_ARRAY = new float[0];
     private static final double[] ZERO_DOUBLE_ARRAY = new double[0];
+    private static final String[] ZERO_STRING_ARRAY = new String[0];
+
+    static {
+        try {
+            ZERO_CACHE.get(Object.class, () -> ZERO);
+            ZERO_CACHE.get(String.class, () -> ZERO_STRING_ARRAY);
+        } catch (Exception e) {
+            //ignore
+        }
+    }
+
+    public static Object[] zero() {
+        return ZERO;
+    }
 
     public static byte[] zeroByte() {
         return ZERO_BYTE_ARRAY;
@@ -110,5 +118,9 @@ public final class ArrayUtils {
 
     public static double[] zeroDouble() {
         return ZERO_DOUBLE_ARRAY;
+    }
+
+    public static String[] zeroString() {
+        return ZERO_STRING_ARRAY;
     }
 }

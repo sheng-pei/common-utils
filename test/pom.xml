@@ -98,6 +98,16 @@
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.63</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+            <version>5.7.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.1</version>
+        </dependency>
     </dependencies>
 
     <build>
