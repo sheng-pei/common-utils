@@ -297,6 +297,10 @@ public class URL {
         return new URL(scheme, host, port, "", null, null, Collections.emptyList());
     }
 
+    public URL truncateToPath() {
+        return new URL(scheme, host, port, path, null, null, Collections.emptyList());
+    }
+
     public URL noQuery() {
         return new URL(scheme, host, port, path, null, fragment, Collections.emptyList());
     }
