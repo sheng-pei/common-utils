@@ -129,21 +129,21 @@ public class CommandArguments implements Arguments<Object, Argument> {
             return this;
         }
 
-        public Builder addArgument(ToggleOptionArgument argument) {
+        public Builder addToggleArgument(ToggleOptionArgument argument) {
             checkArgument(argument);
             addAllArgument(argument);
             _addToggleOptionArgument(argument);
             return this;
         }
 
-        public Builder addArgument(ValueOptionArgument<?> argument) {
+        public Builder addOptionArgument(ValueOptionArgument<?> argument) {
             checkArgument(argument);
             addAllArgument(argument);
             _addValueOptionArgument(argument);
             return this;
         }
 
-        public Builder addArgument(PositionArgument<?> argument) {
+        public Builder addPositionArgument(PositionArgument<?> argument) {
             checkArgument(argument);
             addAllArgument(argument);
             _addPositionArgument(argument);

@@ -31,4 +31,8 @@ public final class Paths {
         }
         return ret;
     }
+
+    public static Path root() {
+        return PathImpl.ROOT;
+    }
 }
