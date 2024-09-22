@@ -1,6 +1,5 @@
 package ppl.common.utils.http.clients.base;
 
-import ppl.common.utils.ArrayUtils;
 import ppl.common.utils.http.Connection;
 import ppl.common.utils.http.NetworkException;
 import ppl.common.utils.http.header.Header;
@@ -11,7 +10,6 @@ import ppl.common.utils.http.response.Response;
 import ppl.common.utils.http.response.ResponseCode;
 import ppl.common.utils.pair.Pair;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,8 +18,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BaseConnection implements Connection {
-
-    private static final InputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(ArrayUtils.zeroByte());
 
     private final HttpURLConnection connection;
 
@@ -66,11 +62,7 @@ public class BaseConnection implements Connection {
             @Override
             public InputStream openInputStream() {
                 try {
-                    InputStream is = (getCode().isError() ? connection.getErrorStream() : connection.getInputStream());
-                    if (is == null) {
-                        is = EMPTY_INPUT_STREAM;
-                    }
-                    return is;
+                    return getCode().isError() ? connection.getErrorStream() : connection.getInputStream();
                 } catch (IOException e) {
                     throw new NetworkException("Couldn't open input stream.", e);
                 }
