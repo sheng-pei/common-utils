@@ -5,20 +5,43 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
+import java.util.Calendar;
 import java.util.Date;
 
 public class DateDeserializer extends JsonDeserializer<Date> {
 
-    private static final String DEFAULT_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss";
+    private static final DateTimeFormatter DEFAULT_FORMAT_STRING;
+
+    static {
+        DateTimeFormatterBuilder formatterBuilder = new DateTimeFormatterBuilder();
+        formatterBuilder.appendPattern("yyyy");
+        formatterBuilder.optionalStart();
+        formatterBuilder.appendPattern("-MM");
+        formatterBuilder.optionalStart();
+        formatterBuilder.appendPattern("-dd");
+        formatterBuilder.optionalStart();
+        formatterBuilder.appendPattern(" HH");
+        formatterBuilder.optionalStart();
+        formatterBuilder.appendPattern(":mm");
+        formatterBuilder.optionalStart();
+        formatterBuilder.appendPattern(":ss");
+        formatterBuilder.appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true);
+        formatterBuilder.optionalEnd();
+        formatterBuilder.optionalEnd();
+        formatterBuilder.optionalEnd();
+        formatterBuilder.optionalEnd();
+        formatterBuilder.optionalEnd();
+        DEFAULT_FORMAT_STRING = formatterBuilder.toFormatter();
+    }
 
     private final DateTimeFormatter formatter;
 
     public DateDeserializer() {
-        this(DEFAULT_FORMAT_STRING);
+        this.formatter = DEFAULT_FORMAT_STRING;
     }
 
     public DateDeserializer(String format) {
@@ -32,9 +55,16 @@ public class DateDeserializer extends JsonDeserializer<Date> {
             return null;
         }
 
-        LocalDateTime localDateTime = LocalDateTime.parse(text, formatter);
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
-        return Date.from(zonedDateTime.toInstant());
+        TemporalAccessor accessor = formatter.parse("2024-09-10 00:59:01.1000");
+        Calendar.Builder builder = new Calendar.Builder();
+        builder.setDate(accessor.get(ChronoField.YEAR),
+                accessor.isSupported(ChronoField.MONTH_OF_YEAR) ? accessor.get(ChronoField.MONTH_OF_YEAR) : 1,
+                accessor.isSupported(ChronoField.DAY_OF_MONTH) ? accessor.get(ChronoField.DAY_OF_MONTH) : 1);
+        builder.setTimeOfDay(accessor.isSupported(ChronoField.HOUR_OF_DAY) ? accessor.get(ChronoField.HOUR_OF_DAY) : 0,
+                accessor.isSupported(ChronoField.MINUTE_OF_HOUR) ? accessor.get(ChronoField.MINUTE_OF_HOUR) : 0,
+                accessor.isSupported(ChronoField.SECOND_OF_MINUTE) ? accessor.get(ChronoField.SECOND_OF_MINUTE) : 0,
+                accessor.isSupported(ChronoField.MILLI_OF_SECOND) ? accessor.get(ChronoField.MILLI_OF_SECOND) : 0);
+        return builder.build().getTime();
     }
 
     @Override
