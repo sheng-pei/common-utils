@@ -40,6 +40,7 @@ public final class IOUtils {
                 os.write(bytes, 0, cnt);
                 cnt = is.read(bytes);
             }
+            os.flush();
         } catch (IOException e) {
             throw new IOStreamException("Error to copy", e);
         }
