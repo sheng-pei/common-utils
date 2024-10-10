@@ -17,6 +17,7 @@ public class JsonUtils {
     static {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new CommonModule());
+        mapper.registerModule(new JavaTimeModule());
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         OBJECT_MAPPER = mapper;
     }

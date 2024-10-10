@@ -55,10 +55,10 @@ public class DateDeserializer extends JsonDeserializer<Date> {
             return null;
         }
 
-        TemporalAccessor accessor = formatter.parse("2024-09-10 00:59:01.1000");
+        TemporalAccessor accessor = formatter.parse(text);
         Calendar.Builder builder = new Calendar.Builder();
         builder.setDate(accessor.get(ChronoField.YEAR),
-                accessor.isSupported(ChronoField.MONTH_OF_YEAR) ? accessor.get(ChronoField.MONTH_OF_YEAR) : 1,
+                accessor.isSupported(ChronoField.MONTH_OF_YEAR) ? accessor.get(ChronoField.MONTH_OF_YEAR) - 1 : 0,
                 accessor.isSupported(ChronoField.DAY_OF_MONTH) ? accessor.get(ChronoField.DAY_OF_MONTH) : 1);
         builder.setTimeOfDay(accessor.isSupported(ChronoField.HOUR_OF_DAY) ? accessor.get(ChronoField.HOUR_OF_DAY) : 0,
                 accessor.isSupported(ChronoField.MINUTE_OF_HOUR) ? accessor.get(ChronoField.MINUTE_OF_HOUR) : 0,
