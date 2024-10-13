@@ -1,24 +1,31 @@
 package ppl.common.utils.json.jackson;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.ContextualSerializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
-public class LocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
-    private static final String DEFAULT_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss";
+public class LocalDateTimeSerializer extends StdSerializer<LocalDateTime> implements ContextualSerializer {
+    private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final DateTimeFormatter formatter;
 
     public LocalDateTimeSerializer() {
-        this(DEFAULT_FORMAT_STRING);
+        this(null);
     }
 
-    public LocalDateTimeSerializer(String format) {
-        this.formatter = DateTimeFormatter.ofPattern(format);
+    public LocalDateTimeSerializer(DateTimeFormatter formatter) {
+        super(LocalDateTime.class);
+        this.formatter = formatter == null ? DEFAULT_FORMATTER : formatter;
     }
 
     @Override
@@ -31,7 +38,18 @@ public class LocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
     }
 
     @Override
-    public Class<LocalDateTime> handledType() {
-        return LocalDateTime.class;
+    public JsonSerializer<?> createContextual(SerializerProvider serializers, BeanProperty property) throws JsonMappingException {
+        // Note! Should not skip if `property` null since that'd skip check
+        // for config overrides, in case of root value
+        JsonFormat.Value format = findFormatOverrides(serializers, property, handledType());
+        if (format == null || !format.hasPattern()) {
+            return this;
+        }
+
+        final Locale loc = format.hasLocale()
+                ? format.getLocale()
+                : serializers.getLocale();
+        DateTimeFormatter f = DateTimeFormatter.ofPattern(format.getPattern(), loc);
+        return new LocalDateTimeSerializer(f);
     }
 }

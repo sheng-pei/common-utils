@@ -106,9 +106,8 @@ public class DateDeserializer extends StdDeserializer<Date> implements Contextua
                 return (java.util.Date) ctxt.handleWeirdStringValue(handledType(), str,
                         "expected format \"%s\"", _formatString);
             }
-        } else {
-            return super._parseDate(p, ctxt);
         }
+        return super._parseDate(p, ctxt);
     }
 
     @Override
