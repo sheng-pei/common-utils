@@ -22,6 +22,7 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -97,7 +98,14 @@ public class DateDeserializer extends StdDeserializer<Date> implements Contextua
                 if (accessor.isSupported(ChronoField.OFFSET_SECONDS)) {
                     zonedDateTime = ZonedDateTime.from(accessor);
                 } else {
-                    LocalDateTime localDateTime = LocalDateTime.from(accessor);
+                    LocalDateTime localDateTime = LocalDateTime.of(
+                            accessor.get(ChronoField.YEAR),
+                            accessor.isSupported(ChronoField.MONTH_OF_YEAR) ? accessor.get(ChronoField.MONTH_OF_YEAR) : 1,
+                            accessor.isSupported(ChronoField.DAY_OF_MONTH) ? accessor.get(ChronoField.DAY_OF_MONTH) : 1,
+                            accessor.isSupported(ChronoField.HOUR_OF_DAY) ? accessor.get(ChronoField.HOUR_OF_DAY) : 0,
+                            accessor.isSupported(ChronoField.MINUTE_OF_HOUR) ? accessor.get(ChronoField.MINUTE_OF_HOUR) : 0,
+                            accessor.isSupported(ChronoField.SECOND_OF_MINUTE) ? accessor.get(ChronoField.SECOND_OF_MINUTE) : 0,
+                            accessor.isSupported(ChronoField.NANO_OF_SECOND) ? accessor.get(ChronoField.NANO_OF_SECOND) : 0);
                     zonedDateTime = ZonedDateTime.of(localDateTime, formatter.getZone() == null ? ZoneId.systemDefault() : formatter.getZone());
                 }
 
