@@ -56,7 +56,7 @@ public class DateSerializer extends StdSerializer<Date> implements ContextualSer
         // Note! Should not skip if `property` null since that'd skip check
         // for config overrides, in case of root value
         JsonFormat.Value format = findFormatOverrides(serializers, property, handledType());
-        if (format == null) {
+        if (format == null || JsonFormat.Value.empty().equals(format)) {
             return this;
         }
 

@@ -123,7 +123,7 @@ public class DateDeserializer extends StdDeserializer<Date> implements Contextua
         final JsonFormat.Value format = findFormatOverrides(ctxt, property,
                 handledType());
 
-        if (format != null) {
+        if (format != null && !JsonFormat.Value.empty().equals(format)) {
             TimeZone tz = format.getTimeZone();
             final Boolean lenient = format.getLenient();
 

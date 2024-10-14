@@ -16,7 +16,7 @@ public class CommonModule extends SimpleModule {
         delegateBeanSerializerModifier.addSerializerModifier(new BeanSerializerModifier() {
             @Override
             public JsonSerializer<?> modifySerializer(SerializationConfig config, BeanDescription beanDesc, JsonSerializer<?> serializer) {
-                if (beanDesc.getBeanClass().equals(Date.class)) {
+                if (Date.class.isAssignableFrom(beanDesc.getBeanClass())) {
                     return new DateSerializer();
                 }
                 return super.modifySerializer(config, beanDesc, serializer);
@@ -30,7 +30,7 @@ public class CommonModule extends SimpleModule {
         delegateBeanDeserializerModifier.addDeserializerModifier(new BeanDeserializerModifier() {
             @Override
             public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config, BeanDescription beanDesc, JsonDeserializer<?> deserializer) {
-                if (beanDesc.getBeanClass().equals(Date.class)) {
+                if (Date.class.isAssignableFrom(beanDesc.getBeanClass())) {
                     return new DateDeserializer();
                 }
                 return super.modifyDeserializer(config, beanDesc, deserializer);
