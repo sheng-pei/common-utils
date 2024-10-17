@@ -9,7 +9,7 @@ public class KMPSubstringFinder extends AbstractSimpleSubstringFinder {
 
     public KMPSubstringFinder(String pattern) {
         if (Strings.isEmpty(pattern)) {
-            throw new IllegalArgumentException("Pattern is empty or null.");
+            throw new IllegalArgumentException("ExtPattern is empty or null.");
         }
         this.pattern = pattern.toCharArray();
         this.next = new int[this.pattern.length + 1];

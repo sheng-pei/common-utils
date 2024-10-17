@@ -10,7 +10,7 @@ public class SundaySubstringFinder extends AbstractSimpleSubstringFinder {
 
         private Pattern(String pattern) {
             if (Strings.isEmpty(pattern)) {
-                throw new IllegalArgumentException("Pattern is empty or null.");
+                throw new IllegalArgumentException("ExtPattern is empty or null.");
             }
             this.pattern = pattern.toCharArray();
         }
