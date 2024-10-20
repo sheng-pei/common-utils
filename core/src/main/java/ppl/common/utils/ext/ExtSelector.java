@@ -1,9 +1,8 @@
 package ppl.common.utils.ext;
 
-import java.util.Collection;
 import java.util.List;
 
-public interface ExtSelector {
-    List<ExtPattern> select(String item);
-    void addPattern(ExtPattern pattern);
+interface ExtSelector {
+    List<OrderedExtPattern> select(String item);
+    void addPattern(OrderedExtPattern pattern);
 }

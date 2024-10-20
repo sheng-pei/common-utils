@@ -1,4 +1,4 @@
-package ppl.common.utils.string.trim;
+package ppl.common.utils.string;
 
 public enum TrimPosition {
     ALL,

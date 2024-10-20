@@ -1,13 +1,13 @@
-package ppl.common.utils.string.variable;
+package ppl.common.utils.string.variable.replacer;
 
 import java.util.Map;
 import java.util.Objects;
 
-class VariableString implements StringReplacer {
+public class VariableString implements StringReplacer {
 
     private final String name;
 
-    VariableString(String name) {
+    public VariableString(String name) {
         this.name = name;
     }
 

@@ -1,12 +1,14 @@
-package ppl.common.utils.string.variable;
+package ppl.common.utils.string.variable.replacer;
+
+import ppl.common.utils.string.variable.VariablePatternException;
 
 import java.util.*;
 
-class DynamicString implements StringReplacer {
+public class DynamicString implements StringReplacer {
 
     private final List<StringReplacer> parts;
 
-    DynamicString(String dynamic) {
+    public DynamicString(String dynamic) {
         this.parts = parseVariable(dynamic);
     }
 

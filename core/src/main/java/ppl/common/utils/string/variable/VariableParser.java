@@ -1,5 +1,8 @@
 package ppl.common.utils.string.variable;
 
+import ppl.common.utils.string.variable.replacer.DynamicString;
+import ppl.common.utils.string.variable.replacer.StringReplacer;
+
 import java.util.Objects;
 
 public class VariableParser {

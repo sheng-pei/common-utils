@@ -16,7 +16,7 @@ public class ExtPatternParser {
     private static final char CASE_INSENSITIVE_FLAG = 'i';
     private static final int EXT_KIND_FLAG_INDEX = 2;
 
-    public static ExtPattern compile(String pattern, int order) {
+    public static ExtPattern compile(String pattern) {
         char patternRuleKind = EMPTY_RULE_PATTERN_FLAG;
         char caseSensitive = CASE_INSENSITIVE_FLAG;
         ExtKind kind = ExtKind.SAME;
@@ -89,6 +89,6 @@ public class ExtPatternParser {
         } else {
             throw new IllegalArgumentException("Invalid pattern, invalid pattern kind.");
         }
-        return builder.order(order).build();
+        return builder.build();
     }
 }

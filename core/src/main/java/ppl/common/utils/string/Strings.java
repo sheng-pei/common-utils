@@ -5,7 +5,6 @@ import ppl.common.utils.string.substring.PositionalArguments;
 import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.impl.SundaySubstringFinder;
 import ppl.common.utils.string.substring.impl.ToStringArguments;
-import ppl.common.utils.string.trim.TrimPosition;
 
 import java.util.*;
 import java.util.function.Predicate;

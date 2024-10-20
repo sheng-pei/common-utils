@@ -7,7 +7,7 @@ import ppl.common.utils.http.symbol.HttpCharGroup;
 import ppl.common.utils.http.symbol.Lexer;
 import ppl.common.utils.string.Strings;
 import ppl.common.utils.pair.Pair;
-import ppl.common.utils.string.trim.TrimPosition;
+import ppl.common.utils.string.TrimPosition;
 
 import java.io.*;
 import java.nio.CharBuffer;

@@ -1,4 +1,4 @@
-package ppl.common.utils.string.variable;
+package ppl.common.utils.string.variable.replacer;
 
 import java.util.Map;
 

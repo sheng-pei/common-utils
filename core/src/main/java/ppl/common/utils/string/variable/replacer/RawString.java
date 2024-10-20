@@ -1,13 +1,13 @@
-package ppl.common.utils.string.variable;
+package ppl.common.utils.string.variable.replacer;
 
 import java.util.Map;
 import java.util.Objects;
 
-class RawString implements StringReplacer {
+public class RawString implements StringReplacer {
 
     private final String str;
 
-    RawString(String str) {
+    public RawString(String str) {
         this.str = str;
     }
 
