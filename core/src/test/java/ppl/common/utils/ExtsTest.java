@@ -13,9 +13,9 @@ public class ExtsTest {
     @ParameterizedTest
     @MethodSource("extParsingArgumentsProvider")
     public void testParseExtension(Exts exts, String filename, String ext, boolean known) {
-        Exts.Ext e = exts.getExt(filename);
-        Assertions.assertEquals(ext, e.getExt());
-        Assertions.assertEquals(known, e.isKnown());
+        Exts.ParsedName e = exts.parse(filename);
+        Assertions.assertEquals(ext, e.getExt().getExt());
+        Assertions.assertEquals(known, e.getExt().isKnown());
     }
 
     private static Stream<Arguments> extParsingArgumentsProvider() {
