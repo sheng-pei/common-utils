@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.cfg.CoercionAction;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
@@ -22,7 +21,6 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -80,16 +78,9 @@ public class DateDeserializer extends StdDeserializer<Date> implements Contextua
         if (p.hasToken(JsonToken.VALUE_STRING)) {
             String str = p.getText().trim();
             if (str.isEmpty()) {
-                final CoercionAction act = _checkFromStringCoercion(ctxt, str);
-                switch (act) { // note: Fail handled above
-                    case AsEmpty:
-                        return new java.util.Date(0L);
-                    case AsNull:
-                    case TryConvert:
-                    default:
-                }
-                return null;
+                return new java.util.Date(0L);
             }
+
             DateTimeFormatter formatter = this.formatter;
             formatter = formatter == null ? DEFAULT_FORMATTER : formatter;
             try {
