@@ -4,6 +4,7 @@ import ppl.common.utils.string.Strings;
 
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Exts {
     public static final Exts DEFAULT_EXTS = Exts.builder()
@@ -63,7 +64,8 @@ public class Exts {
             .add("zip")
             .add("rie/brt/\\.brt(?:\\.[0-9]+)?$")
             .add("rie/asm/\\.asm(?:\\.[0-9]+)?$")
-            .add("rie/prepin/^prepin\\.")
+            .add("riel/prepin/^prepin\\.")
+            .add("rip/bsd/\\.bsd[0-9]*$")
             .build();
 
     private static final char EXT_DELIMITER = '.';
@@ -80,11 +82,39 @@ public class Exts {
         }
     }
 
-    public Ext getExt(String name) {
+    public ParsedName parse(String name) {
+        List<ExtPattern> patterns = getPatterns(name);
+        ParsedName parsedName = parse(patterns, name);
+        if (parsedName != null) {
+            return parsedName;
+        }
+
+        int periodIdx = name.lastIndexOf('.');
+        if (periodIdx == -1) {
+            return null;
+        }
+        String unknownExt = name.substring(periodIdx + 1);
+        return new ParsedName(name.substring(0, periodIdx), new Ext(false, unknownExt));
+    }
+
+    private ParsedName parse(List<ExtPattern> patterns, String name) {
+        if (!patterns.isEmpty()) {
+            Optional<ParsedName> optionalExt = patterns.stream()
+                    .map(p -> p.parse(name))
+                    .filter(Objects::nonNull)
+                    .findFirst();
+            if (optionalExt.isPresent()) {
+                return optionalExt.get();
+            }
+        }
+        return null;
+    }
+
+    private List<ExtPattern> getPatterns(String name) {
         List<OrderedExtPattern> patterns = new ArrayList<>();
         if (!selectors.isEmpty()) {
             String[] items = Strings.split(name, Pattern.quote("" + EXT_DELIMITER));
-            for (int i = 1; i < items.length; i++) {
+            for (int i = 0; i < items.length; i++) {
                 if (!items[i].isEmpty()) {
                     for (ExtSelector selector : selectors.values()) {
                         if (selector != null) {
@@ -94,29 +124,10 @@ public class Exts {
                 }
             }
         }
-
-        if (patterns.size() == 1 && patterns.get(0).getPattern().matches(name)) {
-            return new Ext(true, patterns.get(0).getPattern().ext());
-        }
-        if (!patterns.isEmpty()) {
-            patterns.sort(Comparator.comparingInt(OrderedExtPattern::getOrder));
-            Optional<Ext> optionalExt = patterns.stream()
-                    .map(OrderedExtPattern::getPattern)
-                    .filter(p -> p.matches(name))
-                    .findFirst()
-                    .map(ExtPattern::ext)
-                    .map(e -> new Ext(true, e));
-            if (optionalExt.isPresent()) {
-                return optionalExt.get();
-            }
-        }
-
-        int periodIdx = name.lastIndexOf('.');
-        if (periodIdx == -1) {
-            return null;
-        }
-        String unknownExt = name.substring(periodIdx + 1);
-        return new Ext(false, unknownExt);
+        return patterns.stream()
+                .sorted(Comparator.comparingInt(OrderedExtPattern::getOrder))
+                .map(OrderedExtPattern::getPattern)
+                .collect(Collectors.toList());
     }
 
     public static Builder builder() {
@@ -174,6 +185,24 @@ public class Exts {
         public String toString() {
             return (isKnown() ? "known" : "unknown") +
                     " extension name: '" + getExt() + "'.";
+        }
+    }
+
+    public static class ParsedName {
+        private final String base;
+        private final Ext ext;
+
+        public ParsedName(String base, Ext ext) {
+            this.base = base;
+            this.ext = ext;
+        }
+
+        public Ext getExt() {
+            return ext;
+        }
+
+        public String getBase() {
+            return base;
         }
     }
 }

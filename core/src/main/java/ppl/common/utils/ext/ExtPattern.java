@@ -1,23 +1,28 @@
 package ppl.common.utils.ext;
 
+import ppl.common.utils.exception.UnreachableCodeException;
 import ppl.common.utils.string.Strings;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ExtPattern {
     private final String ext;
     private final ExtKind kind;
-    private final ExtPredicate predicate;
+    private final Pattern pattern;
+    private final ExtPosition position;
 
     private ExtPattern(Builder builder) {
         if (Strings.isEmpty(builder.ext)) {
             throw new IllegalArgumentException("Extension name must be empty.");
         }
         Objects.requireNonNull(builder.kind, "Extension name selector kind is required.");
-        Objects.requireNonNull(builder.predicate, "Predicate is required.");
+        Objects.requireNonNull(builder.pattern, "Pattern is required.");
         this.ext = builder.ext;
         this.kind = builder.kind;
-        this.predicate = builder.predicate;
+        this.pattern = builder.pattern;
+        this.position = builder.position == null ? ExtPosition.RIGHT : builder.position;
     }
 
     public String ext() {
@@ -28,8 +33,23 @@ public class ExtPattern {
         return kind;
     }
 
-    public boolean matches(String name) {
-        return predicate.test(name);
+    public Exts.ParsedName parse(String name) {
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.find()) {
+            Exts.Ext ext = new Exts.Ext(true, ext());
+            return new Exts.ParsedName(base(name, matcher), ext);
+        }
+        return null;
+    }
+
+    private String base(String name, Matcher matcher) {
+        if (position == ExtPosition.LEFT) {
+            return name.substring(matcher.end());
+        } else if (position == ExtPosition.RIGHT) {
+            return name.substring(0, matcher.start());
+        } else {
+            throw new UnreachableCodeException("Unknown position flags.");
+        }
     }
 
     static Builder builder() {
@@ -39,7 +59,8 @@ public class ExtPattern {
     static class Builder {
         private String ext;
         private ExtKind kind;
-        private ExtPredicate predicate;
+        private Pattern pattern;
+        private ExtPosition position;
 
         private Builder() {}
 
@@ -53,8 +74,13 @@ public class ExtPattern {
             return this;
         }
 
-        Builder predicate(ExtPredicate predicate) {
-            this.predicate = predicate;
+        Builder pattern(Pattern pattern) {
+            this.pattern = pattern;
+            return this;
+        }
+
+        Builder position(ExtPosition position) {
+            this.position = position;
             return this;
         }
 

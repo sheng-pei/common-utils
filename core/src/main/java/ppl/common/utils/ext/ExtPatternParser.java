@@ -15,11 +15,17 @@ public class ExtPatternParser {
     private static final char CASE_SENSITIVE_FLAG = 'c';
     private static final char CASE_INSENSITIVE_FLAG = 'i';
     private static final int EXT_KIND_FLAG_INDEX = 2;
+    private static final char EQUALS_EXT_FLAG = 'e';
+    private static final char PREFIX_EXT_FLAG = 'p';
+    private static final int EXT_POSITION_FLAG_INDEX = 3;
+    private static final char LEFT_FLAG = 'l';
+    private static final char RIGHT_FLAG = 'r';
 
     public static ExtPattern compile(String pattern) {
         char patternRuleKind = EMPTY_RULE_PATTERN_FLAG;
         char caseSensitive = CASE_INSENSITIVE_FLAG;
-        ExtKind kind = ExtKind.SAME;
+        ExtKind kind = ExtKind.EQUALS;
+        ExtPosition position = ExtPosition.RIGHT;
 
         char[] chars = pattern.toCharArray();
         int s = 0;
@@ -45,6 +51,12 @@ public class ExtPatternParser {
                         } catch (UnknownEnumException ex) {
                             throw new IllegalArgumentException("Invalid pattern, unknown selector flag.", ex);
                         }
+                    } else if (EXT_POSITION_FLAG_INDEX == idx) {
+                        try {
+                            position = EnumUtils.enumOf(ExtPosition.class, chars[j]);
+                        } catch (UnknownEnumException ex) {
+                            throw new IllegalArgumentException("Invalid position, unknown position flag.", ex);
+                        }
                     } else {
                         throw new IllegalArgumentException("Too many flags.");
                     }
@@ -54,7 +66,7 @@ public class ExtPatternParser {
             i++;
         }
 
-        ExtPattern.Builder builder = ExtPattern.builder().kind(kind);
+        ExtPattern.Builder builder = ExtPattern.builder().kind(kind).position(position);
         String ext = new String(chars, extStart, e - extStart);
         int ruleStart = e;
         int j = extStart;
@@ -77,7 +89,7 @@ public class ExtPatternParser {
         String rule = new String(chars, ruleStart, e - ruleStart);
         if (patternRuleKind == REGEX_RULE_PATTERN_FLAG) {
             Pattern p = Pattern.compile((caseSensitive == CASE_SENSITIVE_FLAG ? "" : "(?i)") + rule);
-            builder.predicate(n -> p.matcher(n).find());
+            builder.pattern(p);
         } else if (patternRuleKind == EMPTY_RULE_PATTERN_FLAG) {
             if (rule.isEmpty()) {
                 rule = ext;
@@ -85,7 +97,7 @@ public class ExtPatternParser {
             rule = "\\." + rule + "$";
             rule = (caseSensitive == CASE_SENSITIVE_FLAG ? "" : "(?i)") + rule;
             Pattern p = Pattern.compile(rule);
-            builder.predicate(n -> p.matcher(n).find());
+            builder.pattern(p);
         } else {
             throw new IllegalArgumentException("Invalid pattern, invalid pattern kind.");
         }

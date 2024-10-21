@@ -5,7 +5,7 @@ import ppl.common.utils.enumerate.EnumEncoder;
 import java.util.function.Supplier;
 
 public enum ExtKind {
-    SAME('e', EqualsExtSelector::new),
+    EQUALS('e', EqualsExtSelector::new),
     PREFIX('p', PrefixExtSelector::new);
 
     private final char flag;
