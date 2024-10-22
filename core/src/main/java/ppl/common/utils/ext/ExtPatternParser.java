@@ -39,6 +39,10 @@ public class ExtPatternParser {
                     int idx = j - s;
                     if (RULE_KIND_FLAG_INDEX == idx) {
                         patternRuleKind = chars[j];
+                        if (patternRuleKind != REGEX_RULE_PATTERN_FLAG &&
+                                patternRuleKind != EMPTY_RULE_PATTERN_FLAG) {
+                            throw new IllegalArgumentException("Invalid pattern, invalid pattern kind.");
+                        }
                     } else if (CASE_FLAG_INDEX == idx) {
                         caseSensitive = chars[j];
                         if (caseSensitive != CASE_SENSITIVE_FLAG &&
@@ -86,21 +90,20 @@ public class ExtPatternParser {
             throw new IllegalArgumentException("Invalid pattern, empty rule pattern must not have regex part.");
         }
 
-        String rule = new String(chars, ruleStart, e - ruleStart);
+        String rule = ext;
         if (patternRuleKind == REGEX_RULE_PATTERN_FLAG) {
-            Pattern p = Pattern.compile((caseSensitive == CASE_SENSITIVE_FLAG ? "" : "(?i)") + rule);
-            builder.pattern(p);
-        } else if (patternRuleKind == EMPTY_RULE_PATTERN_FLAG) {
-            if (rule.isEmpty()) {
-                rule = ext;
-            }
-            rule = "\\." + rule + "$";
-            rule = (caseSensitive == CASE_SENSITIVE_FLAG ? "" : "(?i)") + rule;
-            Pattern p = Pattern.compile(rule);
-            builder.pattern(p);
-        } else {
-            throw new IllegalArgumentException("Invalid pattern, invalid pattern kind.");
+            rule = new String(chars, ruleStart, e - ruleStart);
         }
+
+        if (position == ExtPosition.LEFT) {
+            rule = "^" + rule + "\\.";
+        } else {
+            rule = "\\." + rule + "$";
+        }
+
+        rule = (caseSensitive == CASE_SENSITIVE_FLAG ? "" : "(?i)") + rule;
+        Pattern p = Pattern.compile(rule);
+        builder.pattern(p);
         return builder.build();
     }
 }

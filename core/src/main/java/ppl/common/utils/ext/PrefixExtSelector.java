@@ -38,7 +38,7 @@ class PrefixExtSelector implements ExtSelector {
     @Override
     public void addPattern(OrderedExtPattern pattern) {
         String key = pattern.getPattern().ext().toLowerCase();
-        int idx = key.lastIndexOf('.');
+        int idx = key.lastIndexOf(Exts.EXT_DELIMITER);
         if (idx >= 0) {
             key = key.substring(idx + 1);
         }

@@ -52,7 +52,6 @@ public class Exts {
             .add("rtf")
             .add("stl")
             .add("stp")
-            .add("tmp")
             .add("txt")
             .add("unv")
             .add("vsd")
@@ -62,13 +61,13 @@ public class Exts {
             .add("xlsx")
             .add("xml")
             .add("zip")
-            .add("rie/brt/\\.brt(?:\\.[0-9]+)?$")
-            .add("rie/asm/\\.asm(?:\\.[0-9]+)?$")
-            .add("riel/prepin/^prepin\\.")
-            .add("rip/bsd/\\.bsd[0-9]*$")
+            .add("rie/brt/brt(?:\\.[0-9]+)?")
+            .add("rie/asm/asm(?:\\.[0-9]+)?")
+            .add("riel/prepin/prepin")
+            .add("rip/bsd/bsd[0-9]*")
             .build();
 
-    private static final char EXT_DELIMITER = '.';
+    public static final char EXT_DELIMITER = '.';
 
     private final EnumMap<ExtKind, ExtSelector> selectors = new EnumMap<>(ExtKind.class);
 
@@ -89,7 +88,7 @@ public class Exts {
             return parsedName;
         }
 
-        int periodIdx = name.lastIndexOf('.');
+        int periodIdx = name.lastIndexOf(EXT_DELIMITER);
         if (periodIdx == -1) {
             return null;
         }
