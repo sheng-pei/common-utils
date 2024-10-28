@@ -1,17 +1,16 @@
 package ppl.common.utils.bytes;
 
 import ppl.common.utils.ArrayUtils;
-import ppl.common.utils.string.Strings;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class Bytes {
-    private static final byte[] HEX;
+    private static final char[] HEX;
 
     static {
         String base = "0123456789ABCDEF";
-        HEX = base.getBytes();
+        HEX = base.toCharArray();
     }
 
     public static byte[] fromHex(String hex) {
@@ -22,7 +21,6 @@ public class Bytes {
             return ArrayUtils.zeroByte();
         }
 
-        hex = hex.toUpperCase();
         if ((hex.length() & 1) != 0) {
             hex = "0" + hex;
         }
@@ -35,7 +33,7 @@ public class Bytes {
     }
 
     public static byte oneFromHex(char high, char low) {
-        return unsafeByte(Character.toUpperCase(high), Character.toUpperCase(low));
+        return unsafeByte(high, low);
     }
 
     public static byte oneFromHex(String hex) {
@@ -64,6 +62,8 @@ public class Bytes {
             i = hexDigit - '0';
         } else if ('A' <= hexDigit && hexDigit <= 'Z') {
             i = hexDigit - 'A' + 10;
+        } else if ('a' <= hexDigit && hexDigit <= 'z') {
+            i = hexDigit - 'a' + 10;
         } else {
             throw new IllegalArgumentException("Invalid hex digit: " + hexDigit + ".");
         }
@@ -75,20 +75,42 @@ public class Bytes {
             return null;
         }
 
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder(bytes.length * 2);
+        char[] chars = new char[2];
         for (byte b : bytes) {
-            builder.append(hex(b));
+            builder.append(hex(b, chars));
         }
         return builder.toString();
     }
 
     public static String hex(byte b) {
-        byte[] bytes = new byte[2];
+        return new String(hex(b, new char[2]));
+    }
+
+    private static char[] hex(byte b, char[] in) {
         int higher = (b >> 4) & 0x0f;
         int lower = b & 0x0f;
-        bytes[0] = HEX[higher];
-        bytes[1] = HEX[lower];
-        return new String(bytes);
+        in[0] = HEX[higher];
+        in[1] = HEX[lower];
+        return in;
+    }
+
+    public static String hex(int i) {
+        char[] chars = new char[8];
+        for (int j = 7; j >= 0; j--) {
+            chars[j] = HEX[i & 0x0f];
+            i = i >> 4;
+        }
+        return new String(chars);
+    }
+
+    public static String hex(long l) {
+        char[] chars = new char[16];
+        for (int j = 15; j >= 0; j--) {
+            chars[j] = HEX[(int) (l & 0x0f)];
+            l = l >> 4;
+        }
+        return new String(chars);
     }
 
     public static String base64(byte[] bytes) {

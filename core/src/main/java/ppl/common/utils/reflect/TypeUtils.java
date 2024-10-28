@@ -3,6 +3,7 @@ package ppl.common.utils.reflect;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public final class TypeUtils {
 
@@ -42,6 +43,16 @@ public final class TypeUtils {
             return clazz;
         }
         return wrapperToPrimitive.get(clazz);
+    }
+
+    public static boolean isPrimitive(Class<?> clazz) {
+        Objects.requireNonNull(clazz);
+        return primitiveToWrapper.containsKey(clazz);
+    }
+
+    public static boolean isWrapper(Class<?> clazz) {
+        Objects.requireNonNull(clazz);
+        return wrapperToPrimitive.containsKey(clazz);
     }
 
 }

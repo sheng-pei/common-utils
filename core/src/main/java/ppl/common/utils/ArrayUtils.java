@@ -53,11 +53,13 @@ public final class ArrayUtils {
 
     public static <T> T[] zero(Class<T> clazz) {
         Objects.requireNonNull(clazz);
-        Class<?> retClass = TypeUtils.box(clazz);
-        //TODO, 若父类已缓冲，使用父类对象返回
+        if (TypeUtils.isPrimitive(clazz)) {
+            throw new IllegalArgumentException("Primitive type is not allowed. Use zeroXXX() instead.");
+        }
+
         try {
             @SuppressWarnings("unchecked")
-            T[] ret = (T[]) ZERO_CACHE.get(retClass, () -> Array.newInstance(retClass, 0));
+            T[] ret = (T[]) ZERO_CACHE.get(clazz, () -> Array.newInstance(clazz, 0));
             return ret;
         } catch (ExecutionException e) {
             throw new UnreachableCodeException(e);
@@ -65,15 +67,15 @@ public final class ArrayUtils {
     }
 
     private static final Object[] ZERO = new Object[0];
-    private static final int[] ZERO_INT_ARRAY = new int[0];
+    private static final String[] ZERO_STRING_ARRAY = new String[0];
     private static final byte[] ZERO_BYTE_ARRAY = new byte[0];
     private static final short[] ZERO_SHORT_ARRAY = new short[0];
+    private static final int[] ZERO_INT_ARRAY = new int[0];
     private static final long[] ZERO_LONG_ARRAY = new long[0];
     private static final boolean[] ZERO_BOOL_ARRAY = new boolean[0];
     private static final char[] ZERO_CHAR_ARRAY = new char[0];
     private static final float[] ZERO_FLOAT_ARRAY = new float[0];
     private static final double[] ZERO_DOUBLE_ARRAY = new double[0];
-    private static final String[] ZERO_STRING_ARRAY = new String[0];
 
     static {
         try {
@@ -86,6 +88,10 @@ public final class ArrayUtils {
 
     public static Object[] zero() {
         return ZERO;
+    }
+
+    public static String[] zeroString() {
+        return ZERO_STRING_ARRAY;
     }
 
     public static byte[] zeroByte() {
@@ -118,9 +124,5 @@ public final class ArrayUtils {
 
     public static double[] zeroDouble() {
         return ZERO_DOUBLE_ARRAY;
-    }
-
-    public static String[] zeroString() {
-        return ZERO_STRING_ARRAY;
     }
 }
