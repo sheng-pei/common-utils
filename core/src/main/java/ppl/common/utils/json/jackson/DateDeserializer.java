@@ -3,10 +3,7 @@ package ppl.common.utils.json.jackson;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
@@ -78,7 +75,7 @@ public class DateDeserializer extends StdDeserializer<Date> implements Contextua
         if (p.hasToken(JsonToken.VALUE_STRING)) {
             String str = p.getText().trim();
             if (str.isEmpty()) {
-                return new java.util.Date(0L);
+                return null;
             }
 
             DateTimeFormatter formatter = this.formatter;
