@@ -36,8 +36,8 @@ public class ExtPattern {
     public Exts.ParsedName parse(String name) {
         Matcher matcher = pattern.matcher(name);
         if (matcher.find()) {
-            Exts.Ext ext = new Exts.Ext(true, ext());
-            return new Exts.ParsedName(base(name, matcher), ext);
+            Exts.Ext ext = new Exts.Ext(true, position, ext());
+            return new Exts.ParsedName(base(name, matcher), ext(name, matcher), ext);
         }
         return null;
     }
@@ -47,6 +47,16 @@ public class ExtPattern {
             return name.substring(matcher.end());
         } else if (position == ExtPosition.RIGHT) {
             return name.substring(0, matcher.start());
+        } else {
+            throw new UnreachableCodeException("Unknown position flags.");
+        }
+    }
+
+    private String ext(String name, Matcher matcher) {
+        if (position == ExtPosition.LEFT) {
+            return name.substring(0, matcher.end() - 1);
+        } else if (position == ExtPosition.RIGHT) {
+            return name.substring(matcher.start() + 1);
         } else {
             throw new UnreachableCodeException("Unknown position flags.");
         }

@@ -81,6 +81,7 @@ public class Exts {
         }
     }
 
+    @Deprecated
     public ParsedName parse(String name) {
         List<ExtPattern> patterns = getPatterns(name);
         ParsedName parsedName = parse(patterns, name);
@@ -93,7 +94,14 @@ public class Exts {
             return null;
         }
         String unknownExt = name.substring(periodIdx + 1);
-        return new ParsedName(name.substring(0, periodIdx), new Ext(false, unknownExt));
+        return new ParsedName(name.substring(0, periodIdx),
+                name.substring(periodIdx + 1),
+                new Ext(false, ExtPosition.RIGHT, unknownExt));
+    }
+
+    public ParsedName parseKnownExt(String name) {
+        List<ExtPattern> patterns = getPatterns(name);
+        return parse(patterns, name);
     }
 
     private ParsedName parse(List<ExtPattern> patterns, String name) {
@@ -113,11 +121,11 @@ public class Exts {
         List<OrderedExtPattern> patterns = new ArrayList<>();
         if (!selectors.isEmpty()) {
             String[] items = Strings.split(name, Pattern.quote("" + EXT_DELIMITER));
-            for (int i = 0; i < items.length; i++) {
-                if (!items[i].isEmpty()) {
+            for (String item : items) {
+                if (!item.isEmpty()) {
                     for (ExtSelector selector : selectors.values()) {
                         if (selector != null) {
-                            patterns.addAll(selector.select(items[i]));
+                            patterns.addAll(selector.select(item));
                         }
                     }
                 }
@@ -152,15 +160,21 @@ public class Exts {
 
     public static class Ext {
         private final boolean known;
+        private final ExtPosition position;
         private final String ext;
 
-        public Ext(boolean known, String ext) {
+        public Ext(boolean known, ExtPosition position, String ext) {
             this.known = known;
+            this.position = position;
             this.ext = ext;
         }
 
         public boolean isKnown() {
             return known;
+        }
+
+        public ExtPosition getPosition() {
+            return position;
         }
 
         public String getExt() {
@@ -172,36 +186,45 @@ public class Exts {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Ext ext1 = (Ext) o;
-            return known == ext1.known && Objects.equals(ext, ext1.ext);
+            return known == ext1.known &&
+                    position == ext1.position &&
+                    Objects.equals(ext, ext1.ext);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(known, ext);
+            return Objects.hash(known, position, ext);
         }
 
         @Override
         public String toString() {
             return (isKnown() ? "known" : "unknown") +
-                    " extension name: '" + getExt() + "'.";
+                    " extension name: '" + getExt() + "' " +
+                    "and on the " + position.name().toLowerCase() + ".";
         }
     }
 
     public static class ParsedName {
         private final String base;
-        private final Ext ext;
+        private final String ext;
+        private final Ext parsedExt;
 
-        public ParsedName(String base, Ext ext) {
+        public ParsedName(String base, String ext, Ext parsedExt) {
             this.base = base;
             this.ext = ext;
+            this.parsedExt = parsedExt;
         }
 
-        public Ext getExt() {
-            return ext;
+        public Ext getParsedExt() {
+            return parsedExt;
         }
 
         public String getBase() {
             return base;
+        }
+
+        public String getExt() {
+            return ext;
         }
     }
 }
