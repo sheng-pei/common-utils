@@ -1,6 +1,7 @@
 package ppl.common.utils.ext;
 
 class OrderedExtPattern {
+    
     private final ExtPattern pattern;
     private final int order;
 

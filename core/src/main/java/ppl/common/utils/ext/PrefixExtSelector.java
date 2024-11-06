@@ -1,6 +1,7 @@
 package ppl.common.utils.ext;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 class PrefixExtSelector implements ExtSelector {
 
@@ -45,5 +46,12 @@ class PrefixExtSelector implements ExtSelector {
 
         List<OrderedExtPattern> patterns = this.patterns.computeIfAbsent(hashCode(key), k -> new ArrayList<>());
         patterns.add(pattern);
+    }
+
+    @Override
+    public List<OrderedExtPattern> getPatterns() {
+        return patterns.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 }

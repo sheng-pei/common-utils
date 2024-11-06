@@ -1,6 +1,7 @@
 package ppl.common.utils.ext;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 class EqualsExtSelector implements ExtSelector {
     private final Map<String, List<OrderedExtPattern>> patterns = new HashMap<>();
@@ -19,5 +20,12 @@ class EqualsExtSelector implements ExtSelector {
         }
         List<OrderedExtPattern> patterns = this.patterns.computeIfAbsent(key, k -> new ArrayList<>());
         patterns.add(pattern);
+    }
+
+    @Override
+    public List<OrderedExtPattern> getPatterns() {
+        return patterns.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 }
