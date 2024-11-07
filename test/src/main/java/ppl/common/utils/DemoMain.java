@@ -24,6 +24,6 @@ public class DemoMain {
         Pattern p = Pattern.compile("^rar(\\.|$)");
         Matcher matcher = p.matcher("rar");
         matcher.find();
-        System.out.println(Exts.DEFAULT_EXTS.parseKnownExt(".rar").getBase());
+        System.out.println(Exts.DEFAULT_EXTS.parseKnownExt("prepin").getBase());
     }
 }

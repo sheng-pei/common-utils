@@ -61,13 +61,13 @@ public class ExtPattern {
             if (matcher.end() == name.length() && name.charAt(name.length() - 1) != '.') {
                 return name;
             } else {
-                return name.substring(0, matcher.end() - 1);
+                return name.substring(0, matcher.end());
             }
         } else if (position == ExtPosition.RIGHT) {
             if (matcher.start() == 0 && name.charAt(0) != '.') {
                 return name;
             } else {
-                return name.substring(matcher.start() + 1);
+                return name.substring(matcher.start());
             }
         } else {
             throw new UnreachableCodeException("Unknown position flags.");
