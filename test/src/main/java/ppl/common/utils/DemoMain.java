@@ -21,6 +21,9 @@ public class DemoMain {
     private static final Pattern P_EXACT_SECRET_FLAG = Pattern.compile("[(（](?:公开|内部|秘密|机密)[）)]$");
 
     public static void main(String[] args) throws IOException {
-        Exts.Builder builder = Exts.DEFAULT_EXTS.copy();
+        Pattern p = Pattern.compile("^rar(\\.|$)");
+        Matcher matcher = p.matcher("rar");
+        matcher.find();
+        System.out.println(Exts.DEFAULT_EXTS.parseKnownExt(".rar").getBase());
     }
 }

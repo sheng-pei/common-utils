@@ -96,9 +96,9 @@ public class ExtPatternParser {
         }
 
         if (position == ExtPosition.LEFT) {
-            rule = "^" + rule + "\\.";
+            rule = "^" + rule + "(\\.|$)";
         } else {
-            rule = "\\." + rule + "$";
+            rule = "(^|\\.)" + rule + "$";
         }
 
         rule = (caseSensitive == CASE_SENSITIVE_FLAG ? "" : "(?i)") + rule;

@@ -44,7 +44,11 @@ public class ExtPattern {
 
     private String base(String name, Matcher matcher) {
         if (position == ExtPosition.LEFT) {
-            return name.substring(matcher.end());
+            if (matcher.end() == name.length()) {
+                return "";
+            } else {
+                return name.substring(matcher.end());
+            }
         } else if (position == ExtPosition.RIGHT) {
             return name.substring(0, matcher.start());
         } else {
@@ -54,9 +58,17 @@ public class ExtPattern {
 
     private String ext(String name, Matcher matcher) {
         if (position == ExtPosition.LEFT) {
-            return name.substring(0, matcher.end() - 1);
+            if (matcher.end() == name.length() && name.charAt(name.length() - 1) != '.') {
+                return name;
+            } else {
+                return name.substring(0, matcher.end() - 1);
+            }
         } else if (position == ExtPosition.RIGHT) {
-            return name.substring(matcher.start() + 1);
+            if (matcher.start() == 0 && name.charAt(0) != '.') {
+                return name;
+            } else {
+                return name.substring(matcher.start() + 1);
+            }
         } else {
             throw new UnreachableCodeException("Unknown position flags.");
         }
