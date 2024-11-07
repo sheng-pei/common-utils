@@ -821,7 +821,7 @@ public class Exts {
 
         @Override
         public String toString() {
-            return "ParsedName{}";
+            return parsedExt.getPosition() == ExtPosition.LEFT ? ext + base : base + ext;
         }
     }
 }
