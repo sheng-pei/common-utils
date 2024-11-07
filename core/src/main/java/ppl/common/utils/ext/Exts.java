@@ -818,5 +818,10 @@ public class Exts {
         public String getExt() {
             return ext;
         }
+
+        @Override
+        public String toString() {
+            return "ParsedName{}";
+        }
     }
 }
