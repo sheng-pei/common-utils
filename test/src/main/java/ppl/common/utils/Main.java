@@ -1,5 +1,7 @@
 package ppl.common.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.MessageDigestPasswordEncoder;
 import ppl.common.utils.bytes.Bytes;
@@ -19,26 +21,24 @@ import java.util.regex.Pattern;
 
 public class Main {
 
-    private static final Pattern IP_PATTERN = Pattern.compile("(?:(?:[0-1]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-1]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])");
-
     public static void main(String[] args) throws IOException {
 
-        String random = "LT-wZ1dnMhT2DPCmkqtVCI+";
-        ECPublicKey publicKey = BCECUtils.publicKey("04bd2df35b56122e520452083a9c8e21861a9325ebe32851be97317e6bbe15e88005c3bc077d07a90107150b66a250b697dfbbe2600026eb2abc5d10b24357b108");
-        ECPrivateKey privateKey = BCECUtils.privateKey("848830bddbf9c87627a356bb3007ffb65e4af39e60df475340220a6f187c22bf");
-
-        String salt = "$2y$10$" + Base64.getEncoder().encodeToString(padding("baizhi@dtstack.com".getBytes(), ' ', 16));
-        String digest = BCrypt.hashpw("DT#passw0rd2022".getBytes(), salt);
-        System.out.println(digest);
-
-//        MessageDigestPasswordEncoder encoder = new MessageDigestPasswordEncoder("SHA-256");
-        String body = random + "#" + digest + "#" + "baizhi@dtstack.com";
-        File file = new File("body");
-        try (OutputStream os = new FileOutputStream(file)) {
-            os.write(Bytes.hex(ECUtils.encrypt(publicKey, body.getBytes())).getBytes());
-        }
-
-        System.out.println(URLEncoder.encode("http://localhost:8080"));
+//        String random = "LT-wZ1dnMhT2DPCmkqtVCI+";
+//        ECPublicKey publicKey = BCECUtils.publicKey("04bd2df35b56122e520452083a9c8e21861a9325ebe32851be97317e6bbe15e88005c3bc077d07a90107150b66a250b697dfbbe2600026eb2abc5d10b24357b108");
+//        ECPrivateKey privateKey = BCECUtils.privateKey("848830bddbf9c87627a356bb3007ffb65e4af39e60df475340220a6f187c22bf");
+//
+//        String salt = "$2y$10$" + Base64.getEncoder().encodeToString(padding("baizhi@dtstack.com".getBytes(), ' ', 16));
+//        String digest = BCrypt.hashpw("DT#passw0rd2022".getBytes(), salt);
+//        System.out.println(digest);
+//
+////        MessageDigestPasswordEncoder encoder = new MessageDigestPasswordEncoder("SHA-256");
+//        String body = random + "#" + digest + "#" + "baizhi@dtstack.com";
+//        File file = new File("body");
+//        try (OutputStream os = new FileOutputStream(file)) {
+//            os.write(Bytes.hex(ECUtils.encrypt(publicKey, body.getBytes())).getBytes());
+//        }
+//
+//        System.out.println(URLEncoder.encode("http://localhost:8080"));
 
 //        CommandArguments arguments = CommandArguments.newBuilder()
 //                .addArgument(ValueOptionArgument.newBuilder("test", 't')
