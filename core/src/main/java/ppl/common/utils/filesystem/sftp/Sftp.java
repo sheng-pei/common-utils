@@ -262,8 +262,8 @@ public class Sftp implements FileSystem, AutoCloseable {
 
         private void ensurePath(String remote) {
             Path path = Paths.get(remote);
-            Path[] ps = lockedCheckPath(path.getParent());
-            lockedMkdirs(ps[0], ps[1]);
+            Path[] ps = lockedCheckPath(path);
+            lockedMkdirs(ps[0], ps[1].getParent());
         }
 
         @Override

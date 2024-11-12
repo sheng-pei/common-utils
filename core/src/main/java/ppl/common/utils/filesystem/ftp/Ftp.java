@@ -184,9 +184,7 @@ public class Ftp implements FileSystem, AutoCloseable {
         @Override
         public void store(String remote, File local) {
             Ftp.this.checkShutdown();
-            Path r = Paths.get(remote);
-            Path[] ps = lockedCheckPath(r);
-            lockedMkdirs(ps[0], ps[1]);
+            ensurePath(remote);
             readLocked(() -> {
                 ftp.setFileType(FTP.BINARY_FILE_TYPE);
                 ftp.store(remote, local);
@@ -197,14 +195,18 @@ public class Ftp implements FileSystem, AutoCloseable {
         @Override
         public void store(String remote, InputStream is) {
             Ftp.this.checkShutdown();
-            Path r = Paths.get(remote);
-            Path[] ps = lockedCheckPath(r);
-            lockedMkdirs(ps[0], ps[1]);
+            ensurePath(remote);
             readLocked(() -> {
                 ftp.setFileType(FTP.BINARY_FILE_TYPE);
                 ftp.store(remote, is);
                 return null;
             });
+        }
+
+        private void ensurePath(String remote) {
+            Path path = Paths.get(remote);
+            Path[] ps = lockedCheckPath(path);
+            lockedMkdirs(ps[0], ps[1].getParent());
         }
 
         @Override
@@ -238,7 +240,7 @@ public class Ftp implements FileSystem, AutoCloseable {
         @Override
         public List<CFile> listFiles() {
             Ftp.this.checkShutdown();
-            Path pwd = pwd();
+            Path pwd = lockedPwd();
             FTPFile[] ftpFiles = ftp.listFiles();
             return Arrays.stream(ftpFiles)
                     .map(f -> new FtpFileAdapter(pwd, f))
@@ -249,7 +251,7 @@ public class Ftp implements FileSystem, AutoCloseable {
         public List<CFile> listFiles(LocalDateTime day, boolean isDirectory) {
             Ftp.this.checkShutdown();
             LocalDateTime d = day.truncatedTo(ChronoUnit.DAYS);
-            Path pwd = pwd();
+            Path pwd = lockedPwd();
             FTPFile[] ftpFiles = ftp.listFiles();
             return Arrays.stream(ftpFiles)
                     .filter(Objects::nonNull)
@@ -262,7 +264,7 @@ public class Ftp implements FileSystem, AutoCloseable {
         @Override
         public List<CFile> listFiles(Predicate<CFile> predicate) {
             Ftp.this.checkShutdown();
-            Path pwd = pwd();
+            Path pwd = lockedPwd();
             FTPFile[] ftpFiles = ftp.listFiles();
             return Arrays.stream(ftpFiles)
                     .filter(Objects::nonNull)

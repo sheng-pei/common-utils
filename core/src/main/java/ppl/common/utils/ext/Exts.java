@@ -662,6 +662,15 @@ public class Exts {
                 new Ext(false, ExtPosition.RIGHT, unknownExt));
     }
 
+    public ParsedName parseExt(String name) {
+        List<ExtPattern> patterns = getPatterns(name);
+        ParsedName ret = parse(patterns, name);
+        if (ret != null) {
+            return ret;
+        }
+        return new ParsedName(name, "", new Ext(false, ExtPosition.RIGHT, ""));
+    }
+
     public ParsedName parseKnownExt(String name) {
         List<ExtPattern> patterns = getPatterns(name);
         return parse(patterns, name);
