@@ -1,6 +1,7 @@
 package ppl.common.utils.filesystem.ftp;
 
 import ppl.common.utils.filesystem.core.FileSystemProperties;
+import ppl.common.utils.filesystem.core.Protocol;
 import ppl.common.utils.filesystem.path.Path;
 
 import java.nio.charset.Charset;
@@ -22,6 +23,7 @@ public class FtpProperties implements FileSystemProperties {
     private final String working;
     private final boolean autoCreateWorking;
     private final Charset charset;
+    private final String name;
 
     private FtpProperties(Builder builder) {
         this.host = builder.host;
@@ -32,6 +34,7 @@ public class FtpProperties implements FileSystemProperties {
         this.working = builder.working;
         this.autoCreateWorking = builder.autoCreateWorking;
         this.charset = builder.charset;
+        this.name = builder.name;
     }
 
     public String getHost() {
@@ -70,6 +73,16 @@ public class FtpProperties implements FileSystemProperties {
         return new Builder();
     }
 
+    @Override
+    public Protocol getProtocol() {
+        return Protocol.FTP;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
     public static class Builder {
         private String host;
         private int port;
@@ -79,6 +92,7 @@ public class FtpProperties implements FileSystemProperties {
         private String working;
         private boolean autoCreateWorking;
         private Charset charset;
+        private String name;
 
         public Builder setHost(String host) {
             host = (host == null ? "" : host.trim());
@@ -136,6 +150,10 @@ public class FtpProperties implements FileSystemProperties {
         public Builder setCharset(Charset charset) {
             this.charset = (charset == null ? DEFAULT_CHARSET : charset);
             return this;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         public FtpProperties build() {

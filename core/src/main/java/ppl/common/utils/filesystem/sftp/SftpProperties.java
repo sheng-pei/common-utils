@@ -3,6 +3,7 @@ package ppl.common.utils.filesystem.sftp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ppl.common.utils.filesystem.core.FileSystemProperties;
+import ppl.common.utils.filesystem.core.Protocol;
 import ppl.common.utils.filesystem.ftp.FtpProperties;
 import ppl.common.utils.filesystem.path.Path;
 
@@ -32,6 +33,7 @@ public class SftpProperties implements FileSystemProperties {
     private final boolean channelFirst;
     private final int coreSession;
     private final int maxChannel;
+    private final String name;
 
     private SftpProperties(Builder builder) {
         this.host = builder.host;
@@ -44,6 +46,7 @@ public class SftpProperties implements FileSystemProperties {
         this.channelFirst = builder.channelFirst;
         this.coreSession = builder.coreSession;
         this.maxChannel = builder.maxChannel;
+        this.name = builder.name;
     }
 
     public String getHost() {
@@ -86,8 +89,18 @@ public class SftpProperties implements FileSystemProperties {
         return maxChannel;
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
     public static Builder builder() {
         return new Builder();
+    }
+
+    @Override
+    public Protocol getProtocol() {
+        return Protocol.SFTP;
     }
 
     public static class Builder {
@@ -101,6 +114,7 @@ public class SftpProperties implements FileSystemProperties {
         private boolean channelFirst;
         private int coreSession;
         private int maxChannel;
+        private String name;
 
         public SftpProperties.Builder setHost(String host) {
             host = (host == null ? "" : host.trim());
@@ -176,6 +190,10 @@ public class SftpProperties implements FileSystemProperties {
             }
             this.maxChannel = maxChannel;
             return this;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         public SftpProperties build() {

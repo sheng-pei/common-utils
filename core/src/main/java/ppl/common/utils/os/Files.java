@@ -3,6 +3,7 @@ package ppl.common.utils.os;
 import ppl.common.utils.character.ascii.AsciiGroup;
 import ppl.common.utils.filesystem.path.Path;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,6 +15,14 @@ public final class Files {
     private static final Platform CURRENT_OS = OsInfo.instance.getOS();
 
     private Files() {
+    }
+
+    public static File newFile(Path path) {
+        String p = path.toString();
+        if (CURRENT_OS == Platform.WINDOWS) {
+            p = windowsPath(path);
+        }
+        return new File(p);
     }
 
     public static InputStream newInputStream(Path path, OpenOption... options) throws IOException {

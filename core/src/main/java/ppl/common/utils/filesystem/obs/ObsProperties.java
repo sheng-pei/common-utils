@@ -1,6 +1,7 @@
 package ppl.common.utils.filesystem.obs;
 
 import ppl.common.utils.filesystem.core.FileSystemProperties;
+import ppl.common.utils.filesystem.core.Protocol;
 import ppl.common.utils.filesystem.path.Path;
 import ppl.common.utils.filesystem.sftp.SftpProperties;
 
@@ -15,6 +16,7 @@ public class ObsProperties implements FileSystemProperties {
     private final String bucket;
     private final String working;
     private final boolean autoCreateWorking;
+    private final String name;
 
     private ObsProperties(Builder builder) {
         this.endpoint = builder.endpoint;
@@ -23,6 +25,7 @@ public class ObsProperties implements FileSystemProperties {
         this.bucket = builder.bucket;
         this.working = builder.working;
         this.autoCreateWorking = builder.autoCreateWorking;
+        this.name = builder.name;
     }
 
     public String getEndpoint() {
@@ -49,6 +52,16 @@ public class ObsProperties implements FileSystemProperties {
         return autoCreateWorking;
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Protocol getProtocol() {
+        return Protocol.OBS;
+    }
+
     public static class Builder {
         private String endpoint;
         private String ak;
@@ -56,6 +69,7 @@ public class ObsProperties implements FileSystemProperties {
         private String bucket;
         private boolean autoCreateWorking;
         private String working;
+        private String name;
 
         public Builder setEndpoint(String endpoint) {
             endpoint = (endpoint == null ? "" : endpoint.trim());
@@ -105,6 +119,10 @@ public class ObsProperties implements FileSystemProperties {
             }
             this.working = working;
             return this;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         public ObsProperties build() {
