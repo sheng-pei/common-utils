@@ -186,6 +186,7 @@ public class Exts {
             .add("class")
             .add("dlg")
             .add("htm")
+            .add("abq")
             .add("grp")
             .add("dll")
             .add("gl")
@@ -644,36 +645,22 @@ public class Exts {
         }
     }
 
-    @Deprecated
-    public ParsedName parse(String name) {
-        List<ExtPattern> patterns = getPatterns(name);
-        ParsedName parsedName = parse(patterns, name);
-        if (parsedName != null) {
-            return parsedName;
-        }
-
-        int periodIdx = name.lastIndexOf(EXT_DELIMITER);
-        if (periodIdx == -1) {
-            return null;
-        }
-        String unknownExt = name.substring(periodIdx + 1);
-        return new ParsedName(name.substring(0, periodIdx),
-                name.substring(periodIdx + 1),
-                new Ext(false, ExtPosition.RIGHT, unknownExt));
-    }
-
     public ParsedName parseExt(String name) {
         List<ExtPattern> patterns = getPatterns(name);
         ParsedName ret = parse(patterns, name);
         if (ret != null) {
             return ret;
         }
-        return new ParsedName(name, "", new Ext(false, ExtPosition.RIGHT, ""));
+        return new ParsedName(name);
     }
 
     public ParsedName parseKnownExt(String name) {
         List<ExtPattern> patterns = getPatterns(name);
-        return parse(patterns, name);
+        ParsedName ret = parse(patterns, name);
+        if (ret == null) {
+            throw new IllegalArgumentException("unknown extension name.");
+        }
+        return ret;
     }
 
     private ParsedName parse(List<ExtPattern> patterns, String name) {
@@ -760,77 +747,77 @@ public class Exts {
     }
 
     public static class Ext {
-        private final boolean known;
-        private final ExtPosition position;
         private final String ext;
+        private final String parsedExt;
 
-        public Ext(boolean known, ExtPosition position, String ext) {
-            this.known = known;
-            this.position = position;
+        public Ext(String ext, String parsedExt) {
             this.ext = ext;
-        }
-
-        public boolean isKnown() {
-            return known;
-        }
-
-        public ExtPosition getPosition() {
-            return position;
+            this.parsedExt = parsedExt;
         }
 
         public String getExt() {
             return ext;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Ext ext1 = (Ext) o;
-            return known == ext1.known &&
-                    position == ext1.position &&
-                    Objects.equals(ext, ext1.ext);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(known, position, ext);
+        public String getParsedExt() {
+            return parsedExt;
         }
 
         @Override
         public String toString() {
-            return (isKnown() ? "known" : "unknown") +
-                    " extension name: '" + getExt() + "' " +
-                    "and on the " + position.name().toLowerCase() + ".";
+            return "'" + getExt() + "' is extension name: '" + getParsedExt() + "'";
         }
     }
 
     public static class ParsedName {
         private final String base;
-        private final String ext;
-        private final Ext parsedExt;
+        private final ExtPosition position;
+        private final Ext ext;
 
-        public ParsedName(String base, String ext, Ext parsedExt) {
+        public ParsedName(String base) {
+            Objects.requireNonNull(base);
             this.base = base;
-            this.ext = ext;
-            this.parsedExt = parsedExt;
+            this.position = null;
+            this.ext = null;
         }
 
-        public Ext getParsedExt() {
-            return parsedExt;
+        public ParsedName(String base, ExtPosition position, Ext parsedExt) {
+            Objects.requireNonNull(base);
+            Objects.requireNonNull(position);
+            Objects.requireNonNull(parsedExt);
+            this.base = base;
+            this.position = position;
+            this.ext = parsedExt;
+        }
+
+        public Ext getExt() {
+            if (hasExt()) {
+                return ext;
+            }
+            throw new IllegalStateException("No extension name");
         }
 
         public String getBase() {
             return base;
         }
 
-        public String getExt() {
-            return ext;
+        public ExtPosition getPosition() {
+            if (hasExt()) {
+                return position;
+            }
+            throw new IllegalStateException("No extension name");
+        }
+
+        public boolean hasExt() {
+            return ext != null;
         }
 
         @Override
         public String toString() {
-            return parsedExt.getPosition() == ExtPosition.LEFT ? ext + base : base + ext;
+            if (ext == null) {
+                return base;
+            }
+            return position == ExtPosition.LEFT ? ext.getExt() + base : base + ext.getExt();
         }
     }
 }

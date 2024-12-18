@@ -36,8 +36,8 @@ public class ExtPattern {
     public Exts.ParsedName parse(String name) {
         Matcher matcher = pattern.matcher(name);
         if (matcher.find()) {
-            Exts.Ext ext = new Exts.Ext(true, position, ext());
-            return new Exts.ParsedName(base(name, matcher), ext(name, matcher), ext);
+            Exts.Ext ext = new Exts.Ext(ext(name, matcher), ext());
+            return new Exts.ParsedName(base(name, matcher), position, ext);
         }
         return null;
     }
