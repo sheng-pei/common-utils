@@ -6,7 +6,7 @@
 
     <groupId>ppl.common.utils</groupId>
     <artifactId>common-utils</artifactId>
-    <version>1.5.7-SNAPSHOT</version>
+    <version>1.5.8-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>core</module>
@@ -37,12 +37,12 @@
 
     <distributionManagement>
         <repository>
-            <id>releases</id>
-            <url>http://nexus.dev.dtstack.cn/nexus/content/repositories/dtstack-release/</url>
+            <id>maven-releases</id>
+            <url>http://localhost:8081/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>snapshot</id>
-            <url>http://nexus.dev.dtstack.cn/nexus/content/repositories/dtstack-snapshot/</url>
+            <id>maven-snapshots</id>
+            <url>http://localhost:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 

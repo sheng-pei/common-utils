@@ -122,9 +122,8 @@ class StringsTest {
 
     private static Stream<Arguments> snakeCaseProvider() {
         return Stream.of(
-                Arguments.of("MM", "mm"),
-                Arguments.of("mM", "m_m"),
-                Arguments.of("m_M", "m_m")
+                Arguments.of("MM", "_m_m"),
+                Arguments.of("mM", "m_m")
         );
     }
 

@@ -194,25 +194,73 @@ public final class Strings {
 		return true;
 	}
 
+	private static final Pattern CAMEL_CASE_CHAR_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*$");
+
+	public static boolean isCamelCase(String string) {
+		if (isEmpty(string)) {
+			return true;
+		}
+
+		return CAMEL_CASE_CHAR_PATTERN.matcher(string).matches();
+	}
+
+	public static String toCamelCase(String string) {
+		if (isEmpty(string)) {
+			return string;
+		}
+
+		if (!SNAKE_CASE_CHAR_PATTERN.matcher(string).matches()) {
+			throw new IllegalArgumentException(format("The string '{}' is not snake case.", string));
+		}
+
+		StringBuilder resultBuilder = new StringBuilder(string.length());
+		boolean upper = false;
+		for (char currentCharacter : string.toCharArray()) {
+			if (currentCharacter == '_') {
+				upper = true;
+			} else {
+				if (upper) {
+					resultBuilder.append(Character.toUpperCase(currentCharacter));
+					upper = false;
+				} else {
+					resultBuilder.append(currentCharacter);
+				}
+			}
+		}
+		return resultBuilder.toString();
+	}
+
+	private static final Pattern SNAKE_CASE_CHAR_PATTERN = Pattern.compile("^_?[a-z][a-z0-9]*(?:_[a-z][a-z0-9]*)*$");
+
+	public static boolean isSnakeCase(String string) {
+		if (isEmpty(string)) {
+			return true;
+		}
+
+		return SNAKE_CASE_CHAR_PATTERN.matcher(string).matches();
+	}
+
 	public static String toSnakeCase(String string) {
 		if (isEmpty(string)) {
 			return string;
 		}
 
+		if (!isCamelCase(string)) {
+			throw new IllegalArgumentException(format("The string '{}' is not camel case.", string));
+		}
+
 		StringBuilder resultBuilder = new StringBuilder(string.length());
-		Character previousCharacter = null;
 		for (char currentCharacter : string.toCharArray()) {
-			if (needUnderscore(previousCharacter, currentCharacter)) {
+			if (needUnderscore(currentCharacter)) {
 				resultBuilder.append("_");
 			}
 			resultBuilder.append(Character.toLowerCase(currentCharacter));
-			previousCharacter = currentCharacter;
 		}
 		return resultBuilder.toString();
 	}
 
-	private static boolean needUnderscore(Character previous, Character current) {
-		return previous != null && Character.isLowerCase(previous) && Character.isUpperCase(current);
+	private static boolean needUnderscore(Character current) {
+		return Character.isUpperCase(current);
 	}
 
 	public static boolean startsWith(String prefix, char[] chars, int begin, int end) {
