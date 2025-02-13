@@ -12,7 +12,7 @@ public interface Header<V extends HeaderValue> {
     }
 
     default HeaderName name() {
-        HeaderName name = extractName(this.getClass());
+        HeaderName name = nameOf(this.getClass());
         if (name == null) {
             throw new IllegalStateException(String.format(
                     "Please add name annotation for class '%s'.",
@@ -25,7 +25,7 @@ public interface Header<V extends HeaderValue> {
         if (clazz == null) {
             return false;
         }
-        HeaderName name = extractName(clazz);
+        HeaderName name = nameOf(clazz);
         return name().equals(name);
     }
 
@@ -41,7 +41,7 @@ public interface Header<V extends HeaderValue> {
         return TO_CANONICAL_STRING.apply(name(), value());
     }
 
-    static HeaderName extractName(Class<?> clazz) {
+    static HeaderName nameOf(Class<?> clazz) {
         Name name = clazz.getAnnotation(Name.class);
         if (name == null) {
             return null;

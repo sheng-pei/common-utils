@@ -192,7 +192,7 @@ public class Request implements Headers {
         }
 
         public Builder clearHeader(Class<? extends Header<? extends HeaderValue>> clazz) {
-            HeaderName name = Header.extractName(clazz);
+            HeaderName name = Header.nameOf(clazz);
             return clearHeader(name);
         }
 
@@ -227,7 +227,7 @@ public class Request implements Headers {
         }
 
         public <T extends Header<? extends HeaderValue>> T getHeader(Class<T> clazz) {
-            HeaderName targetName = Header.extractName(clazz);
+            HeaderName targetName = Header.nameOf(clazz);
             if (targetName == null) {
                 throw new IllegalArgumentException("Unknown header: " + clazz.getCanonicalName());
             }

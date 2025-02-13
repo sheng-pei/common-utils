@@ -42,7 +42,7 @@ public final class HeaderFactory {
     }
 
     private static HeaderName getName(Class<? extends Header<? extends HeaderValue>> clazz) {
-        HeaderName name = Header.extractName(clazz);
+        HeaderName name = Header.nameOf(clazz);
         if (name == null) {
             throw new IllegalArgumentException(
                     "No name annotation is found in class: " +
