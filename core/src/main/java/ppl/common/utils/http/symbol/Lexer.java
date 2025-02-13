@@ -53,6 +53,10 @@ public final class Lexer {
         return LINE_PATTERN.matcher(string).matches();
     }
 
+    public static boolean isPseudoHeader(String string) {
+        return string.startsWith(":") && isToken(string.substring(1));
+    }
+
     public static boolean isInternalHeader(String string) {
         if (string == null) {
             return false;

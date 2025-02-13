@@ -36,8 +36,8 @@ public final class HeaderName {
     }
     
     public static HeaderName create(String name) {
-        if (!Lexer.isToken(name) && !Lexer.isInternalHeader(name)) {
-            throw new IllegalArgumentException("Invalid name. Not token or internal.");
+        if (!Lexer.isToken(name) && !Lexer.isInternalHeader(name) && !Lexer.isPseudoHeader(name)) {
+            throw new IllegalArgumentException("Invalid name. Not token or internal or pseudo.");
         }
         return new HeaderName(name);
     }
