@@ -227,13 +227,8 @@ public class Request implements Headers {
         }
 
         public <T extends Header<? extends HeaderValue>> T getHeader(Class<T> clazz) {
-            HeaderName targetName = Header.nameOf(clazz);
-            if (targetName == null) {
-                throw new IllegalArgumentException("Unknown header: " + clazz.getCanonicalName());
-            }
-
             @SuppressWarnings("unchecked")
-            T res = (T) findHeader(targetName);
+            T res = (T) findHeader(Header.nameOf(clazz));
             return res;
         }
 

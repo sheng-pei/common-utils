@@ -25,13 +25,8 @@ public interface Headers {
             return Collections.emptyList();
         }
 
-        HeaderName name = Header.nameOf(clazz);
-        if (name == null) {
-            throw new IllegalArgumentException("Unknown header: " + clazz.getCanonicalName());
-        }
-
         @SuppressWarnings("unchecked")
-        List<T> res = (List<T>) getHeaders(name);
+        List<T> res = (List<T>) getHeaders(Header.nameOf(clazz));
         return res;
     }
 
@@ -54,13 +49,8 @@ public interface Headers {
             return null;
         }
 
-        HeaderName name = Header.nameOf(clazz);
-        if (name == null) {
-            throw new IllegalArgumentException("Unknown header: " + clazz.getCanonicalName());
-        }
-
         @SuppressWarnings("unchecked")
-        T res = (T) getHeader(name);
+        T res = (T) getHeader(Header.nameOf(clazz));
         return res;
     }
 
@@ -88,11 +78,6 @@ public interface Headers {
             return false;
         }
 
-        HeaderName name = Header.nameOf(clazz);
-        if (name == null) {
-            throw new IllegalArgumentException("Unknown header: " + clazz.getCanonicalName());
-        }
-
-        return containsHeader(name);
+        return containsHeader(Header.nameOf(clazz));
     }
 }
