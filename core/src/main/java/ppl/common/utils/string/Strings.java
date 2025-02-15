@@ -567,4 +567,10 @@ public final class Strings {
 		return new Substring(chars, start, end);
 	}
 
+	public static String repeat(char c, int repeatTimes) {
+		char[] chars = new char[repeatTimes];
+		Arrays.fill(chars, c);
+		return new String(chars);
+	}
+
 }
