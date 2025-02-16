@@ -35,6 +35,10 @@ public class ScalarNode extends AbstractNode {
         }
     };
 
+    public static boolean isScalar(Object object) {
+        return object != null && BASE_TYPES.contains(object.getClass());
+    }
+
     private final Object scalar;
 
     ScalarNode(String path, Object scalar) {
@@ -116,6 +120,16 @@ public class ScalarNode extends AbstractNode {
     }
 
     @Override
+    public BigInteger bigintValue(BigInteger def) {
+        return bigintValue();
+    }
+
+    @Override
+    public BigInteger bigintValue() {
+        return Converters.bigintValue(scalar);
+    }
+
+    @Override
     public Boolean boolValue(Boolean def) {
         return boolValue();
     }
@@ -126,6 +140,16 @@ public class ScalarNode extends AbstractNode {
     }
 
     @Override
+    public Float floatValue(Float def) {
+        return floatValue();
+    }
+
+    @Override
+    public Float floatValue() {
+        return Converters.floatValue(scalar);
+    }
+
+    @Override
     public Double doubleValue(Double def) {
         return doubleValue();
     }
@@ -133,6 +157,21 @@ public class ScalarNode extends AbstractNode {
     @Override
     public Double doubleValue() {
         return Converters.doubleValue(scalar);
+    }
+
+    @Override
+    public Double doubleValue(int scale) {
+        return Converters.doubleValue(scalar, scale);
+    }
+
+    @Override
+    public BigDecimal decimalValue(BigDecimal def) {
+        return decimalValue();
+    }
+
+    @Override
+    public BigDecimal decimalValue() {
+        return Converters.decimalValue(scalar);
     }
 
     @Override

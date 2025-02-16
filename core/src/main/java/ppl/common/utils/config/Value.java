@@ -1,5 +1,8 @@
 package ppl.common.utils.config;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 /**
  * Marker interface used to denote accessors for value node.
  */
@@ -89,6 +92,22 @@ public interface Value {
     Long longValue();
 
     /**
+     * Method for accessing bigint data that is converted from the data this node contains.
+     * @param def the default bigint data.
+     * @return Returns, by default, bigint data if this node contains primitive integral number or its wrapper
+     * or BigInteger. The specified default value will be returned if this node is a null or missing node.
+     * @throws ConvertException if no conversion is possible from the data this node contains to long data.
+     */
+    BigInteger bigintValue(BigInteger def);
+
+    /**
+     * Method similar to {@link #bigintValue(BigInteger)} except that the default value is always null.
+     * @return bigint data as described at the "Returns" paragraph of method {@link #bigintValue(BigInteger)}.
+     * @throws ConvertException if no conversion is possible from the data this node contains to bigint data.
+     */
+    BigInteger bigintValue();
+
+    /**
      * Method for accessing bool data that is converted from the data this node contains.
      * @param def the default bool data.
      * @return Returns, by default, bool data as it is if this node is a bool node. The specified default value will
@@ -105,20 +124,67 @@ public interface Value {
     Boolean boolValue();
 
     /**
+     * Method for accessing float data that is converted from the data this node contains.
+     * @param def the default float data.
+     * @return Returns, by default, float data if this node contains primitive float number or its wrapper
+     * (float or double). The default value given will be returned if this node is a null or missing node.
+     * @throws ConvertException if no conversion is possible from the data this node contains to float data
+     * or maybe loss of accuracy.
+     */
+    Float floatValue(Float def);
+
+    /**
+     * Method similar to {@link #floatValue(Float)} except that the default value is always null.
+     * @return float data as described at the "Returns" paragraph of method {@link #floatValue(Float)}.
+     * @throws ConvertException if no conversion is possible from the data this node contains to float data
+     * or maybe loss of accuracy.
+     */
+    Float floatValue();
+
+    /**
      * Method for accessing double data that is converted from the data this node contains.
      * @param def the default double data.
      * @return Returns, by default, double data if this node contains primitive float number or its wrapper
      * (float or double). The specified default value will be returned if this node is a null or missing node.
-     * @throws ConvertException if no conversion is possible from the data this node contains to double data.
+     * @throws ConvertException if no conversion is possible from the data this node contains to double data
+     * or maybe loss of accuracy.
      */
     Double doubleValue(Double def);
 
     /**
      * Method similar to {@link #doubleValue(Double)} except that the default value is always null.
      * @return double data as described at the "Returns" paragraph of method {@link #doubleValue(Double)}.
-     * @throws ConvertException if no conversion is possible from the data this node contains to double data.
+     * @throws ConvertException if no conversion is possible from the data this node contains to double data
+     * or maybe loss of accuracy.
      */
     Double doubleValue();
+
+    /**
+     * Method for accessing double data that is converted from the data this node contains.
+     * And rounded with scale given.
+     * @param scale rounded with.
+     * @return Returns, by default, double data if this node contains primitive float number or its wrapper
+     * (float or double). The specified default value will be returned if this node is a null or missing node.
+     * @throws ConvertException if no conversion is possible from the data this node contains to double data
+     * or maybe loss of accuracy.
+     */
+    Double doubleValue(int scale);
+
+    /**
+     * Method for accessing decimal data that is converted from the data this node contains.
+     * @param def the default decimal data.
+     * @return Returns, by default, decimal data if this node contains primitive float number or its wrapper
+     * (float or double) or BigDecimal. The default value given will be returned if this node is a null or missing node.
+     * @throws ConvertException if no conversion is possible from the data this node contains to decimal data.
+     */
+    BigDecimal decimalValue(BigDecimal def);
+
+    /**
+     * Method similar to {@link #decimalValue(BigDecimal)} except that the default value is always null.
+     * @return decimal data as described at the "Returns" paragraph of method {@link #decimalValue(BigDecimal)}.
+     * @throws ConvertException if no conversion is possible from the data this node contains to decimal data.
+     */
+    BigDecimal decimalValue();
 
     /**
      * Method for accessing enum data that is converted from the data this node contains.

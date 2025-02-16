@@ -6,6 +6,8 @@ import ppl.common.utils.config.nodes.AbstractNode;
 import ppl.common.utils.config.nodes.MissingNode;
 import ppl.common.utils.config.nodes.iterator.ObjectIterator;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 public final class MapNode extends AbstractNode {
@@ -102,6 +104,16 @@ public final class MapNode extends AbstractNode {
     }
 
     @Override
+    public BigInteger bigintValue(BigInteger def) {
+        throw new ConvertException("Map node");
+    }
+
+    @Override
+    public BigInteger bigintValue() {
+        throw new ConvertException("Map node");
+    }
+
+    @Override
     public Boolean boolValue(Boolean def) {
         throw new ConvertException("Map node");
     }
@@ -112,12 +124,37 @@ public final class MapNode extends AbstractNode {
     }
 
     @Override
+    public Float floatValue(Float def) {
+        throw new ConvertException("Map node");
+    }
+
+    @Override
+    public Float floatValue() {
+        throw new ConvertException("Map node");
+    }
+
+    @Override
     public Double doubleValue(Double def) {
         throw new ConvertException("Map node");
     }
 
     @Override
     public Double doubleValue() {
+        throw new ConvertException("Map node");
+    }
+
+    @Override
+    public Double doubleValue(int scale) {
+        throw new ConvertException("Map node");
+    }
+
+    @Override
+    public BigDecimal decimalValue(BigDecimal def) {
+        throw new ConvertException("Map node");
+    }
+
+    @Override
+    public BigDecimal decimalValue() {
         throw new ConvertException("Map node");
     }
 

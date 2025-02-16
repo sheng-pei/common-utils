@@ -10,6 +10,8 @@ import ppl.common.utils.config.nodes.iterator.ArrayIterator;
 import ppl.common.utils.config.nodes.iterator.ObjectIterator;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -160,6 +162,19 @@ public class JacksonNode extends AbstractNode {
     }
 
     @Override
+    public BigInteger bigintValue(BigInteger def) {
+        return bigintValue();
+    }
+
+    @Override
+    public BigInteger bigintValue() {
+        if (json.isContainerNode()) {
+            throw new ConvertException("Jackson container node.");
+        }
+        return Converters.bigintValue(json);
+    }
+
+    @Override
     public Boolean boolValue(Boolean def) {
         return boolValue();
     }
@@ -173,6 +188,19 @@ public class JacksonNode extends AbstractNode {
     }
 
     @Override
+    public Float floatValue(Float def) {
+        return floatValue();
+    }
+
+    @Override
+    public Float floatValue() {
+        if (json.isContainerNode()) {
+            throw new ConvertException("Jackson container node.");
+        }
+        return Converters.floatValue(json);
+    }
+
+    @Override
     public Double doubleValue(Double def) {
         return doubleValue();
     }
@@ -183,6 +211,27 @@ public class JacksonNode extends AbstractNode {
             throw new ConvertException("Jackson container node.");
         }
         return Converters.doubleValue(json);
+    }
+
+    @Override
+    public Double doubleValue(int scale) {
+        if (json.isContainerNode()) {
+            throw new ConvertException("Jackson container node.");
+        }
+        return Converters.doubleValue(json, scale);
+    }
+
+    @Override
+    public BigDecimal decimalValue(BigDecimal def) {
+        return decimalValue();
+    }
+
+    @Override
+    public BigDecimal decimalValue() {
+        if (json.isContainerNode()) {
+            throw new ConvertException("Jackson container node.");
+        }
+        return Converters.decimalValue(json);
     }
 
     @Override

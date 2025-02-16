@@ -50,7 +50,7 @@ public interface Node extends Value, Iterable<Node> {
     int OBJECT = 2;
 
     String INDEX_FIELD_PATTERN_STRING = "\\[[0-9]+]";
-    String COMPLEX_OBJECT_FIELD_PATTERN_STRING = "\\{[\\041-\\0132\\0134\\0136-\\0172\\0174\\0176]+\\}";
+    String COMPLEX_OBJECT_FIELD_PATTERN_STRING = "\\{[\\041-\\0132\\0134\\0136-\\0172\\0174\\0176]+}";
     String SIMPLE_OBJECT_FIELD_PATTERN_STRING = "[\\041-\\055\\057-\\0132\\0134\\0136-\\0172\\0174\\0176]+";
     String FIELD_PATTERN_STRING = INDEX_FIELD_PATTERN_STRING + "|" +
             COMPLEX_OBJECT_FIELD_PATTERN_STRING + "|" +

@@ -5,6 +5,8 @@ import ppl.common.utils.config.nodes.AbstractNode;
 import ppl.common.utils.config.nodes.MissingNode;
 import ppl.common.utils.config.nodes.iterator.ArrayIterator;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
 
@@ -104,6 +106,16 @@ public final class ListNode extends AbstractNode {
     }
 
     @Override
+    public BigInteger bigintValue(BigInteger def) {
+        throw new ConvertException("List node");
+    }
+
+    @Override
+    public BigInteger bigintValue() {
+        throw new ConvertException("List node");
+    }
+
+    @Override
     public Boolean boolValue(Boolean def) {
         throw new ConvertException("List node");
     }
@@ -114,12 +126,37 @@ public final class ListNode extends AbstractNode {
     }
 
     @Override
+    public Float floatValue(Float def) {
+        throw new ConvertException("List node");
+    }
+
+    @Override
+    public Float floatValue() {
+        throw new ConvertException("List node");
+    }
+
+    @Override
     public Double doubleValue(Double def) {
         throw new ConvertException("List node");
     }
 
     @Override
     public Double doubleValue() {
+        throw new ConvertException("List node");
+    }
+
+    @Override
+    public Double doubleValue(int scale) {
+        throw new ConvertException("List node");
+    }
+
+    @Override
+    public BigDecimal decimalValue(BigDecimal def) {
+        throw new ConvertException("List node");
+    }
+
+    @Override
+    public BigDecimal decimalValue() {
         throw new ConvertException("List node");
     }
 

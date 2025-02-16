@@ -6,6 +6,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ppl.common.utils.config.Node;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
@@ -96,6 +98,16 @@ public class AbstractNodeTest {
         }
 
         @Override
+        public BigInteger bigintValue(BigInteger def) {
+            throw new UnsupportedOperationException("");
+        }
+
+        @Override
+        public BigInteger bigintValue() {
+            throw new UnsupportedOperationException("");
+        }
+
+        @Override
         public Boolean boolValue(Boolean def) {
             throw new UnsupportedOperationException("");
         }
@@ -106,12 +118,37 @@ public class AbstractNodeTest {
         }
 
         @Override
+        public Float floatValue(Float def) {
+            throw new UnsupportedOperationException("");
+        }
+
+        @Override
+        public Float floatValue() {
+            throw new UnsupportedOperationException("");
+        }
+
+        @Override
         public Double doubleValue(Double def) {
             throw new UnsupportedOperationException("");
         }
 
         @Override
         public Double doubleValue() {
+            throw new UnsupportedOperationException("");
+        }
+
+        @Override
+        public Double doubleValue(int scale) {
+            throw new UnsupportedOperationException("");
+        }
+
+        @Override
+        public BigDecimal decimalValue(BigDecimal def) {
+            throw new UnsupportedOperationException("");
+        }
+
+        @Override
+        public BigDecimal decimalValue() {
             throw new UnsupportedOperationException("");
         }
 

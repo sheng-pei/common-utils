@@ -2,6 +2,8 @@ package ppl.common.utils.config.nodes;
 
 import ppl.common.utils.config.Node;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -87,6 +89,16 @@ public final class MissingNode extends AbstractNode {
     }
 
     @Override
+    public BigInteger bigintValue(BigInteger def) {
+        return def;
+    }
+
+    @Override
+    public BigInteger bigintValue() {
+        return null;
+    }
+
+    @Override
     public Boolean boolValue(Boolean def) {
         return def;
     }
@@ -97,12 +109,37 @@ public final class MissingNode extends AbstractNode {
     }
 
     @Override
+    public Float floatValue(Float def) {
+        return def;
+    }
+
+    @Override
+    public Float floatValue() {
+        return null;
+    }
+
+    @Override
     public Double doubleValue(Double def) {
         return def;
     }
 
     @Override
     public Double doubleValue() {
+        return null;
+    }
+
+    @Override
+    public Double doubleValue(int scale) {
+        return null;
+    }
+
+    @Override
+    public BigDecimal decimalValue(BigDecimal def) {
+        return BigDecimal.ZERO;
+    }
+
+    @Override
+    public BigDecimal decimalValue() {
         return null;
     }
 

@@ -5,13 +5,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ppl.common.utils.cache.ConcurrentReferenceValueCache;
 import ppl.common.utils.cache.ReferenceType;
+import ppl.common.utils.config.nodes.scalar.ScalarNode;
 import ppl.common.utils.exception.UnreachableCodeException;
 import ppl.common.utils.order.Condition;
+import ppl.common.utils.reflect.Types;
 import ppl.common.utils.string.Strings;
 import ppl.common.utils.cache.Cache;
 import ppl.common.utils.enumerate.EnumEncoderNotSupportedException;
 import ppl.common.utils.enumerate.EnumUtils;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -25,17 +30,40 @@ public class Converters {
     static {
         Map<Class<?>, Converter<?>> systemConverters = new HashMap<>();
 
-        systemConverters.put(char.class, Converter.castConverter());
-        systemConverters.put(Character.class, Converter.castConverter());
+        Converter<Character> charConverter = new Converter<>("char", Character.class::equals, (o, c) -> {
+            if (o == null) {
+                return null;
+            }
+
+            if (o instanceof String) {
+                String s = (String) o;
+                if (s.length() == 1) {
+                    return s.charAt(0);
+                }
+            } else if (o instanceof Character) {
+                return (Character) o;
+            }
+            throw new IllegalArgumentException("Not character or single char string.");
+        });
+        systemConverters.put(char.class, charConverter);
+        systemConverters.put(Character.class, charConverter);
 
         Converter<Byte> byteConverter = new Converter<>("byte", Byte.class::equals, (o, c) -> {
             if (o == null) {
                 return null;
             }
 
-            long v = primitiveIntegerToLong(o);
-            if (inByte(v)) {
-                return (byte) v;
+            if (!isInteger(o)) {
+                throw new IllegalArgumentException("Couldn't be represented as whole number.");
+            }
+
+            try {
+                long v = toLong(o);
+                if (inByte(v)) {
+                    return (byte) v;
+                }
+            } catch (ArithmeticException e) {
+                //ignore
             }
             throw new IllegalArgumentException("Out of byte range.");
         });
@@ -47,9 +75,17 @@ public class Converters {
                 return null;
             }
 
-            long v = primitiveIntegerToLong(o);
-            if (inShort(v)) {
-                return (short) v;
+            if (!isInteger(o)) {
+                throw new IllegalArgumentException("Couldn't be represented as whole number.");
+            }
+
+            try {
+                long v = toLong(o);
+                if (inShort(v)) {
+                    return (short) v;
+                }
+            } catch (ArithmeticException e) {
+                //ignore
             }
             throw new IllegalArgumentException("Out of short range.");
         });
@@ -61,9 +97,17 @@ public class Converters {
                 return null;
             }
 
-            long v = primitiveIntegerToLong(o);
-            if (inInt(v)) {
-                return (int) v;
+            if (!isInteger(o)) {
+                throw new IllegalArgumentException("Couldn't be represented as whole number.");
+            }
+
+            try {
+                long v = toLong(o);
+                if (inInt(v)) {
+                    return (int) v;
+                }
+            } catch (ArithmeticException e) {
+                //ignore
             }
             throw new IllegalArgumentException("Out of int range.");
         });
@@ -74,23 +118,58 @@ public class Converters {
             if (o == null) {
                 return null;
             }
-            return primitiveIntegerToLong(o);
+
+            if (!isInteger(o)) {
+                throw new IllegalArgumentException("Couldn't be represented as whole number.");
+            }
+
+            try {
+                return toLong(o);
+            } catch (ArithmeticException e) {
+                throw new IllegalArgumentException("Out of long range.", e);
+            }
         });
         systemConverters.put(Long.class, longConverter);
         systemConverters.put(long.class, longConverter);
+
+        Converter<BigInteger> bigintConverter = new Converter<>("bigint", BigInteger.class::equals, (o, c) -> {
+            if (o == null) {
+                return null;
+            }
+
+            if (!isInteger(o)) {
+                throw new IllegalArgumentException("Couldn't be represented as whole number.");
+            }
+
+            if (o instanceof BigInteger) {
+                return (BigInteger) o;
+            } else {
+                return BigInteger.valueOf(toLong(o));
+            }
+        });
+        systemConverters.put(BigInteger.class, bigintConverter);
 
         Converter<Float> floatConverter = new Converter<>("float", Float.class::equals, (o, c) -> {
             if (o == null) {
                 return null;
             }
-            if (o instanceof JsonNode) {
-                JsonNode jNode = (JsonNode) o;
-                if (jNode.isFloat()) {
-                    return jNode.floatValue();
-                }
-            } else if (o instanceof Float) {
-                return (Float) o;
+
+            if (isFloat(o)) {
+                return toFloat(o);
             }
+
+            if (isInteger(o)) {
+                try {
+                    long v = toLong(o);
+                    if (inShort(v)) {
+                        return (float) v;
+                    }
+                } catch (ArithmeticException e) {
+                    //ignore
+                }
+                throw new IllegalArgumentException("Out of short range, to float maybe loss of accuracy.");
+            }
+
             throw new IllegalArgumentException("Couldn't be represented as float (java primitive).");
         });
         systemConverters.put(float.class, floatConverter);
@@ -100,20 +179,52 @@ public class Converters {
             if (o == null) {
                 return null;
             }
-            if (o instanceof JsonNode) {
-                JsonNode jNode = (JsonNode) o;
-                if (jNode.isFloat() || jNode.isDouble()) {
-                    return jNode.doubleValue();
-                }
-            } else if (o instanceof Float) {
-                return ((Float) o).doubleValue();
-            } else if (o instanceof Double) {
-                return (Double) o;
+
+            if (isFloat(o)) {
+                return toDouble(o);
             }
-            throw new IllegalArgumentException("Couldn't be represented as float double (java primitive).");
+
+            if (isInteger(o)) {
+                try {
+                    long v = toLong(o);
+                    if (inInt(v)) {
+                        return (double) v;
+                    }
+                } catch (ArithmeticException e) {
+                    //ignore
+                }
+                throw new IllegalArgumentException("Out of int range, to double maybe loss of accuracy.");
+            }
+
+            throw new IllegalArgumentException("Couldn't be represented as double (java primitive).");
         });
         systemConverters.put(Double.class, doubleConverter);
         systemConverters.put(double.class, doubleConverter);
+
+        Converter<BigDecimal> decimalConverter = new Converter<>("decimal", BigDecimal.class::equals, (o, c) -> {
+            if (o == null) {
+                return null;
+            }
+
+            if (isFloat(o)) {
+                if (o instanceof BigDecimal) {
+                    return (BigDecimal) o;
+                } else {
+                    return BigDecimal.valueOf(toDouble(o));
+                }
+            }
+
+            if (isInteger(o)) {
+                if (o instanceof BigInteger) {
+                    return new BigDecimal((BigInteger) o);
+                } else {
+                    return new BigDecimal(toLong(o));
+                }
+            }
+
+            throw new IllegalArgumentException("Couldn't be represented as real number.");
+        });
+        systemConverters.put(BigDecimal.class, decimalConverter);
 
         Converter<Boolean> boolConverter = new Converter<>("bool", Boolean.class::equals, (o, c) -> {
             if (o == null) {
@@ -143,8 +254,10 @@ public class Converters {
                 }
             } else if (o instanceof String) {
                 return (String) o;
+            } else if (ScalarNode.isScalar(o)) {
+                return o.toString();
             }
-            throw new IllegalArgumentException("Couldn't be represented as ppl.common.utils.string.");
+            throw new IllegalArgumentException("Couldn't be represented as string");
         });
         systemConverters.put(String.class, stringConverter);
 
@@ -167,7 +280,7 @@ public class Converters {
                 ), e);
             }
 
-            if (isPrimitiveInteger(o.getClass())) {
+            if (Types.isBaseInteger(o)) {
                 long value = ((Number) o).longValue();
                 if (inInt(value)) {
                     return c.getEnumConstants()[(int) value];
@@ -191,26 +304,52 @@ public class Converters {
         }
     };
 
-    private static final Set<Class<?>> INTEGER_TYPE = new HashSet<Class<?>>() {
-        {
-            add(Byte.class);
-            add(Short.class);
-            add(Integer.class);
-            add(Long.class);
-        }
-    };
-
-    private static long primitiveIntegerToLong(Object o) {
+    private static boolean isFloat(Object o) {
         if (o instanceof JsonNode) {
             JsonNode jNode = (JsonNode) o;
-            if (jNode.isInt() || jNode.isLong() || jNode.isShort()) {
-                return jNode.longValue();
-            }
-        } else if (isPrimitiveInteger(o.getClass())) {
-            return ((Number) o).longValue();
-        }
-        throw new IllegalArgumentException("Couldn't be represented as byte short int long (java primitive).");
+            return jNode.isFloat() || jNode.isDouble() || jNode.isBigDecimal();
+        } else return Types.isFloat(o);
     }
+
+    private static float toFloat(Object o) {
+        if (o instanceof JsonNode) {
+            JsonNode jNode = (JsonNode) o;
+            if (jNode.isFloat()) {
+                return jNode.floatValue();
+            }
+        } else if (o instanceof Float) {
+            return (Float) o;
+        }
+        throw new IllegalArgumentException("Reject to be represented as float, maybe loss of accuracy.");
+    }
+
+    private static double toDouble(Object o) {
+        if (o instanceof JsonNode) {
+            JsonNode jNode = (JsonNode) o;
+            if (jNode.isFloat() || jNode.isDouble()) {
+                return jNode.doubleValue();
+            }
+        } else if (o instanceof Float || o instanceof Double) {
+            return ((Number) o).doubleValue();
+        }
+        throw new IllegalArgumentException("Reject to be represented as double, maybe loss of accuracy.");
+    }
+
+    private static boolean isInteger(Object o) {
+        if (o instanceof JsonNode) {
+            JsonNode jNode = (JsonNode) o;
+            return jNode.isInt() || jNode.isLong() || jNode.isShort() || jNode.isBigInteger();
+        } else return Types.isInteger(o);
+    }
+
+    private static long toLong(Object o) {
+        if (o instanceof BigInteger) {
+            BigInteger bi = (BigInteger) o;
+            return bi.longValueExact();
+        }
+        return ((Number) o).longValue();
+    }
+
     private static Object toEnumKey(Object o) {
         if (o instanceof JsonNode) {
             JsonNode jNode = (JsonNode) o;
@@ -219,20 +358,20 @@ public class Converters {
             } else if (jNode.isInt() || jNode.isShort() || jNode.isLong()) {
                 return jNode.longValue();
             }
-        } else if (o instanceof String || isPrimitiveInteger(o.getClass())) {
+        } else if (o instanceof String || Types.isBaseInteger(o)) {
             return o;
         }
         throw new IllegalArgumentException("Couldn't be converted to enum.");
     }
-    private static boolean isPrimitiveInteger(Class<?> clazz) {
-        return INTEGER_TYPE.contains(clazz);
-    }
+
     private static boolean inInt(Long l) {
         return Condition.in(l, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
+
     private static boolean inShort(Long i) {
         return Condition.in(i, Short.MIN_VALUE, Short.MAX_VALUE);
     }
+
     private static boolean inByte(Long i) {
         return Condition.in(i, Byte.MIN_VALUE, Byte.MAX_VALUE);
     }
@@ -268,7 +407,8 @@ public class Converters {
 
     };
 
-    public Converters() {}
+    public Converters() {
+    }
 
     public <T> void addConverter(Converter<T> converter) {
         customConverters.add(converter);
@@ -280,8 +420,9 @@ public class Converters {
      * 1. system converter
      * 2. custom converter
      * 3. default cast converter
+     *
      * @param targetClazz java reflect class represented as actual type required.
-     * @param <T> actual type required
+     * @param <T>         actual type required
      * @return converter used to do conversion from an object to the specified target.
      */
     private <T> Converter<T> getConverter(Class<T> targetClazz) {
@@ -328,9 +469,10 @@ public class Converters {
 
     /**
      * Use system converter to do conversion from char (java primitive) to char (java primitive).
+     *
      * @param obj object whose type is unknown.
-     * @throws ppl.common.utils.config.ConvertException, if the specified object is not java char.
      * @return data of char (java primitive)
+     * @throws ppl.common.utils.config.ConvertException, if the specified object is not java char.
      */
     public static Character charValue(Object obj) {
         return defaultConvert(obj, Character.class);
@@ -339,11 +481,12 @@ public class Converters {
     /**
      * Use system converter to do conversion from byte short int long (java primitive) or
      * IntNode ShortNode LongNode (jackson node) to byte (java primitive).
+     *
      * @param obj object whose type is unknown.
+     * @return data of byte (java primitive)
      * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
      * byte short int long (java primitive) nor IntNode ShortNode LongNode (jackson node);
-     * if the number is out of byte range.
-     * @return data of byte (java primitive)
+     * or the number is out of byte range.
      */
     public static Byte byteValue(Object obj) {
         return defaultConvert(obj, Byte.class);
@@ -352,11 +495,12 @@ public class Converters {
     /**
      * Use system converter to do conversion from byte short int long (java primitive) or
      * IntNode ShortNode LongNode (jackson node) to short (java primitive).
+     *
      * @param obj object whose type is unknown.
-     * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
-     * byte short int long (java primitive) nor IntNode ShortNode LongNode (jackson node);
-     * if the number is out of short range.
      * @return data of short (java primitive).
+     * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
+     * byte short int long (java primitive) nor IntNode ShortNode LongNode (jackson node)
+     * or the number is out of short range.
      */
     public static Short shortValue(Object obj) {
         return defaultConvert(obj, Short.class);
@@ -365,11 +509,12 @@ public class Converters {
     /**
      * Use system converter to do conversion from byte short int long (java primitive) or
      * IntNode ShortNode LongNode (jackson node) to int (java primitive).
+     *
      * @param obj object whose type is unknown.
-     * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
-     * byte short int long (java primitive) nor IntNode ShortNode LongNode (jackson node);
-     * if the number is out of int range.
      * @return data of int (java primitive)
+     * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
+     * byte short int long (java primitive) nor IntNode ShortNode LongNode (jackson node)
+     * or the number is out of int range.
      */
     public static Integer intValue(Object obj) {
         return defaultConvert(obj, Integer.class);
@@ -378,22 +523,37 @@ public class Converters {
     /**
      * Use system converter to do conversion from byte short int long (java primitive) or
      * IntNode ShortNode LongNode (jackson node) to long (java primitive).
+     *
      * @param obj object whose type is unknown.
+     * @return data of long (java primitive)
      * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
      * byte short int long (java primitive) nor IntNode ShortNode LongNode (jackson node).
-     * @return data of long (java primitive)
      */
     public static Long longValue(Object obj) {
         return defaultConvert(obj, Long.class);
     }
 
     /**
+     * Use system converter to do conversion from byte short int long (java primitive) BigInteger or
+     * IntNode ShortNode LongNode BigIntegerNode (jackson node) to bigint (java primitive).
+     *
+     * @param obj object whose type is unknown.
+     * @return data of BigInteger (java primitive)
+     * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
+     * byte short int long (java primitive) BigInteger nor IntNode ShortNode LongNode BigIntegerNode (jackson node).
+     */
+    public static BigInteger bigintValue(Object obj) {
+        return defaultConvert(obj, BigInteger.class);
+    }
+
+    /**
      * Use system converter to do conversion from float (java primitive) or
      * FloatNode (jackson node) to float (java primitive).
+     *
      * @param obj object whose type is unknown.
+     * @return data of float (java primitive)
      * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
      * float (java primitive) nor FloatNode (jackson node).
-     * @return data of float (java primitive)
      */
     public static Float floatValue(Object obj) {
         return defaultConvert(obj, Float.class);
@@ -402,22 +562,55 @@ public class Converters {
     /**
      * Use system converter to do conversion from float double (java primitive) or
      * FloatNode DoubleNode (jackson node) to double (java primitive).
+     *
      * @param obj object whose type is unknown.
+     * @return data of double (java primitive)
      * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
      * float double (java primitive) nor DoubleNode (jackson node).
-     * @return data of double (java primitive)
      */
     public static Double doubleValue(Object obj) {
         return defaultConvert(obj, Double.class);
     }
 
     /**
+     * Use system converter to do conversion from float double (java primitive) or
+     * FloatNode DoubleNode (jackson node) to double (java primitive). And round
+     * with scale given.
+     *
+     * @param obj object whose type is unknown.
+     * @param scale scale rounded with.
+     * @return data of double (java primitive)
+     * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
+     * float double (java primitive) nor DoubleNode (jackson node).
+     */
+    public static Double doubleValue(Object obj, int scale) {
+        Double ret = defaultConvert(obj, Double.class);
+        return BigDecimal.valueOf(ret)
+                .setScale(scale, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
+
+    /**
+     * Use system converter to do conversion from float double (java primitive) BigDecimal or
+     * FloatNode DoubleNode BigDecimalNode (jackson node) to BigDecimal.
+     *
+     * @param obj object whose type is unknown.
+     * @return data of BigDecimal
+     * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
+     * float double (java primitive) BigDecimal nor FloatNode DoubleNode BigDecimalNode (jackson node).
+     */
+    public static BigDecimal decimalValue(Object obj) {
+        return defaultConvert(obj, BigDecimal.class);
+    }
+
+    /**
      * Use system converter to do conversion from boolean (java primitive) or
      * BooleanNode (jackson node) to boolean (java primitive).
+     *
      * @param obj object whose type is unknown.
+     * @return data of boolean (java primitive)
      * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
      * boolean (java primitive) nor BooleanNode (jackson node).
-     * @return data of boolean (java primitive)
      */
     public static Boolean boolValue(Object obj) {
         return defaultConvert(obj, Boolean.class);
@@ -426,25 +619,27 @@ public class Converters {
     /**
      * Use system converter to do conversion from String (java) or 'Textual Node' (jackson node)
      * to String (java).
+     *
      * @param obj object whose type is unknown.
+     * @return data of String (java)
      * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
      * String (java) nor 'Textual Node' (jackson node).
-     * @return data of String (java)
      */
     public static String stringValue(Object obj) {
         return defaultConvert(obj, String.class);
     }
 
     /**
-     * Use system converter to do conversion from byte short int long (java primitive) String (java) or
+     * Use system converter to do conversion from byte short int long (java primitive) String or
      * IntNode ShortNode LongNode 'Textual Node' (jackson node) to enum (java).
-     * @param obj object whose type is unknown.
+     *
+     * @param obj       object whose type is unknown.
      * @param enumClass java reflect class represented as actual type required.
-     * @param <E> actual type required.
-     * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
-     * byte short int long (java primitive) nor IntNode ShortNode LongNode (jackson node);
-     * if the specified object is not in the enumeration.
+     * @param <E>       actual type required.
      * @return data of type E
+     * @throws ppl.common.utils.config.ConvertException, if the specified object is neither
+     * byte short int long (java primitive) String nor IntNode ShortNode LongNode 'Textual Node' (jackson node)
+     * or the specified object is not in the enumeration.
      */
     public static <E extends Enum<E>> E enumValue(Object obj, Class<E> enumClass) {
         return defaultConvert(obj, enumClass);
@@ -457,11 +652,12 @@ public class Converters {
     /**
      * Find converter to do conversion from an object to the specified class and do conversion
      * from the specified object.
-     * @param obj object whose type is unknown.
+     *
+     * @param obj   object whose type is unknown.
      * @param clazz java reflect class represented as actual type required.
-     * @param <T> actual type required.
-     * @throws ppl.common.utils.config.ConvertException, if the specified object couldn't be converted.
+     * @param <T>   actual type required.
      * @return data of type T.
+     * @throws ppl.common.utils.config.ConvertException, if the specified object couldn't be converted.
      */
     public <T> T convert(Object obj, Class<T> clazz) {
         return internalConvert(obj, clazz);

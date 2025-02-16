@@ -11,7 +11,7 @@ public class Converter<C> {
 
     private static final String INCOMPATIBLE_TYPE_MESSAGE = "Incompatible with {}";
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static final Converter CAST_CONVERTER = new Converter("string", c -> true, (o, c) -> {
+    private static final Converter CAST_CONVERTER = new Converter("cast", c -> true, (o, c) -> {
         Class clazz = (Class) c;
         return clazz.cast(o);
     });
