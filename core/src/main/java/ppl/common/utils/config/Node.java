@@ -6,7 +6,8 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**
- * Node interface for nodes of tree config model. A node could have one base type value or any number
+ * Node interface for nodes of tree config model. A node could have either one base type value
+ * (boolean, char, byte, short, int, long, float, double, BigInteger, BigDecimal, String) or any number
  * of child nodes. The following characters '[', ']', '{' and '}' are disallowed in field name of an
  * object node. We use a path to address to a node in the config. Path is a sequence of keys separated
  * by letter '.'.

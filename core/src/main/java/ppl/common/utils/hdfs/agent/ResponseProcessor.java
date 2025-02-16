@@ -3,7 +3,7 @@ package ppl.common.utils.hdfs.agent;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ppl.common.utils.IOUtils;
+import ppl.common.utils.IOs;
 import ppl.common.utils.watch.StopWatch;
 import ppl.common.utils.exception.IOStreamException;
 import ppl.common.utils.hdfs.HdfsException;
@@ -109,7 +109,7 @@ public class ResponseProcessor {
     public static void writeToRequestBody(InputStream is, Connection conn) {
         StopWatch watch = StopWatch.createStopWatch();
         try (OutputStream os = conn.openOutputStream()) {
-            IOUtils.copy(is, os, 10240);
+            IOs.copy(is, os, 10240);
         } catch (IOException | IOStreamException e) {
             throw new NetworkException("Something error during data was written to request body.", e);
         } finally {

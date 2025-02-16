@@ -6,11 +6,11 @@ import ppl.common.utils.exception.IOStreamException;
 
 import java.io.*;
 
-public final class IOUtils {
+public final class IOs {
 
-    private IOUtils() { }
+    private IOs() { }
 
-    private static final Logger logger = LoggerFactory.getLogger(IOUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(IOs.class);
 
     private static final int COPY_BUF_SIZE = 8024;
 

@@ -1,6 +1,6 @@
 package ppl.common.utils.net;
 
-import ppl.common.utils.bytes.Bytes;
+import ppl.common.utils.Bytes;
 import ppl.common.utils.character.ascii.AsciiGroup;
 import ppl.common.utils.exception.UnreachableCodeException;
 import ppl.common.utils.string.Strings;

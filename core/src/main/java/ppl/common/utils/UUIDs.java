@@ -2,9 +2,9 @@ package ppl.common.utils;
 
 import java.util.UUID;
 
-public final class UUIDUtils {
+public final class UUIDs {
 
-    private UUIDUtils() { }
+    private UUIDs() { }
 
     public static String uuid() {
         return UUID.randomUUID().toString().replace("-", "");

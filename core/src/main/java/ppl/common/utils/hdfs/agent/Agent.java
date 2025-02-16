@@ -1,7 +1,7 @@
 package ppl.common.utils.hdfs.agent;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import ppl.common.utils.IOUtils;
+import ppl.common.utils.IOs;
 import ppl.common.utils.exception.IOStreamException;
 import ppl.common.utils.filesystem.path.Path;
 import ppl.common.utils.hdfs.HdfsException;
@@ -125,7 +125,7 @@ public class Agent {
                 u -> Request.get(createOperation(u, Op.OPEN)).build(),
                 Response::openInputStream).apply(remote);
              OutputStream os = Files.newOutputStream(Paths.get(local.toString()))) {
-            IOUtils.copy(is, os);
+            IOs.copy(is, os);
         } catch (IOException | IOStreamException e) {
             throw new NetworkException("IO error.", e);
         }

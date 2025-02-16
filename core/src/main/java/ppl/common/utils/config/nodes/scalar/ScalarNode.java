@@ -13,6 +13,8 @@ public class ScalarNode extends AbstractNode {
 
     private static final Set<Class<?>> BASE_TYPES = new HashSet<Class<?>>() {
         {
+            add(char.class);
+            add(Character.class);
             add(boolean.class);
             add(Boolean.class);
             add(byte.class);

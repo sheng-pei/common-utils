@@ -4,7 +4,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ppl.common.utils.IOUtils;
+import ppl.common.utils.IOs;
 import ppl.common.utils.compress.ArchiveException;
 
 import java.io.IOException;
@@ -69,7 +69,7 @@ public class InputStreamZip extends AbstractCCmprss {
     protected void copy(OutputStream os) {
         checkNext();
         checkExists();
-        IOUtils.copy(is, os);
+        IOs.copy(is, os);
     }
 
     @Override

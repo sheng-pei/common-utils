@@ -4,14 +4,14 @@ import ppl.common.utils.cache.Cache;
 import ppl.common.utils.cache.ConcurrentReferenceValueCache;
 import ppl.common.utils.cache.ReferenceType;
 import ppl.common.utils.exception.UnreachableCodeException;
-import ppl.common.utils.reflect.TypeUtils;
+import ppl.common.utils.reflect.Types;
 
 import java.lang.reflect.Array;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-public final class ArrayUtils {
-    private ArrayUtils() {}
+public final class Arrays {
+    private Arrays() {}
 
     public static <T> boolean isEmpty(T[] array) {
         return array == null || array.length == 0;
@@ -53,7 +53,7 @@ public final class ArrayUtils {
 
     public static <T> T[] zero(Class<T> clazz) {
         Objects.requireNonNull(clazz);
-        if (TypeUtils.isPrimitive(clazz)) {
+        if (Types.isPrimitive(clazz)) {
             throw new IllegalArgumentException("Primitive type is not allowed. Use zeroXXX() instead.");
         }
 
@@ -66,8 +66,6 @@ public final class ArrayUtils {
         }
     }
 
-    private static final Object[] ZERO = new Object[0];
-    private static final String[] ZERO_STRING_ARRAY = new String[0];
     private static final byte[] ZERO_BYTE_ARRAY = new byte[0];
     private static final short[] ZERO_SHORT_ARRAY = new short[0];
     private static final int[] ZERO_INT_ARRAY = new int[0];
@@ -77,21 +75,12 @@ public final class ArrayUtils {
     private static final float[] ZERO_FLOAT_ARRAY = new float[0];
     private static final double[] ZERO_DOUBLE_ARRAY = new double[0];
 
-    static {
-        try {
-            ZERO_CACHE.get(Object.class, () -> ZERO);
-            ZERO_CACHE.get(String.class, () -> ZERO_STRING_ARRAY);
-        } catch (Exception e) {
-            //ignore
-        }
-    }
-
     public static Object[] zero() {
-        return ZERO;
+        return zero(Object.class);
     }
 
     public static String[] zeroString() {
-        return ZERO_STRING_ARRAY;
+        return zero(String.class);
     }
 
     public static byte[] zeroByte() {

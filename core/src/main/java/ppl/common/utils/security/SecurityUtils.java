@@ -1,6 +1,6 @@
 package ppl.common.utils.security;
 
-import ppl.common.utils.bytes.Bytes;
+import ppl.common.utils.Bytes;
 import ppl.common.utils.exception.JavaLibraryException;
 
 import java.nio.charset.Charset;

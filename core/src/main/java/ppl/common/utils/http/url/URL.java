@@ -1,6 +1,6 @@
 package ppl.common.utils.http.url;
 
-import ppl.common.utils.bytes.Bytes;
+import ppl.common.utils.Bytes;
 import ppl.common.utils.character.ascii.AsciiGroup;
 import ppl.common.utils.character.ascii.Mask;
 import ppl.common.utils.net.URICharGroup;

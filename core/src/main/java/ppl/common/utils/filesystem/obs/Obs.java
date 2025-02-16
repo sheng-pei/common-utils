@@ -4,7 +4,7 @@ import com.obs.services.ObsClient;
 import com.obs.services.model.ObsObject;
 import com.obs.services.model.PutObjectRequest;
 import com.obs.services.model.fs.NewFolderRequest;
-import ppl.common.utils.IOUtils;
+import ppl.common.utils.IOs;
 import ppl.common.utils.filesystem.core.*;
 import ppl.common.utils.filesystem.path.Path;
 import ppl.common.utils.filesystem.path.Paths;
@@ -287,7 +287,7 @@ public class Obs implements FileSystem {
             try (InputStream content = obsObject.getObjectContent();
                  BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(localFile.toPath()))) {
                 if (content != null) {
-                    IOUtils.copy(content, bos);
+                    IOs.copy(content, bos);
                 }
             } catch (IOException e) {
                 throw new ObsException("Failed to download file from obs", e);
@@ -297,7 +297,7 @@ public class Obs implements FileSystem {
         private void readIn(ObsObject obsObject, OutputStream os) {
             try (InputStream content = obsObject.getObjectContent()) {
                 if (content != null) {
-                    IOUtils.copy(content, os);
+                    IOs.copy(content, os);
                 }
             } catch (IOException e) {
                 throw new ObsException("Failed to download file from obs", e);

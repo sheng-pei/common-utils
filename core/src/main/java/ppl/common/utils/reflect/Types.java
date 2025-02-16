@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class TypeUtils {
+public final class Types {
 
     private static final Map<Class<?>, Class<?>> primitiveToWrapper;
     private static final Map<Class<?>, Class<?>> wrapperToPrimitive;
 
-    private TypeUtils() {}
+    private Types() {}
 
     static {
         Map<Class<?>, Class<?>> pToW = new HashMap<>();

@@ -18,7 +18,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 @ExtendWith(MockitoExtension.class)
-public class IOUtilsTest {
+public class IOsTest {
 
     private static final byte[] DATA = ("# 公共信息\n" +
             "## Header鉴权方式:\n" +
@@ -474,7 +474,7 @@ public class IOUtilsTest {
     @SuppressWarnings("all")
     public void testCopy() throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        IOUtils.copy(is, os, BUFFER_SIZE);
+        IOs.copy(is, os, BUFFER_SIZE);
         Assertions.assertArrayEquals(DATA, os.toByteArray());
     }
 

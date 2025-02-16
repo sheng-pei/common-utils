@@ -4,7 +4,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ppl.common.utils.IOUtils;
+import ppl.common.utils.IOs;
 import ppl.common.utils.compress.ArchiveException;
 
 import java.io.File;
@@ -69,7 +69,7 @@ public class Zip extends AbstractCCmprss {
     protected void copy(OutputStream os) throws IOException {
         checkNext();
         checkExists();
-        IOUtils.copy(file.getInputStream(e), os);
+        IOs.copy(file.getInputStream(e), os);
     }
 
     @Override

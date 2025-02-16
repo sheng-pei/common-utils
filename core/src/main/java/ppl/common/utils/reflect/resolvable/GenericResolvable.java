@@ -1,13 +1,12 @@
 package ppl.common.utils.reflect.resolvable;
 
-import ppl.common.utils.ArrayUtils;
+import ppl.common.utils.Arrays;
 import ppl.common.utils.exception.UnreachableCodeException;
 import ppl.common.utils.reflect.resolvable.variableresolver.DefaultVariableResolver;
 import ppl.common.utils.reflect.resolvable.variableresolver.VariableResolver;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
@@ -24,7 +23,7 @@ public abstract class GenericResolvable implements Resolvable {
             Resolvable[] generics,
             Resolvable owner) {
         this.generics = generics == null ?
-                ArrayUtils.zero(Resolvable.class) : generics;
+                Arrays.zero(Resolvable.class) : generics;
         this.owner = owner;
         this.interfaces = new AtomicReferenceArray<>(
                 clazz.getGenericInterfaces().length);
@@ -116,7 +115,7 @@ public abstract class GenericResolvable implements Resolvable {
             generics = resolveGenerics(variableResolver);
         }
 
-        if (Objects.equals(this.owner, owner) && Arrays.equals(this.generics, generics)) {
+        if (Objects.equals(this.owner, owner) && java.util.Arrays.equals(this.generics, generics)) {
             return this;
         }
         return create(generics, owner);
@@ -124,7 +123,7 @@ public abstract class GenericResolvable implements Resolvable {
 
     private Resolvable[] resolveGenerics(VariableResolver variableResolver) {
         Resolvable[] generics = this.generics;
-        return Arrays.stream(generics)
+        return java.util.Arrays.stream(generics)
                 .map(variableResolver::resolve)
                 .toArray(Resolvable[]::new);
     }
@@ -136,13 +135,13 @@ public abstract class GenericResolvable implements Resolvable {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         GenericResolvable that = (GenericResolvable) object;
-        return Arrays.equals(generics, that.generics) && Objects.equals(owner, that.owner);
+        return java.util.Arrays.equals(generics, that.generics) && Objects.equals(owner, that.owner);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(owner);
-        result = 31 * result + Arrays.hashCode(generics);
+        result = 31 * result + java.util.Arrays.hashCode(generics);
         return result;
     }
 }

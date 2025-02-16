@@ -1,11 +1,9 @@
-package ppl.common.utils.bytes;
-
-import ppl.common.utils.ArrayUtils;
+package ppl.common.utils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public class Bytes {
+public final class Bytes {
     private static final char[] HEX;
 
     static {
@@ -13,12 +11,14 @@ public class Bytes {
         HEX = base.toCharArray();
     }
 
+    private Bytes() {}
+
     public static byte[] fromHex(String hex) {
         if (hex == null) {
             return null;
         }
         if (hex.isEmpty()) {
-            return ArrayUtils.zeroByte();
+            return Arrays.zeroByte();
         }
 
         if ((hex.length() & 1) != 0) {

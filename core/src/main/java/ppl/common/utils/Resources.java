@@ -7,9 +7,9 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class ResourceUtils {
+public final class Resources {
 
-    private ResourceUtils() { }
+    private Resources() { }
 
     private static final Pattern JAR_URL_PATTERN = Pattern.compile("^[jJ][aA][rR]:.*!/.*$");
     private static final String FILE = "file";

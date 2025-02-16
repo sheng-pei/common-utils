@@ -3,7 +3,7 @@ package ppl.common.utils.json.jackson;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ppl.common.utils.IOUtils;
+import ppl.common.utils.IOs;
 import ppl.common.utils.json.JsonException;
 
 import java.io.ByteArrayOutputStream;
@@ -49,7 +49,7 @@ public class JsonUtils {
     public static <T> T read(InputStream is, Class<T> clazz) {
         try {
             try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                IOUtils.copy(is, os);
+                IOs.copy(is, os);
                 return OBJECT_MAPPER.readValue(os.toByteArray(), clazz);
             }
         } catch (Throwable t) {
