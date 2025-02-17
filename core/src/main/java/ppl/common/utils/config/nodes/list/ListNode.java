@@ -1,9 +1,11 @@
 package ppl.common.utils.config.nodes.list;
 
+import jdk.nashorn.internal.runtime.regexp.joni.Config;
 import ppl.common.utils.config.*;
 import ppl.common.utils.config.nodes.AbstractNode;
 import ppl.common.utils.config.nodes.MissingNode;
 import ppl.common.utils.config.nodes.iterator.ArrayIterator;
+import ppl.common.utils.config.nodes.iterator.ConfigIterator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -25,14 +27,18 @@ public final class ListNode extends AbstractNode {
     }
 
     @Override
+    public boolean isValue() {
+        return false;
+    }
+
+    @Override
     public int size() {
         return this.list.size();
     }
 
     @Override
     public Node getChild(String fieldName) {
-        String path = childPath(fieldName);
-        return new MissingNode(path);
+        return new MissingNode(childPath(fieldName));
     }
 
     @Override
@@ -51,7 +57,7 @@ public final class ListNode extends AbstractNode {
     }
 
     @Override
-    public Iterator<Node> iterator() {
+    public ConfigIterator iterator() {
         return new ArrayIterator(this.list.iterator(), this::childPath);
     }
 

@@ -3,6 +3,8 @@ package ppl.common.utils.config.nodes.jackson;
 import com.fasterxml.jackson.databind.JsonNode;
 import ppl.common.utils.config.Node;
 import ppl.common.utils.config.NodeFactory;
+import ppl.common.utils.config.nodes.MissingNode;
+import ppl.common.utils.config.nodes.NullNode;
 
 public class JacksonFactory implements NodeFactory {
     @Override
@@ -30,6 +32,13 @@ public class JacksonFactory implements NodeFactory {
             throw new IllegalArgumentException("Not jackson.");
         }
 
-        return new JacksonNode(path, (JsonNode) obj);
+        JsonNode node = (JsonNode) obj;
+        if (node.isNull()) {
+            return new NullNode(path);
+        } else if (node.isMissingNode()) {
+            return new MissingNode(path);
+        } else {
+            return new JacksonNode(path, node);
+        }
     }
 }

@@ -7,7 +7,7 @@ import ppl.common.utils.config.nodes.NullNode;
 import ppl.common.utils.config.nodes.jackson.JacksonFactory;
 import ppl.common.utils.config.nodes.list.ListFactory;
 import ppl.common.utils.config.nodes.map.MapFactory;
-import ppl.common.utils.config.nodes.map.PropertiesFactory;
+import ppl.common.utils.config.nodes.propertey.PropertiesFactory;
 import ppl.common.utils.config.nodes.scalar.ScalarFactory;
 
 import java.util.*;

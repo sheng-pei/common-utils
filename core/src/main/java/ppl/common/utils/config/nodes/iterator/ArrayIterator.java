@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-public class ArrayIterator implements Iterator<Node> {
+public class ArrayIterator implements ConfigIterator {
     private int cursor = 0;
     private final Iterator<?> iter;
     private final Function<Integer, String> childPathCreator;
@@ -25,17 +25,12 @@ public class ArrayIterator implements Iterator<Node> {
 
     @Override
     public Node next() {
-        String path = childPathCreator.apply(this.cursor);
+        String path = childPathCreator.apply(this.cursor ++);
         Object ele = iter.next();
-
-        Node node;
         try {
-            node = Nodes.createByPath(path, ele);
+            return Nodes.createByPath(path, ele);
         } catch (RuntimeException e) {
             throw new NodeException("Unknown value of '" + path + "'.", e);
         }
-
-        this.cursor ++;
-        return node;
     }
 }

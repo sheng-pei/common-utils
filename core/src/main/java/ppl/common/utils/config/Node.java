@@ -58,9 +58,9 @@ public interface Node extends Value, Iterable<Node> {
     Pattern FIELD_PATTERN = Pattern.compile(FIELD_PATTERN_STRING);
     Pattern PATH_PATTERN = Pattern.compile("^\\.|\\.?(?:(?:" +
             FIELD_PATTERN_STRING +
-            ")\\.+)*(?<last>" +
+            ")\\.)*(?<last>" +
             FIELD_PATTERN_STRING +
-            ")\\.*$");
+            ")$");
 
     /**
      * Method that returns true for "virtual" nodes which represent missing entries constructed by accessor methods
@@ -72,11 +72,19 @@ public interface Node extends Value, Iterable<Node> {
     }
 
     /**
-     * Method that returns true for a node which support iterator.
-     * @return true if this node is an array node or object node, false if not.
+     * Method that returns true for a node which is iterable.
+     * @return true if this node is iterable, false if not.
      */
     default boolean isContainer() {
         return false;
+    }
+
+    /**
+     * Method that returns true for a node which support value operation.
+     * @return true if this node support value operation, false if not.
+     */
+    default boolean isValue() {
+        return true;
     }
 
     /**
@@ -103,12 +111,6 @@ public interface Node extends Value, Iterable<Node> {
     String path();
 
     /**
-     * Method that returns the number of child nodes that this node contains if this node is an object or array node.
-     * @return number of child nodes for an object or array node, 0 otherwise.
-     */
-    int size();
-
-    /**
      * Method for getting a field that this node contains if this node is an object node.
      * @param fieldName name of a field to get.
      * @return the node you expected if this node is an object node and has the specified field,
@@ -127,10 +129,17 @@ public interface Node extends Value, Iterable<Node> {
     Node getChild(Integer index);
 
     /**
+     * Method that returns the number of child nodes that this node contains if this node is an object or array node.
+     * @return number of child nodes for an object or array node, 0 otherwise.
+     * @throws UnsupportedOperationException if this node is not iterable.
+     */
+    int size();
+
+    /**
      * Method for accessing child nodes. If this node is an object or array node.
      * @return {@link Iterator} for iterating all child nodes of this node if this node is an object or array node,
      * otherwise "empty iterator" is returned.
-     * @throws NodeException error during iterating child nodes with {@link Iterator} returned.
+     * @throws UnsupportedOperationException if this node is not iterable.
      */
     Iterator<Node> iterator();
 
@@ -207,24 +216,6 @@ public interface Node extends Value, Iterable<Node> {
             } else {
                 throw new IllegalStateException("Error field.");
             }
-        }
-
-        public <T> T getField(Class<T> clazz) {
-            if (checkArray(clazz) || checkObject(clazz)) {
-                @SuppressWarnings("unchecked")
-                T t = (T) field;
-                return t;
-            } else {
-                throw new IllegalArgumentException("Error type: " + clazz);
-            }
-        }
-
-        private boolean checkArray(Class<?> clazz) {
-            return (int.class.equals(clazz) || Integer.class.equals(clazz)) && type == ARRAY;
-        }
-
-        private boolean checkObject(Class<?> clazz) {
-            return String.class.equals(clazz) && type == OBJECT;
         }
 
         @Override

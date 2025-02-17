@@ -14,8 +14,8 @@ public final class NullNode extends AbstractNode {
     }
 
     @Override
-    public int size() {
-        return 0;
+    public boolean isContainer() {
+        return true;
     }
 
     @Override
@@ -26,6 +26,11 @@ public final class NullNode extends AbstractNode {
     @Override
     public Node getChild(Integer index) {
         return new MissingNode(childPath(index));
+    }
+
+    @Override
+    public int size() {
+        return 0;
     }
 
     @Override

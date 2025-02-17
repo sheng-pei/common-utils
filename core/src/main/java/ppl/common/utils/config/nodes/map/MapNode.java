@@ -4,6 +4,7 @@ import ppl.common.utils.config.*;
 import ppl.common.utils.config.ConvertException;
 import ppl.common.utils.config.nodes.AbstractNode;
 import ppl.common.utils.config.nodes.MissingNode;
+import ppl.common.utils.config.nodes.iterator.ConfigIterator;
 import ppl.common.utils.config.nodes.iterator.ObjectIterator;
 
 import java.math.BigDecimal;
@@ -25,8 +26,8 @@ public final class MapNode extends AbstractNode {
     }
 
     @Override
-    public int size() {
-        return this.map.size();
+    public boolean isValue() {
+        return false;
     }
 
     @Override
@@ -44,12 +45,16 @@ public final class MapNode extends AbstractNode {
 
     @Override
     public Node getChild(Integer index) {
-        String path = childPath(index);
-        return new MissingNode(path);
+        return new MissingNode(childPath(index));
     }
 
     @Override
-    public Iterator<Node> iterator() {
+    public int size() {
+        return this.map.size();
+    }
+
+    @Override
+    public ConfigIterator iterator() {
         return new ObjectIterator(this.map.entrySet().iterator(), this::childPath);
     }
 

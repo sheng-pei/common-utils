@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 
-public class ObjectIterator implements Iterator<Node> {
+public class ObjectIterator implements ConfigIterator {
     private final Iterator<? extends Map.Entry<?, ?>> iter;
     private final Function<String, String> childPathCreator;
 

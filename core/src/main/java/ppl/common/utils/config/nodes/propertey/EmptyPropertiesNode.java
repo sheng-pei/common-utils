@@ -1,21 +1,18 @@
-package ppl.common.utils.config.nodes;
+package ppl.common.utils.config.nodes.propertey;
 
 import ppl.common.utils.config.Node;
+import ppl.common.utils.config.nodes.AbstractNode;
+import ppl.common.utils.config.nodes.MissingNode;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Iterator;
 
-public final class MissingNode extends AbstractNode {
+public class EmptyPropertiesNode extends AbstractNode {
 
-    public MissingNode(String path) {
+    protected EmptyPropertiesNode(String path) {
         super(path);
-    }
-
-    @Override
-    public boolean isMissing() {
-        return true;
     }
 
     @Override
@@ -140,7 +137,7 @@ public final class MissingNode extends AbstractNode {
 
     @Override
     public BigDecimal decimalValue(BigDecimal def) {
-        return BigDecimal.ZERO;
+        return def;
     }
 
     @Override

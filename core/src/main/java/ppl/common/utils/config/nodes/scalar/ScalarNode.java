@@ -50,11 +50,6 @@ public class ScalarNode extends AbstractNode {
     }
 
     @Override
-    public int size() {
-        return 0;
-    }
-
-    @Override
     public Node getChild(String fieldName) {
         return new MissingNode(childPath(fieldName));
     }
@@ -65,8 +60,13 @@ public class ScalarNode extends AbstractNode {
     }
 
     @Override
+    public int size() {
+        throw new UnsupportedOperationException("Not an iterable node.");
+    }
+
+    @Override
     public Iterator<Node> iterator() {
-        return Collections.emptyIterator();
+        throw new UnsupportedOperationException("Not an iterable node.");
     }
 
     @Override

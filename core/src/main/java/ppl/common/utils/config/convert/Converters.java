@@ -230,12 +230,17 @@ public class Converters {
             if (o == null) {
                 return null;
             }
-            if (o instanceof JsonNode) {
-                JsonNode jNode = (JsonNode) o;
-                if (jNode.isBoolean()) {
-                    return jNode.booleanValue();
+            try {
+                if (o instanceof JsonNode) {
+                    JsonNode jNode = (JsonNode) o;
+                    if (jNode.isBoolean()) {
+                        return jNode.booleanValue();
+                    }
                 }
-            } else if (o instanceof Boolean) {
+            } catch (LinkageError e) {
+                //ignore jackson
+            }
+            if (o instanceof Boolean) {
                 return (Boolean) o;
             }
             throw new IllegalArgumentException("Couldn't be represented as boolean (java primitive).");
@@ -247,12 +252,17 @@ public class Converters {
             if (o == null) {
                 return null;
             }
-            if (o instanceof JsonNode) {
-                JsonNode jNode = (JsonNode) o;
-                if (jNode.isTextual()) {
-                    return jNode.textValue();
+            try {
+                if (o instanceof JsonNode) {
+                    JsonNode jNode = (JsonNode) o;
+                    if (jNode.isTextual()) {
+                        return jNode.textValue();
+                    }
                 }
-            } else if (o instanceof String) {
+            } catch (LinkageError e) {
+                //ignore jackson
+            }
+            if (o instanceof String) {
                 return (String) o;
             } else if (ScalarNode.isScalar(o)) {
                 return o.toString();
@@ -305,60 +315,97 @@ public class Converters {
     };
 
     private static boolean isFloat(Object o) {
-        if (o instanceof JsonNode) {
-            JsonNode jNode = (JsonNode) o;
-            return jNode.isFloat() || jNode.isDouble() || jNode.isBigDecimal();
-        } else return Types.isFloat(o);
+        try {
+            if (o instanceof JsonNode) {
+                JsonNode jNode = (JsonNode) o;
+                return jNode.isFloat() || jNode.isDouble() || jNode.isBigDecimal();
+            }
+        } catch (LinkageError e) {
+            //ignore jackson
+        }
+        return Types.isFloat(o);
     }
 
     private static float toFloat(Object o) {
-        if (o instanceof JsonNode) {
-            JsonNode jNode = (JsonNode) o;
-            if (jNode.isFloat()) {
-                return jNode.floatValue();
+        try {
+            if (o instanceof JsonNode) {
+                JsonNode jNode = (JsonNode) o;
+                if (jNode.isFloat()) {
+                    return jNode.floatValue();
+                }
             }
-        } else if (o instanceof Float) {
+        } catch (LinkageError e) {
+            //ignore jackson
+        }
+        if (o instanceof Float) {
             return (Float) o;
         }
         throw new IllegalArgumentException("Reject to be represented as float, maybe loss of accuracy.");
     }
 
     private static double toDouble(Object o) {
-        if (o instanceof JsonNode) {
-            JsonNode jNode = (JsonNode) o;
-            if (jNode.isFloat() || jNode.isDouble()) {
-                return jNode.doubleValue();
+        try {
+            if (o instanceof JsonNode) {
+                JsonNode jNode = (JsonNode) o;
+                if (jNode.isFloat() || jNode.isDouble()) {
+                    return jNode.doubleValue();
+                }
             }
-        } else if (o instanceof Float || o instanceof Double) {
+        } catch (LinkageError e) {
+            //ignore jackson
+        }
+
+        if (o instanceof Float || o instanceof Double) {
             return ((Number) o).doubleValue();
         }
         throw new IllegalArgumentException("Reject to be represented as double, maybe loss of accuracy.");
     }
 
     private static boolean isInteger(Object o) {
-        if (o instanceof JsonNode) {
-            JsonNode jNode = (JsonNode) o;
-            return jNode.isInt() || jNode.isLong() || jNode.isShort() || jNode.isBigInteger();
-        } else return Types.isInteger(o);
+        try {
+            if (o instanceof JsonNode) {
+                JsonNode jNode = (JsonNode) o;
+                return jNode.isInt() || jNode.isLong() || jNode.isShort() || jNode.isBigInteger();
+            }
+        } catch (LinkageError e) {
+            //ignore jackson
+        }
+        return Types.isInteger(o);
     }
 
     private static long toLong(Object o) {
+        try {
+            if (o instanceof JsonNode) {
+                JsonNode jNode = (JsonNode) o;
+                return jNode.longValue();
+            }
+        } catch (LinkageError e) {
+            //ignore jackson
+        }
         if (o instanceof BigInteger) {
             BigInteger bi = (BigInteger) o;
             return bi.longValueExact();
         }
-        return ((Number) o).longValue();
+        if (o instanceof Number) {
+            return ((Number) o).longValue();
+        }
+        throw new IllegalArgumentException("Reject to be represented as long, not a number.");
     }
 
     private static Object toEnumKey(Object o) {
-        if (o instanceof JsonNode) {
-            JsonNode jNode = (JsonNode) o;
-            if (jNode.isTextual()) {
-                return jNode.textValue();
-            } else if (jNode.isInt() || jNode.isShort() || jNode.isLong()) {
-                return jNode.longValue();
+        try {
+            if (o instanceof JsonNode) {
+                JsonNode jNode = (JsonNode) o;
+                if (jNode.isTextual()) {
+                    return jNode.textValue();
+                } else if (jNode.isInt() || jNode.isShort() || jNode.isLong()) {
+                    return jNode.longValue();
+                }
             }
-        } else if (o instanceof String || Types.isBaseInteger(o)) {
+        } catch (LinkageError e) {
+            //ignore jackson
+        }
+        if (o instanceof String || Types.isBaseInteger(o)) {
             return o;
         }
         throw new IllegalArgumentException("Couldn't be converted to enum.");

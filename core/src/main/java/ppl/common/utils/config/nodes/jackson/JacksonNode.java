@@ -1,19 +1,15 @@
 package ppl.common.utils.config.nodes.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.POJONode;
 import ppl.common.utils.config.*;
 import ppl.common.utils.config.convert.Converters;
 import ppl.common.utils.config.nodes.AbstractNode;
-import ppl.common.utils.config.nodes.MissingNode;
 import ppl.common.utils.config.nodes.iterator.ArrayIterator;
+import ppl.common.utils.config.nodes.iterator.ConfigIterator;
 import ppl.common.utils.config.nodes.iterator.ObjectIterator;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collections;
-import java.util.Iterator;
 
 public class JacksonNode extends AbstractNode {
 
@@ -25,13 +21,18 @@ public class JacksonNode extends AbstractNode {
     }
 
     @Override
-    public boolean isContainer() {
-        return json.isContainerNode();
+    public boolean isMissing() {
+        return json.isMissingNode();
     }
 
     @Override
-    public int size() {
-        return json.size();
+    public boolean isContainer() {
+        return json.isObject() || json.isArray();
+    }
+
+    @Override
+    public boolean isValue() {
+        return json.isValueNode();
     }
 
     @Override
@@ -39,7 +40,7 @@ public class JacksonNode extends AbstractNode {
         String path = childPath(fieldName);
         JsonNode node = json.path(fieldName);
         try {
-            return create(path, node);
+            return Nodes.createByPath(path, node);
         } catch (RuntimeException e) {
             throw new NodeException("Unknown value of '" + path + "'.", e);
         }
@@ -50,50 +51,28 @@ public class JacksonNode extends AbstractNode {
         String path = childPath(index);
         JsonNode node = json.path(index);
         try {
-            return create(path, node);
+            return Nodes.createByPath(path, node);
         } catch (RuntimeException e) {
             throw new NodeException("Unknown value of '" + path + "'.", e);
         }
     }
 
-    private Node create(String path, JsonNode node) {
-        if (node.isMissingNode()) {
-            return new MissingNode(path);
-        } else {
-            return Nodes.createByPath(path, value(node));
+    @Override
+    public int size() {
+        if (!isContainer()) {
+            throw new UnsupportedOperationException("Not an iterable node.");
         }
-    }
-
-    private Object value(JsonNode node) {
-        if (node.isValueNode()) {
-            if (node.isNumber()) {
-                return node.numberValue();
-            } else if (node.isBoolean()) {
-                return node.booleanValue();
-            } else if (node.isNull()) {
-                return null;
-            } else if (node.isTextual()) {
-                return node.textValue();
-            } else if (node.isPojo()) {
-                return ((POJONode) node).getPojo();
-            } else {
-                throw new IllegalArgumentException("Disallowed jackson value node type in config.");
-            }
-        } else if (node.isContainerNode()) {
-            return node;
-        } else {
-            throw new IllegalArgumentException("Disallowed jackson node type in config.");
-        }
+        return json.size();
     }
 
     @Override
-    public Iterator<Node> iterator() {
+    public ConfigIterator iterator() {
         if (this.json.isArray()) {
             return new ArrayIterator(this.json.iterator(), this::childPath);
         } else if (this.json.isObject()) {
             return new ObjectIterator(this.json.fields(), this::childPath);
         }
-        return Collections.emptyIterator();
+        throw new UnsupportedOperationException("Not an iterable node.");
     }
 
     @Override
@@ -103,8 +82,8 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public String textValue() {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.stringValue(json);
     }
@@ -116,8 +95,8 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public Byte byteValue() {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.byteValue(json);
     }
@@ -129,8 +108,8 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public Short shortValue() {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.shortValue(json);
     }
@@ -142,8 +121,8 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public Integer intValue() {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.intValue(json);
     }
@@ -155,8 +134,8 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public Long longValue() {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.longValue(json);
     }
@@ -168,8 +147,8 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public BigInteger bigintValue() {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.bigintValue(json);
     }
@@ -181,8 +160,8 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public Boolean boolValue() {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.boolValue(json);
     }
@@ -194,8 +173,8 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public Float floatValue() {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.floatValue(json);
     }
@@ -207,16 +186,16 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public Double doubleValue() {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.doubleValue(json);
     }
 
     @Override
     public Double doubleValue(int scale) {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.doubleValue(json, scale);
     }
@@ -228,16 +207,16 @@ public class JacksonNode extends AbstractNode {
 
     @Override
     public BigDecimal decimalValue() {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.decimalValue(json);
     }
 
     @Override
     public <E extends Enum<E>> E enumValue(Class<E> enumClass) {
-        if (json.isContainerNode()) {
-            throw new ConvertException("Jackson container node.");
+        if (!isValue()) {
+            throw new ConvertException("Not a value node.");
         }
         return Converters.def().convert(json, enumClass);
     }
