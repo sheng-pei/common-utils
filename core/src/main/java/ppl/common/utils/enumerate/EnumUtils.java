@@ -30,24 +30,6 @@ public class EnumUtils {
 
     }
 
-    public static <K> K encode(Enum e, Class<K> keyClazz) {
-        Objects.requireNonNull(keyClazz, "keyClazz is null");
-        if (e == null) {
-            return null;
-        }
-
-        checkEncodeSupport(e.getClass());
-
-        try {
-            return EnumKey.unwrap(enumToKeyCache.get(e), keyClazz);
-        } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException(Strings.format(
-                    "Could not encode enum({}) to {}",
-                    e.getClass().getCanonicalName(),
-                    keyClazz.getCanonicalName()), ex);
-        }
-    }
-
     public static Object encode(Enum e) {
         if (e == null) {
             return null;

@@ -86,7 +86,8 @@ class EnumSupport {
                     return ERROR.NULL_KEY;
                 }
 
-                EnumKey enumKey = EnumKey.wrap(key);
+                EnumEncoder enumEncoder = encoder.getAnnotation(EnumEncoder.class);
+                EnumKey enumKey = EnumKey.wrap(key, !enumEncoder.caseSensitive());
                 if (keyToEnum.containsKey(enumKey)) {
                     return ERROR.DUPLICATE_ENUM_KEYS;
                 }

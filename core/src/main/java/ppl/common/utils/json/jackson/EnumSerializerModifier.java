@@ -18,14 +18,7 @@ public class EnumSerializerModifier extends BeanSerializerModifier {
                 return new JsonSerializer<Enum<? extends Enum<?>>>() {
                     @Override
                     public void serialize(Enum<? extends Enum<?>> value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                        Object obj = EnumUtils.encode(value);
-                        if (obj instanceof String) {
-                            gen.writeString(obj.toString());
-                        } else if (obj instanceof Character) {
-                            gen.writeString(obj.toString());
-                        } else if (obj instanceof Number) {
-                            gen.writeNumber(obj.toString());
-                        }
+                        gen.writePOJO(EnumUtils.encode(value));
                     }
                 };
             }

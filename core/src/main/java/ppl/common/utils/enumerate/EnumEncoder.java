@@ -7,5 +7,5 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 public @interface EnumEncoder {
-    boolean caseSensitive() default true; //TODO, implements
+    boolean caseSensitive() default true;
 }
