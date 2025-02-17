@@ -22,6 +22,7 @@ public interface NodeFactory {
      * Create a root node out of the material.
      * @param material the material to process.
      * @return root of config
+     * @throws NodeException if the specified material couldn't be converted into {@link Node}.
      */
     Node createRoot(Object material);
 
@@ -30,6 +31,7 @@ public interface NodeFactory {
      * @param path the config path of the created node.
      * @param material the material to process.
      * @return a node
+     * @throws NodeException if the specified material couldn't be converted into {@link Node}.
      */
     Node create(String path, Object material);
 

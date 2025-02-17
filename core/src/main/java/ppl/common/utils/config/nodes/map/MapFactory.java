@@ -1,6 +1,7 @@
 package ppl.common.utils.config.nodes.map;
 
 import ppl.common.utils.config.Node;
+import ppl.common.utils.config.NodeException;
 import ppl.common.utils.config.NodeFactory;
 
 import java.util.Map;
@@ -24,7 +25,7 @@ public class MapFactory implements NodeFactory {
     @Override
     public Node create(String path, Object obj) {
         if (!accept(obj)) {
-            throw new IllegalArgumentException("Not map.");
+            throw new NodeException("Not map.");
         }
 
         return new MapNode(path, (Map<?, ?>) obj);

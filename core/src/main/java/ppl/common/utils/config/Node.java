@@ -3,6 +3,7 @@ package ppl.common.utils.config;
 import ppl.common.utils.config.nodes.MissingNode;
 
 import java.util.Iterator;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -61,6 +62,18 @@ public interface Node extends Value, Iterable<Node> {
             ")\\.)*(?<last>" +
             FIELD_PATTERN_STRING +
             ")$");
+
+    static Matcher checkPath(String path) {
+        Matcher matcher = Node.PATH_PATTERN.matcher(path);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException(
+                    "Invalid path: " + path + ". Use a period('.') for root " +
+                            "or string composed of cells which are result of " +
+                            "concatenating a period('.') and a key which is '[' index ']' " +
+                            "or field name, nonempty string with no letter '[', ']', or '{' field name '}'.");
+        }
+        return matcher;
+    }
 
     /**
      * Method that returns true for "virtual" nodes which represent missing entries constructed by accessor methods

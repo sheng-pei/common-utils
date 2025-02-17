@@ -11,15 +11,7 @@ public abstract class AbstractNode implements Node {
     private final String path;
 
     protected AbstractNode(String path) {
-        Matcher matcher = Node.PATH_PATTERN.matcher(path);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException(
-                    "Invalid path: " + path + ". Use a period('.') for root " +
-                            "or string composed of cells which are result of " +
-                            "concatenating a period('.') and a key which is '[' index ']' " +
-                            "or field name, nonempty string with no letter '[', ']', or '{' field name '}'.");
-        }
-
+        Matcher matcher = Node.checkPath(path);
         this.key = path.equals(".") ? null : matcher.group("last");
         this.path = path;
     }

@@ -43,9 +43,6 @@ public class ScalarNode extends AbstractNode {
 
     ScalarNode(String path, Object scalar) {
         super(path);
-        if (scalar == null || !BASE_TYPES.contains(scalar.getClass())) {
-            throw new IllegalArgumentException("Only base type is allowed.");
-        }
         this.scalar = scalar;
     }
 

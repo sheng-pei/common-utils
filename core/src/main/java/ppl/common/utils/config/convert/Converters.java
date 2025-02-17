@@ -3,11 +3,11 @@ package ppl.common.utils.config.convert;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ppl.common.utils.Numbers;
 import ppl.common.utils.cache.ConcurrentReferenceValueCache;
 import ppl.common.utils.cache.ReferenceType;
 import ppl.common.utils.config.nodes.scalar.ScalarNode;
 import ppl.common.utils.exception.UnreachableCodeException;
-import ppl.common.utils.order.Condition;
 import ppl.common.utils.reflect.Types;
 import ppl.common.utils.string.Strings;
 import ppl.common.utils.cache.Cache;
@@ -59,7 +59,7 @@ public class Converters {
 
             try {
                 long v = toLong(o);
-                if (inByte(v)) {
+                if (Numbers.inByte(v)) {
                     return (byte) v;
                 }
             } catch (ArithmeticException e) {
@@ -81,7 +81,7 @@ public class Converters {
 
             try {
                 long v = toLong(o);
-                if (inShort(v)) {
+                if (Numbers.inShort(v)) {
                     return (short) v;
                 }
             } catch (ArithmeticException e) {
@@ -103,7 +103,7 @@ public class Converters {
 
             try {
                 long v = toLong(o);
-                if (inInt(v)) {
+                if (Numbers.inInt(v)) {
                     return (int) v;
                 }
             } catch (ArithmeticException e) {
@@ -161,7 +161,7 @@ public class Converters {
             if (isInteger(o)) {
                 try {
                     long v = toLong(o);
-                    if (inShort(v)) {
+                    if (Numbers.inShort(v)) {
                         return (float) v;
                     }
                 } catch (ArithmeticException e) {
@@ -187,7 +187,7 @@ public class Converters {
             if (isInteger(o)) {
                 try {
                     long v = toLong(o);
-                    if (inInt(v)) {
+                    if (Numbers.inInt(v)) {
                         return (double) v;
                     }
                 } catch (ArithmeticException e) {
@@ -292,7 +292,7 @@ public class Converters {
 
             if (Types.isBaseInteger(o)) {
                 long value = ((Number) o).longValue();
-                if (inInt(value)) {
+                if (Numbers.inInt(value)) {
                     return c.getEnumConstants()[(int) value];
                 }
             } else if (o instanceof String) {
@@ -409,18 +409,6 @@ public class Converters {
             return o;
         }
         throw new IllegalArgumentException("Couldn't be converted to enum.");
-    }
-
-    private static boolean inInt(Long l) {
-        return Condition.in(l, Integer.MIN_VALUE, Integer.MAX_VALUE);
-    }
-
-    private static boolean inShort(Long i) {
-        return Condition.in(i, Short.MIN_VALUE, Short.MAX_VALUE);
-    }
-
-    private static boolean inByte(Long i) {
-        return Condition.in(i, Byte.MIN_VALUE, Byte.MAX_VALUE);
     }
 
     public static Converters def() {

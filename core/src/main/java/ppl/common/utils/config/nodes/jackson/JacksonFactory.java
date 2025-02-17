@@ -2,6 +2,7 @@ package ppl.common.utils.config.nodes.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import ppl.common.utils.config.Node;
+import ppl.common.utils.config.NodeException;
 import ppl.common.utils.config.NodeFactory;
 import ppl.common.utils.config.nodes.MissingNode;
 import ppl.common.utils.config.nodes.NullNode;
@@ -29,7 +30,7 @@ public class JacksonFactory implements NodeFactory {
     @Override
     public Node create(String path, Object obj) {
         if (!accept(obj)) {
-            throw new IllegalArgumentException("Not jackson.");
+            throw new NodeException("Not jackson.");
         }
 
         JsonNode node = (JsonNode) obj;

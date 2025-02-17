@@ -103,7 +103,8 @@ public class Nodes {
      * @return root node out of the specified material. It is created by a factory that
      * accepts the material and has the highest priority if the material is not null.
      * Otherwise, a root {@link NullNode} will be returned.
-     * @throws IllegalArgumentException if no factory accepts the specified material.
+     * @throws NodeException if the specified material is not accepted by some factory
+     * or couldn't be converted into {@link Node} by the factory selected.
      */
     public static Node root(Object material) {
         return createByPath(Node.ROOT_PATH, material);
@@ -120,6 +121,8 @@ public class Nodes {
      * @return a node out of the specified material whose path is the specified path. It is
      * created by a factory that accepts the material and has the highest priority if the
      * material is not null. Otherwise, a {@link NullNode} will be returned.
+     * @throws NodeException if the specified material is not accepted by some factory
+     * or couldn't be converted into {@link Node} by the factory selected.
      */
     public static Node createByPath(String path, Object material) {
         if (material == null) {
@@ -135,7 +138,7 @@ public class Nodes {
             }
         }
 
-        throw new IllegalArgumentException("No NodeFactory accepts this material.");
+        throw new NodeException("No NodeFactory accepts this material.");
     }
 
     public static <E> Set<E> toSet(Node reader, Function<Node, E> elementConverter) {

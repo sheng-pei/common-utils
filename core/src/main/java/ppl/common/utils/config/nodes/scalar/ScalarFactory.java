@@ -1,6 +1,7 @@
 package ppl.common.utils.config.nodes.scalar;
 
 import ppl.common.utils.config.Node;
+import ppl.common.utils.config.NodeException;
 import ppl.common.utils.config.NodeFactory;
 
 public class ScalarFactory implements NodeFactory {
@@ -11,7 +12,7 @@ public class ScalarFactory implements NodeFactory {
 
     @Override
     public boolean accept(Object obj) {
-        return true;
+        return ScalarNode.isScalar(obj);
     }
 
     @Override
@@ -21,6 +22,9 @@ public class ScalarFactory implements NodeFactory {
 
     @Override
     public Node create(String path, Object obj) {
+        if (!accept(obj)) {
+            throw new NodeException("Not scalar.");
+        }
         return new ScalarNode(path, obj);
     }
 }

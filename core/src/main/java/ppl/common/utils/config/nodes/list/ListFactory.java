@@ -1,6 +1,7 @@
 package ppl.common.utils.config.nodes.list;
 
 import ppl.common.utils.config.Node;
+import ppl.common.utils.config.NodeException;
 import ppl.common.utils.config.NodeFactory;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class ListFactory implements NodeFactory {
     @Override
     public Node create(String path, Object obj) {
         if (!accept(obj)) {
-            throw new IllegalArgumentException("Not list.");
+            throw new NodeException("Not list.");
         }
 
         return new ListNode(path, (List<?>) obj);

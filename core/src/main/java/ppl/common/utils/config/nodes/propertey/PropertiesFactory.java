@@ -1,6 +1,7 @@
 package ppl.common.utils.config.nodes.propertey;
 
 import ppl.common.utils.config.Node;
+import ppl.common.utils.config.NodeException;
 import ppl.common.utils.config.NodeFactory;
 
 import java.util.*;
@@ -26,24 +27,27 @@ public class PropertiesFactory implements NodeFactory {
     @Override
     public Node create(String path, Object obj) {
         if (!accept(obj)) {
-            throw new IllegalArgumentException("Not properties.");
+            throw new NodeException("Not properties.");
         }
 
         Property root = new Property();
-
         Properties properties = (Properties) obj;
-        Map<String, String[]> keys = keys(properties);
-        for (Map.Entry<String, String[]> e : keys.entrySet()) {
-            String k = e.getKey();
-            String[] ns = e.getValue();
-            Object v = properties.get(k);
+        try {
+            Map<String, String[]> keys = keys(properties);
+            for (Map.Entry<String, String[]> e : keys.entrySet()) {
+                String k = e.getKey();
+                String[] ns = e.getValue();
+                Object v = properties.get(k);
 
-            Property property = root;
-            for (String n : ns) {
-                Node.ParsedName field = Node.ParsedName.parse(n);
-                property = property.ensureAndGet(field);
+                Property property = root;
+                for (String n : ns) {
+                    Node.ParsedName field = Node.ParsedName.parse(n);
+                    property = property.ensureAndGet(field);
+                }
+                property.setScalar(v);
             }
-            property.setScalar(v);
+        } catch (RuntimeException e) {
+            throw new NodeException("Properties error.", e);
         }
 
         return root.toNode(path);
