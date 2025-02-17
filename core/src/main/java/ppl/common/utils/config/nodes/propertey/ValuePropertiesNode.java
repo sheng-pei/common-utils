@@ -19,9 +19,6 @@ public class ValuePropertiesNode extends AbstractNode {
 
     protected ValuePropertiesNode(String path, Object value) {
         super(path);
-        if (value != null && !ScalarNode.isScalar(value)) {
-            throw new IllegalArgumentException("Property value must be scalar.");
-        }
         this.scalar = value;
     }
 

@@ -50,7 +50,11 @@ public class PropertiesFactory implements NodeFactory {
             throw new NodeException("Properties error.", e);
         }
 
-        return root.toNode(path);
+        try {
+            return root.toNode(path);
+        } catch (IllegalStateException e) {
+            throw new NodeException("List properties error.", e);
+        }
     }
 
     private Map<String, String[]> keys(Properties properties) {
