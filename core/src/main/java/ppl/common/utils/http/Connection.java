@@ -5,10 +5,7 @@ import ppl.common.utils.http.response.Response;
 import java.io.OutputStream;
 
 /**
- * TODO, Convention is same as URLConnection and not support HttpClient.
- * Because when we open output streams to write request body, connection is already opened.
- * But when executing request in HttpClient, a complete request (contains request body)
- * is already prepared. We couldn't open connection before we has prepared request body to write.
+ * Convention is same as URLConnection and not HttpClient like interface.
  */
 public interface Connection {
     void disconnect();
