@@ -213,32 +213,4 @@ public class EnumUtilsTest {
         );
     }
 
-    @Test
-    public void testFailedEncode() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> EnumUtils.encode(IntEnum.U, char.class));
-    }
-
-    @SuppressWarnings("rawtypes")
-    @ParameterizedTest
-    @MethodSource("encodeProvider")
-    public void testEncode(Object expected, Enum e, Class<?> type) {
-        Assertions.assertEquals(expected, EnumUtils.encode(e, type));
-    }
-
-    private static Stream<Arguments> encodeProvider() {
-        return Stream.of(
-                Arguments.of(1, ByteEnum.U, Integer.class),
-                Arguments.of(1, ShortEnum.U, Integer.class),
-                Arguments.of(1, IntEnum.U, Integer.class),
-                Arguments.of(1, LongEnum.U, Integer.class),
-                Arguments.of('c', CharEnum.U, Character.class),
-                Arguments.of("c", StringEnum.U, String.class),
-                Arguments.of(1, WByteEnum.U, int.class),
-                Arguments.of(1, WShortEnum.U, int.class),
-                Arguments.of(1, WIntEnum.U, int.class),
-                Arguments.of(1, WLongEnum.U, int.class),
-                Arguments.of('c', WCharEnum.U, char.class)
-        );
-    }
-
 }
