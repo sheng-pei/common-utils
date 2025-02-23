@@ -12,6 +12,7 @@ public class ExtPattern implements ExtParser {
     private final String name;
     private final SelectorKind supportedSelector;
     private final boolean exact;
+    private final boolean caseSensitive;
     private final Pattern pattern;
     private final ExtPatternPosition position;
 
@@ -23,7 +24,8 @@ public class ExtPattern implements ExtParser {
         SelectorKind supportedSelector = builder.supportedSelector;
         this.name = builder.name;
         this.supportedSelector = supportedSelector == null ? SelectorKind.PREFIX : supportedSelector;
-        this.exact = builder.exact;
+        this.exact = builder.exact == null || builder.exact;
+        this.caseSensitive = builder.caseSensitive != null && builder.caseSensitive;
         this.pattern = builder.pattern;
         this.position = builder.position;
     }
@@ -32,6 +34,7 @@ public class ExtPattern implements ExtParser {
         this.name = pattern.name;
         this.supportedSelector = pattern.supportedSelector;
         this.exact = pattern.exact;
+        this.caseSensitive = pattern.caseSensitive;
         this.pattern = pattern.pattern;
         this.position = pattern.position;
     }
@@ -59,10 +62,15 @@ public class ExtPattern implements ExtParser {
         String ext = this.name();
         if (cnt > 0) {
             StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < cnt; i++) {
-                builder.append(matcher.group(i));
+            for (int i = 1; i <= cnt; i++) {
+                String g = matcher.group(i);
+                if (g != null) {
+                    builder.append(caseSensitive ? g : g.toLowerCase());
+                }
             }
-            ext = builder.toString();
+            if (builder.length() != 0) {
+                ext = builder.toString();
+            }
         }
 
         if (ext.isEmpty()) {
@@ -89,7 +97,8 @@ public class ExtPattern implements ExtParser {
 
     public static class Builder {
         private String name;
-        private boolean exact;
+        private Boolean exact;
+        private Boolean caseSensitive;
         private SelectorKind supportedSelector;
         private Pattern pattern;
         private ExtPatternPosition position;
@@ -101,7 +110,7 @@ public class ExtPattern implements ExtParser {
                 throw new IllegalArgumentException("Point is not allowed.");
             }
 
-            this.name = name;
+            this.name = name.toLowerCase();
             return this;
         }
 
@@ -110,7 +119,12 @@ public class ExtPattern implements ExtParser {
             return this;
         }
 
-        public Builder exact(boolean exact) {
+        public Builder caseSensitive(Boolean caseSensitive) {
+            this.caseSensitive = caseSensitive;
+            return this;
+        }
+
+        public Builder exact(Boolean exact) {
             this.exact = exact;
             return this;
         }

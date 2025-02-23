@@ -113,14 +113,15 @@ public class ExtPatternParser {
         }
 
         if (position == ExtPatternPosition.LEFT) {
-            rule = "^" + rule + "(\\.)";
+            rule = "^" + rule + "\\.";
         } else {
-            rule = "(\\.)" + rule + "$";
+            rule = "\\." + rule + "$";
         }
 
         rule = (caseSensitive == CASE_SENSITIVE_FLAG ? "" : "(?i)") + rule;
         Pattern p = Pattern.compile(rule);
         builder.pattern(p);
+        builder.caseSensitive(caseSensitive == CASE_SENSITIVE_FLAG);
         return builder.build();
     }
 }

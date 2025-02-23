@@ -14,24 +14,26 @@ import java.util.stream.Stream;
 class ExtPatternTest {
 
     private static ExtPattern prt = ExtPattern.builder()
-            .ext("prt")
+            .name("prt")
             .position(ExtPatternPosition.RIGHT)
             .pattern(Pattern.compile("\\.prt(?:\\.[0-9]+)?$"))
             .build();
     private static ExtPattern prepin = ExtPattern.builder()
-            .ext("prepin")
+            .name("prepin")
             .position(ExtPatternPosition.LEFT)
             .pattern(Pattern.compile("^prepin\\."))
             .build();
     private static ExtPattern bsd = ExtPattern.builder()
-            .ext("bsd")
+            .name("bsd")
             .position(ExtPatternPosition.RIGHT)
+            .exact(false)
             .pattern(Pattern.compile("\\.bsd[0-9]*$"))
             .build();
     private static ExtPattern flsgrf = ExtPattern.builder()
-            .ext("flsgrf")
+            .name("flsgrf")
             .position(ExtPatternPosition.LEFT)
             .pattern(Pattern.compile("^flsgrf[0-9]*\\."))
+            .exact(false)
             .build();
 
     @ParameterizedTest
@@ -54,20 +56,18 @@ class ExtPatternTest {
         Ext actual = parser.parse(name);
         Assertions.assertEquals(actual.getExt(), ext.getExt());
         Assertions.assertEquals(actual.getName().getBase(), ext.getName().getBase());
-        Assertions.assertEquals(actual.getName().getExt(), ext.getName().getExt());
-        Assertions.assertEquals(actual.getName().getPosition(), ext.getName().getPosition());
         Assertions.assertEquals(actual.getName().toString(), ext.getName().toString());
     }
 
     private static Stream<Arguments> parserProvider() {
         return Stream.of(
-                Arguments.of(prt, "a.prt", new Ext("prt", new Name("a", ".prt", ExtPatternPosition.RIGHT))),
-                Arguments.of(prt, "a.prt.987", new Ext("prt", new Name("a", ".prt.987", ExtPatternPosition.RIGHT))),
-                Arguments.of(prepin, "prepin.hua", new Ext("prepin", new Name("hua", "prepin.", ExtPatternPosition.LEFT))),
-                Arguments.of(bsd, "a.bsd", new Ext("bsd", new Name("a", ".bsd", ExtPatternPosition.RIGHT))),
-                Arguments.of(bsd, "a.bsd98", new Ext("bsd", new Name("a", ".bsd98", ExtPatternPosition.RIGHT))),
-                Arguments.of(flsgrf, "flsgrf.a", new Ext("flsgrf", new Name("a", "flsgrf.", ExtPatternPosition.LEFT))),
-                Arguments.of(flsgrf, "flsgrf78.97", new Ext("flsgrf", new Name("97", "flsgrf78.", ExtPatternPosition.LEFT)))
+                Arguments.of(prt, "a.prt", new Ext("prt", new Name(new String[] {"a", ".prt"}, 0))),
+                Arguments.of(prt, "a.prt.987", new Ext("prt", new Name(new String[] {"a", ".prt.987"}, 0))),
+                Arguments.of(prepin, "prepin.hua", new Ext("prepin", new Name(new String[] {"prepin.", "hua"}, 1))),
+                Arguments.of(bsd, "a.bsd", new Ext("bsd", new Name(new String[] {"a", ".bsd"}, 0))),
+                Arguments.of(bsd, "a.bsd98", new Ext("bsd", new Name(new String[] {"a", ".bsd98"}, 0))),
+                Arguments.of(flsgrf, "flsgrf.a", new Ext("flsgrf", new Name(new String[] {"flsgrf.", "a"}, 1))),
+                Arguments.of(flsgrf, "flsgrf78.97", new Ext("flsgrf", new Name(new String[] {"flsgrf78.", "97"}, 1)))
                 );
     }
 

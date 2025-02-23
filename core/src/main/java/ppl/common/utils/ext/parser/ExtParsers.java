@@ -52,7 +52,7 @@ public class ExtParsers implements ExtParser {
                 .filter(Strings::isNotBlank)
                 .toArray(String[]::new);
         for (int i = items.length - 1; i >= 0; i--) {
-            String item = items[i];
+            String item = items[i].toLowerCase();
             List<ExtParser> parsers = SelectorKind.selectAllOrdered(trie, item);
             Ext matcher = null;
             int maxLength = 0;
