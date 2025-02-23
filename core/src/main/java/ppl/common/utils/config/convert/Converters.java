@@ -493,7 +493,6 @@ public class Converters {
 
     @SuppressWarnings("unchecked")
     private <T> Converter<T> findCustomConverter(Class<T> targetClazz) {
-        System.out.println("findCustomConverter");
         for (Converter<?> c : customConverters) {
             if (c.accept(targetClazz)) {
                 return (Converter<T>) c;

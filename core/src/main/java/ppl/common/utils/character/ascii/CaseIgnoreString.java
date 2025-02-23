@@ -1,6 +1,4 @@
-package ppl.common.utils.string.ascii;
-
-import ppl.common.utils.character.ascii.AsciiGroup;
+package ppl.common.utils.character.ascii;
 
 public final class CaseIgnoreString {
     private transient final int hash;

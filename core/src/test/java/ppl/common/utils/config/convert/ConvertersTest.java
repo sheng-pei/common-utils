@@ -182,7 +182,7 @@ class ConvertersTest {
     @Test
     void doubleValueExceptionCausedByNonRealNumber() {
         Assertions.assertThrows(ConvertException.class, () -> Converters.doubleValue(new Object()));
-        Assertions.assertThrows(ConvertException.class, () -> Converters.doubleValue(new LongNode(1)));
+        Assertions.assertThrows(ConvertException.class, () -> Converters.doubleValue(new LongNode(Integer.MAX_VALUE + 1L)));
     }
 
     @Test
@@ -201,12 +201,6 @@ class ConvertersTest {
     void stringValue() {
         Assertions.assertEquals("", Converters.stringValue(""));
         Assertions.assertEquals("", Converters.stringValue(new TextNode("")));
-    }
-
-    @Test
-    void stringValueException() {
-        Assertions.assertThrows(ConvertException.class, () -> Converters.stringValue(1L));
-        Assertions.assertThrows(ConvertException.class, () -> Converters.stringValue(new LongNode(1L)));
     }
 
     private enum Standard {

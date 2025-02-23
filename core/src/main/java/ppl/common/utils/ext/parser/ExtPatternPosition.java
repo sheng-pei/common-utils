@@ -1,14 +1,14 @@
-package ppl.common.utils.ext;
+package ppl.common.utils.ext.parser;
 
 import ppl.common.utils.enumerate.EnumEncoder;
 
-public enum ExtPosition {
+public enum ExtPatternPosition {
     LEFT('l'),
     RIGHT('r');
 
     private final char flag;
 
-    ExtPosition(char flag) {
+    ExtPatternPosition(char flag) {
         this.flag = flag;
     }
 

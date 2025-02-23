@@ -72,7 +72,8 @@ class JacksonNodeTest {
     void size() {
         Assertions.assertEquals(1, MAP.size());
         Assertions.assertEquals(2, LIST.size());
-        Assertions.assertEquals(0, TEXT.size());
+        Assertions.assertThrows(
+                UnsupportedOperationException.class, TEXT::size);
     }
 
     @Test
@@ -114,7 +115,7 @@ class JacksonNodeTest {
 
     @Test
     void iteratorNotContainer() {
-        Assertions.assertFalse(BOOL.iterator().hasNext());
+        Assertions.assertThrows(UnsupportedOperationException.class, BOOL::iterator);
     }
 
     @Test

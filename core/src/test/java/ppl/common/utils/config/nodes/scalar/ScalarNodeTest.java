@@ -17,7 +17,7 @@ public class ScalarNodeTest {
 
     @Test
     void size() {
-        Assertions.assertEquals(0, SCALAR.size());
+        Assertions.assertThrows(UnsupportedOperationException.class, SCALAR::size);
     }
 
     @Test
@@ -46,7 +46,6 @@ public class ScalarNodeTest {
 
     @Test
     void iterator() {
-        Iterator<Node> iter = SCALAR.iterator();
-        Assertions.assertFalse(iter.hasNext());
+        Assertions.assertThrows(UnsupportedOperationException.class, SCALAR::iterator);
     }
 }

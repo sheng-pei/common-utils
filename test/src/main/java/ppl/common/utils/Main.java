@@ -2,10 +2,18 @@ package ppl.common.utils;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
+
+        Matcher matcher = Pattern.compile("a(bc)d").matcher("abcdeeeabc");
+        matcher.find();
+        matcher.find();
+        System.out.println(matcher.group());
+        System.out.println(matcher.replaceFirst(""));
 
 //        String random = "LT-wZ1dnMhT2DPCmkqtVCI+";
 //        ECPublicKey publicKey = BCECUtils.publicKey("04bd2df35b56122e520452083a9c8e21861a9325ebe32851be97317e6bbe15e88005c3bc077d07a90107150b66a250b697dfbbe2600026eb2abc5d10b24357b108");

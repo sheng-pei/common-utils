@@ -8,7 +8,7 @@ import ppl.common.utils.http.header.value.UnknownParameterTargetException;
 import ppl.common.utils.http.symbol.HttpCharGroup;
 import ppl.common.utils.http.symbol.Lexer;
 import ppl.common.utils.string.Strings;
-import ppl.common.utils.string.ascii.CaseIgnoreString;
+import ppl.common.utils.character.ascii.CaseIgnoreString;
 
 import java.nio.charset.Charset;
 import java.util.*;

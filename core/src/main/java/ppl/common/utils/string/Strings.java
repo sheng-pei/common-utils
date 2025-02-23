@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public final class Strings {
@@ -571,6 +572,17 @@ public final class Strings {
 		char[] chars = new char[repeatTimes];
 		Arrays.fill(chars, c);
 		return new String(chars);
+	}
+
+	public static String reverse(String string) {
+		IntStream stream = string.codePoints();
+		int[] codes = stream.toArray();
+		for (int i = 0; i <= codes.length >> 1; i++) {
+			int tmp = codes[i];
+			codes[codes.length - i - 1] = tmp;
+			codes[i] = tmp;
+		}
+		return new String(codes, 0, codes.length);
 	}
 
 }

@@ -1,37 +1,26 @@
 package ppl.common.utils.ext;
 
-import ppl.common.utils.exception.UnreachableCodeException;
-
-import java.util.regex.Matcher;
+import ppl.common.utils.string.Strings;
 
 public class ExtMatcher {
-    private final String name;
-    private final Matcher matcher;
-    private final ExtPosition position;
-    private final boolean matches;
+    private final String ext;
+    private final Name name;
 
-    public ExtMatcher(String name, Matcher matcher, ExtPosition position) {
-        this.matches = matcher.find();
+    public ExtMatcher(String ext, Name name) {
+        this.ext = ext;
         this.name = name;
-        this.matcher = matcher;
-        this.position = position;
     }
 
-    public boolean matches() {
-        return matches;
+    public String getExt() {
+        return ext;
     }
 
-    public String base() {
-        if (!matches) {
-            throw new IllegalStateException("Extension pattern not matches.");
-        }
+    public Name getName() {
+        return name;
+    }
 
-        if (position == ExtPosition.LEFT) {
-            return name.substring(matcher.start());
-        } else if (position == ExtPosition.RIGHT) {
-            return name.substring(0, matcher.end());
-        } else {
-            throw new UnreachableCodeException("Unknown position flags.");
-        }
+    @Override
+    public String toString() {
+        return Strings.format("The extension name of '{}' is '{}'.", name, ext);
     }
 }

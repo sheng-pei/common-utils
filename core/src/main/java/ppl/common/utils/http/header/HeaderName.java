@@ -1,7 +1,7 @@
 package ppl.common.utils.http.header;
 
 import ppl.common.utils.http.symbol.Lexer;
-import ppl.common.utils.string.ascii.CaseIgnoreString;
+import ppl.common.utils.character.ascii.CaseIgnoreString;
 
 import java.util.Objects;
 

@@ -2,7 +2,7 @@ package ppl.common.utils.http.header;
 
 import ppl.common.utils.argument.argument.Arguments;
 import ppl.common.utils.argument.argument.value.ValueArgument;
-import ppl.common.utils.string.ascii.CaseIgnoreString;
+import ppl.common.utils.character.ascii.CaseIgnoreString;
 
 import java.util.*;
 

@@ -1,7 +1,6 @@
 package ppl.common.utils.argument.argument;
 
-public interface Arguments<S, R extends Argument> {
-    R getByKey(S s);
-
-    R getByName(String name);
+public interface Arguments<S, A extends Argument> {
+    A getByKey(S s);
+    A getByName(String name);
 }

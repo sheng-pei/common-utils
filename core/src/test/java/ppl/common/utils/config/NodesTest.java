@@ -446,7 +446,7 @@ public class NodesTest {
     @MethodSource("invalidPathProvider")
     public void testInvalidPath(String path) {
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Nodes.createByPath(path, new Object()));
+                () -> Nodes.createByPath(path, 1));
     }
 
     private static Stream<Arguments> pathProvider() {
