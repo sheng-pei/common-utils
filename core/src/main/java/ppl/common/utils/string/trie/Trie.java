@@ -2,12 +2,24 @@ package ppl.common.utils.string.trie;
 
 import ppl.common.utils.Collections;
 import ppl.common.utils.Maps;
+import ppl.common.utils.ext.parser.ExtParser;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Trie<E> {
-    private final TrieNode<E> root = new TrieNode<>();
-    private final IdentityHashMap<TrieNode<E>, Map<Character, TrieNode<E>>> trie = new IdentityHashMap<>();
+    private final TrieNode<E> root;
+    private final IdentityHashMap<TrieNode<E>, Map<Character, TrieNode<E>>> trie;
+
+    public Trie() {
+        this.root = new TrieNode<>();
+        this.trie = new IdentityHashMap<>();
+    }
+
+    private Trie(TrieNode<E> root, IdentityHashMap<TrieNode<E>, Map<Character, TrieNode<E>>> trie) {
+        this.root = root;
+        this.trie = trie;
+    }
 
     public void put(String prefix, E e) {
         Objects.requireNonNull(prefix);
@@ -114,6 +126,54 @@ public class Trie<E> {
             curr = children.get(c);
             return current();
         }
+    }
+
+    public Trie<E> copy() {
+        Map<TrieNode<E>, Map<Character, TrieNode<E>>> trie = this.trie;
+        Set<TrieNode<E>> exists = trie.values().stream()
+                .flatMap(m -> m.values().stream())
+                .collect(() -> Collections.newSetFromMap(new IdentityHashMap<>()),
+                        Set::add, Set::addAll);
+        exists.add(this.root);
+
+        IdentityHashMap<TrieNode<E>, TrieNode<E>> newNodes = new IdentityHashMap<>();
+        for (TrieNode<E> e : exists) {
+            copyNode(e, newNodes);
+        }
+
+        TrieNode<E> root = newNodes.get(this.root);
+        IdentityHashMap<TrieNode<E>, Map<Character, TrieNode<E>>> map = new IdentityHashMap<>();
+        for (TrieNode<E> k : trie.keySet()) {
+            Map<Character, TrieNode<E>> m = map.computeIfAbsent(newNodes.get(k), k1 -> new HashMap<>());
+            for (Character c : trie.get(k).keySet()) {
+                m.put(c, newNodes.get(trie.get(k).get(c)));
+            }
+        }
+        return new Trie<>(root, map);
+    }
+
+    private TrieNode<E> copyNode(TrieNode<E> source, IdentityHashMap<TrieNode<E>, TrieNode<E>> newNodes) {
+        if (source == null) {
+            return null;
+        }
+
+        if (newNodes.containsKey(source)) {
+            return newNodes.get(source);
+        }
+
+        TrieNode<E> newParent = copyNode(source.getParent(), newNodes);
+        TrieNode<E> ret = new TrieNode<>(newParent, source.getIncident());
+        ret.setEle(source.getEle());
+        newNodes.put(source, ret);
+        return ret;
+    }
+
+    public List<E> getAll() {
+        return trie.values().stream()
+                .flatMap(m -> m.values().stream())
+                .map(TrieNode::getEle)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
 }

@@ -1,6 +1,6 @@
 package ppl.common.utils.ext.parser;
 
-import ppl.common.utils.ext.ExtMatcher;
+import ppl.common.utils.ext.Ext;
 import ppl.common.utils.ext.Name;
 import ppl.common.utils.ext.selector.SelectorKind;
 
@@ -47,7 +47,7 @@ public class ExtPattern implements ExtParser {
     }
 
     @Override
-    public ExtMatcher parse(String name) {
+    public Ext parse(String name) {
         Matcher matcher = pattern.matcher(name);
         if (!matcher.find()) {
             return null;
@@ -76,7 +76,7 @@ public class ExtPattern implements ExtParser {
         String[] parts = position == ExtPatternPosition.LEFT ? new String[] {matched, base} : new String[] {base, matched};
         int baseIndex = position == ExtPatternPosition.LEFT ? 1 : 0;
         Name n = new Name(parts, baseIndex);
-        return new ExtMatcher(ext, n);
+        return new Ext(ext, n);
     }
 
     public OrderedExtPattern orderBy(int order) {

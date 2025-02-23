@@ -2,11 +2,11 @@ package ppl.common.utils.ext;
 
 import ppl.common.utils.string.Strings;
 
-public class ExtMatcher {
+public class Ext {
     private final String ext;
     private final Name name;
 
-    public ExtMatcher(String ext, Name name) {
+    public Ext(String ext, Name name) {
         this.ext = ext;
         this.name = name;
     }
@@ -17,6 +17,21 @@ public class ExtMatcher {
 
     public Name getName() {
         return name;
+    }
+
+    public int length() {
+        return countOf(ext, Exts.EXT_DELIMITER) + 1;
+    }
+
+    private static int countOf(String string, char c) {
+        char[] chars = string.toCharArray();
+        int i = 0;
+        for (char c1 : chars) {
+            if (c1 == c) {
+                i ++;
+            }
+        }
+        return i;
     }
 
     @Override

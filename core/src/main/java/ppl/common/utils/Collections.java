@@ -131,4 +131,8 @@ public final class Collections {
         return java.util.Collections.emptyIterator();
     }
 
+    public static <E> Set<E> newSetFromMap(Map<E, Boolean> map) {
+        return java.util.Collections.newSetFromMap(map);
+    }
+
 }

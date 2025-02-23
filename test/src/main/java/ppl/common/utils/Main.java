@@ -1,5 +1,7 @@
 package ppl.common.utils;
 
+import ppl.common.utils.string.trie.Trie;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -9,11 +11,14 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        Matcher matcher = Pattern.compile("a(bc)d").matcher("abcdeeeabc");
-        matcher.find();
-        matcher.find();
-        System.out.println(matcher.group());
-        System.out.println(matcher.replaceFirst(""));
+        Trie<Integer> trie = new Trie<>();
+        trie.put("abcd", 9);
+        trie.put("", 10);
+        trie.put("abc", 1);
+        trie.put("z", 0);
+        System.out.println(trie.get("abcd"));
+        Trie<Integer> n = trie.copy();
+        System.out.println(n.get("abcd"));
 
 //        String random = "LT-wZ1dnMhT2DPCmkqtVCI+";
 //        ECPublicKey publicKey = BCECUtils.publicKey("04bd2df35b56122e520452083a9c8e21861a9325ebe32851be97317e6bbe15e88005c3bc077d07a90107150b66a250b697dfbbe2600026eb2abc5d10b24357b108");

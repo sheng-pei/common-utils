@@ -12,7 +12,7 @@ class TrieNode<E> {
         this.incident = null;
     }
 
-    public TrieNode(TrieNode<E> parent, char incident) {
+    public TrieNode(TrieNode<E> parent, Character incident) {
         this.parent = parent;
         this.incident = incident;
     }

@@ -5,13 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ppl.common.utils.ext.ExtMatcher;
+import ppl.common.utils.ext.Ext;
 import ppl.common.utils.ext.Name;
 
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-class ExtMatcherPatternTest {
+class ExtPatternTest {
 
     private static ExtPattern prt = ExtPattern.builder()
             .ext("prt")
@@ -50,8 +50,8 @@ class ExtMatcherPatternTest {
 
     @ParameterizedTest
     @MethodSource("parserProvider")
-    void parse(ExtParser parser, String name, ExtMatcher ext) {
-        ExtMatcher actual = parser.parse(name);
+    void parse(ExtParser parser, String name, Ext ext) {
+        Ext actual = parser.parse(name);
         Assertions.assertEquals(actual.getExt(), ext.getExt());
         Assertions.assertEquals(actual.getName().getBase(), ext.getName().getBase());
         Assertions.assertEquals(actual.getName().getExt(), ext.getName().getExt());
@@ -61,13 +61,13 @@ class ExtMatcherPatternTest {
 
     private static Stream<Arguments> parserProvider() {
         return Stream.of(
-                Arguments.of(prt, "a.prt", new ExtMatcher("prt", new Name("a", ".prt", ExtPatternPosition.RIGHT))),
-                Arguments.of(prt, "a.prt.987", new ExtMatcher("prt", new Name("a", ".prt.987", ExtPatternPosition.RIGHT))),
-                Arguments.of(prepin, "prepin.hua", new ExtMatcher("prepin", new Name("hua", "prepin.", ExtPatternPosition.LEFT))),
-                Arguments.of(bsd, "a.bsd", new ExtMatcher("bsd", new Name("a", ".bsd", ExtPatternPosition.RIGHT))),
-                Arguments.of(bsd, "a.bsd98", new ExtMatcher("bsd", new Name("a", ".bsd98", ExtPatternPosition.RIGHT))),
-                Arguments.of(flsgrf, "flsgrf.a", new ExtMatcher("flsgrf", new Name("a", "flsgrf.", ExtPatternPosition.LEFT))),
-                Arguments.of(flsgrf, "flsgrf78.97", new ExtMatcher("flsgrf", new Name("97", "flsgrf78.", ExtPatternPosition.LEFT)))
+                Arguments.of(prt, "a.prt", new Ext("prt", new Name("a", ".prt", ExtPatternPosition.RIGHT))),
+                Arguments.of(prt, "a.prt.987", new Ext("prt", new Name("a", ".prt.987", ExtPatternPosition.RIGHT))),
+                Arguments.of(prepin, "prepin.hua", new Ext("prepin", new Name("hua", "prepin.", ExtPatternPosition.LEFT))),
+                Arguments.of(bsd, "a.bsd", new Ext("bsd", new Name("a", ".bsd", ExtPatternPosition.RIGHT))),
+                Arguments.of(bsd, "a.bsd98", new Ext("bsd", new Name("a", ".bsd98", ExtPatternPosition.RIGHT))),
+                Arguments.of(flsgrf, "flsgrf.a", new Ext("flsgrf", new Name("a", "flsgrf.", ExtPatternPosition.LEFT))),
+                Arguments.of(flsgrf, "flsgrf78.97", new Ext("flsgrf", new Name("97", "flsgrf78.", ExtPatternPosition.LEFT)))
                 );
     }
 
