@@ -1,6 +1,7 @@
 package ppl.common.utils.json.jackson;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ppl.common.utils.IOs;
@@ -20,6 +21,14 @@ public class JsonUtils {
         mapper.registerModule(new JavaTimeModule());
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         OBJECT_MAPPER = mapper;
+    }
+
+    public static String pretty(String json) {
+        try {
+            return writePretty(OBJECT_MAPPER.readTree(json));
+        } catch (JacksonException e) {
+            throw new JsonException("Not json.", e);
+        }
     }
 
     public static String writePretty(Object obj) {

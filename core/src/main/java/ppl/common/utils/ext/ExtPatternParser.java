@@ -67,13 +67,13 @@ public class ExtPatternParser {
                         try {
                             position = EnumUtils.enumOf(ExtPatternPosition.class, chars[j]);
                         } catch (UnknownEnumException ex) {
-                            throw new IllegalArgumentException("Invalid position, unknown position flag.", ex);
+                            throw new IllegalArgumentException("Invalid pattern, unknown position flag.", ex);
                         }
                     } else if (IS_EXACT_SELECTOR_FLAG_INDEX == idx) {
                         exactSelector = chars[j];
                         if (exactSelector != EXACT_SELECTOR_FLAG &&
                                 exactSelector != NOT_EXACT_SELECTOR_FLAG) {
-                            throw new IllegalArgumentException("Error exact selector flag.");
+                            throw new IllegalArgumentException("Invalid pattern, unknown exact selector flag.");
                         }
                     } else {
                         throw new IllegalArgumentException("Too many flags.");
@@ -102,9 +102,9 @@ public class ExtPatternParser {
         builder.name(name);
 
         if (patternRuleKind == REGEX_RULE_PATTERN_FLAG && ruleStart == e) {
-            throw new IllegalArgumentException("Invalid pattern, regex rule pattern must have regex part.");
+            throw new IllegalArgumentException("Invalid pattern, regex rule pattern must have rule part.");
         } else if (patternRuleKind == EMPTY_RULE_PATTERN_FLAG && ruleStart != e) {
-            throw new IllegalArgumentException("Invalid pattern, empty rule pattern must not have regex part.");
+            throw new IllegalArgumentException("Invalid pattern, empty rule pattern must not have rule part.");
         }
 
         String rule = name;

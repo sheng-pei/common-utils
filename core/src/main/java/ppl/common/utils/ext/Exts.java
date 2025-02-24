@@ -637,8 +637,8 @@ public class Exts {
             .add("ripl/flsgrf/flsgrf")
             .add("riprf/bsd/bsd[0-9]*")
             .add("rip/rar/(?:(part)[0-9]*(\\.))?(rar)")
-            .add("riprt/tar/(tar(?:.gz)?)")
-            .add("riprt/gz/((?:tar.)?gz)")
+            .add("riprt/tar/(tar(?:\\.gz)?)")
+            .add("riprt/gz/((?:tar\\.)?gz)")
             .build();
 
     public static final char EXT_DELIMITER = '.';

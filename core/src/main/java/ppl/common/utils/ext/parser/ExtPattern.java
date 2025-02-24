@@ -1,6 +1,7 @@
 package ppl.common.utils.ext.parser;
 
 import ppl.common.utils.ext.Ext;
+import ppl.common.utils.ext.Exts;
 import ppl.common.utils.ext.Name;
 import ppl.common.utils.ext.selector.SelectorKind;
 
@@ -59,7 +60,7 @@ public class ExtPattern implements ExtParser {
         String matched = matcher.group();
         String base = matcher.replaceFirst("");
         int cnt = matcher.groupCount();
-        String ext = this.name();
+        String ext = this.name;
         if (cnt > 0) {
             StringBuilder builder = new StringBuilder();
             for (int i = 1; i <= cnt; i++) {
@@ -106,7 +107,7 @@ public class ExtPattern implements ExtParser {
         private Builder() {}
 
         public Builder name(String name) {
-            if (name.contains(".")) {
+            if (name.contains("" + Exts.EXT_DELIMITER)) {
                 throw new IllegalArgumentException("Point is not allowed.");
             }
 

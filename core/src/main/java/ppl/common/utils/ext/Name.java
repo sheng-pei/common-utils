@@ -14,10 +14,10 @@ public class Name {
 
     public Name(String[] parts, int baseIndex) {
         if (Arrays.isEmpty(parts) || parts.length > 2) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("Error extension partition.");
         }
         if (baseIndex < 0 || baseIndex > parts.length) {
-            throw new IndexOutOfBoundsException("");
+            throw new IndexOutOfBoundsException();
         }
         this.parts = parts.clone();
         this.baseIndex = baseIndex;

@@ -32,7 +32,7 @@ public enum SelectorKind implements Selector {
     }
 
     @Override
-    public List<ExtParser> select(Trie<List<ExtParser>> trie, String item) {
+    public Set<ExtParser> select(Trie<List<ExtParser>> trie, String item) {
         return selector.select(trie, item);
     }
 
