@@ -1,5 +1,7 @@
 package ppl.common.utils.reflect;
 
+import ppl.common.utils.IOs;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.JarURLConnection;
@@ -9,6 +11,7 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 public class JarClassLoader extends SecureClassLoader {
+    private static final int INITIAL_SIZE = 8192;
     private final URL jar;
 
     public JarClassLoader(URL jar, ClassLoader parent) {
@@ -24,13 +27,12 @@ public class JarClassLoader extends SecureClassLoader {
             JarURLConnection connection = (JarURLConnection) jar.openConnection();
             JarFile jarFile = connection.getJarFile();
             try (InputStream is = jarFile.getInputStream(e)) {
-                try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                    byte[] buf = new byte[4096];
-                    int cnt = is.read(buf);
-                    while (cnt >= 0) {
-                        os.write(buf, 0, cnt);
-                        cnt = is.read(buf);
-                    }
+                long size = e.getSize();
+                if (size > INITIAL_SIZE) {
+                    size = INITIAL_SIZE;
+                }
+                try (ByteArrayOutputStream os = new ByteArrayOutputStream((int) size)) {
+                    IOs.copy(is, os);
                     byte[] res = os.toByteArray();
                     return defineClass(name, res, 0, res.length);
                 }
