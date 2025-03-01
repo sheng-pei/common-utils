@@ -26,19 +26,19 @@ public class Query {
             .orDontNeedToEncode(Mask.asciiMask(NV_SEPARATOR).predicate())
             .build();
 
-    static Query create(String name, String value) {
+    public static Query create(String name, String value) {
         return new Query(name, value, DEFAULT_CHARSET);
     }
 
-    static Query create(String name, String value, Charset charset) {
+    public static Query create(String name, String value, Charset charset) {
         return new Query(name, value, charset);
     }
 
-    static Query parseQuery(String query) {
+    public static Query parseQuery(String query) {
         return parseQuery(query, DEFAULT_CHARSET);
     }
 
-    static Query parseQuery(String query, Charset charset) {
+    public static Query parseQuery(String query, Charset charset) {
         List<Query> queries = parseQueries(query, charset);
         if (queries.size() > 1) {
             throw new IllegalArgumentException("Not single query.");
@@ -46,7 +46,7 @@ public class Query {
         return queries.isEmpty() ? null : queries.get(0);
     }
 
-    static List<Query> parseQueries(String queries) {
+    public static List<Query> parseQueries(String queries) {
         return Arrays.stream(Strings.split(queries, Pattern.quote(QUERY_DELIMITER)))
                 .filter(Strings::isNotEmpty)
                 .map(q -> Strings.kv(q, NV_SEPARATOR.charAt(0)))
@@ -54,7 +54,7 @@ public class Query {
                 .collect(Collectors.toList());
     }
 
-    static List<Query> parseQueries(String queries, Charset charset) {
+    public static List<Query> parseQueries(String queries, Charset charset) {
         return Arrays.stream(Strings.split(queries, Pattern.quote(QUERY_DELIMITER)))
                 .filter(Strings::isNotEmpty)
                 .map(q -> Strings.kv(q, NV_SEPARATOR.charAt(0)))
