@@ -26,7 +26,7 @@ public class ContentLength implements Header<LongValue> {
     }
 
     @Override
-    public HeaderValue value() {
+    public LongValue value() {
         return value;
     }
 

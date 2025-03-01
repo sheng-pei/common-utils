@@ -6,14 +6,14 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class DelimiterSplitter implements Function<String, Stream<String>> {
-    private final String delim;
+    private final String delimiter;
 
     DelimiterSplitter() {
         this(",");
     }
 
-    DelimiterSplitter(String delim) {
-        this.delim = delim;
+    DelimiterSplitter(String delimiter) {
+        this.delimiter = delimiter;
     }
 
     @Override
@@ -24,13 +24,13 @@ public class DelimiterSplitter implements Function<String, Stream<String>> {
         List<String> res = new ArrayList<>();
         int start = 0;
         while (start < value.length()) {
-            int idx = value.indexOf(delim, start);
+            int idx = value.indexOf(delimiter, start);
             if (idx < 0) {
                 res.add(value.substring(start));
                 break;
             }
             res.add(value.substring(start, idx));
-            start = idx + delim.length();
+            start = idx + delimiter.length();
         }
         return res.stream();
     }

@@ -7,12 +7,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
-public class Elements {
+public class ElementFactory {
 
-    private static final Function<Object, Element<Object>> DEFAULT_FACTORY = v -> (Element<Object>) () -> v;
-    private static final Elements DEFAULT_ELEMENTS = new Elements();
+    private static final ElementCreator<Object> ELEMENT_CREATOR = v -> (Element<Object>) () -> v;
+    private static final ElementFactory DEFAULT_ELEMENT_FACTORY = new ElementFactory();
     private static final String PACKAGE_OF_ELEMENTS = "elements";
 
     static {
@@ -24,9 +23,11 @@ public class Elements {
                 .forEach(c -> {
                     String name = getName(c);
                     Constructor<? extends Element<?>> constructor = getConstructorWithSingleObjectParameter(c);
-                    DEFAULT_ELEMENTS.putFactory(name, s -> {
+                    DEFAULT_ELEMENT_FACTORY.putCreator(name, s -> {
                         try {
-                            return constructor.newInstance(s);
+                            @SuppressWarnings("unchecked")
+                            Element<Object> ret = (Element<Object>) constructor.newInstance(s);
+                            return ret;
                         } catch (IllegalAccessException e) {
                             throw new RuntimeException(String.format(
                                     "The constructor '%s' is not accessible.", constructor.getName()), e);
@@ -64,30 +65,30 @@ public class Elements {
     }
 
     @SuppressWarnings("rawtypes")
-    private final Map factories;
+    private final Map creators;
 
-    private Elements() {
-        this.factories = new HashMap<>();
+    private ElementFactory() {
+        this.creators = new HashMap<>();
     }
 
-    private void putFactory(String name, Function<Object, ? extends Element<?>> factory) {
+    private void putCreator(String name, ElementCreator<Object> creator) {
         @SuppressWarnings("unchecked")
-        Map<String, Function<Object, ? extends Element<?>>> factories = this.factories;
-        if (factories.containsKey(name)) {
-            throw new IllegalArgumentException("Property factory: '" + name + "' is already set.");
+        Map<String, ElementCreator<Object>> creators = this.creators;
+        if (creators.containsKey(name)) {
+            throw new IllegalArgumentException("Property creator: '" + name + "' is already set.");
         }
-        factories.put(name, factory);
+        creators.put(name, creator);
     }
 
     Element<Object> create(String name, Object value) {
         @SuppressWarnings("unchecked")
-        Function<Object, Element<Object>> factory =
-                (Function<Object, Element<Object>>) this.factories.getOrDefault(name, DEFAULT_FACTORY);
-        return factory.apply(value);
+        ElementCreator<Object> creator =
+                (ElementCreator<Object>) this.creators.getOrDefault(name, ELEMENT_CREATOR);
+        return creator.create(value);
     }
 
-    static Elements elements() {
-        return DEFAULT_ELEMENTS;
+    static ElementFactory def() {
+        return DEFAULT_ELEMENT_FACTORY;
     }
 
 }

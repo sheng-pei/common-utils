@@ -18,15 +18,15 @@ public abstract class Fragment<K, V> {
         this.value = value;
     }
 
-    public K getKey() {
+    public final K getKey() {
         return key;
     }
 
-    public V getValue() {
+    public final V getValue() {
         return value;
     }
 
-    public String toString() {
+    public final String toString() {
         return join(key, value);
     }
 

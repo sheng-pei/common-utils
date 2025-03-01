@@ -1,8 +1,8 @@
 package ppl.common.utils.http.header.value.mediatype;
 
 import ppl.common.utils.argument.argument.Arguments;
-import ppl.common.utils.argument.argument.value.BaseValueArgument;
-import ppl.common.utils.argument.argument.value.ValueArgument;
+import ppl.common.utils.argument.argument.value.BaseValuedArgument;
+import ppl.common.utils.argument.argument.value.ValuedArgument;
 import ppl.common.utils.http.header.BaseArguments;
 import ppl.common.utils.http.header.value.UnknownParameterTargetException;
 import ppl.common.utils.http.symbol.HttpCharGroup;
@@ -13,10 +13,10 @@ import ppl.common.utils.character.ascii.CaseIgnoreString;
 import java.nio.charset.Charset;
 import java.util.*;
 
-public class Mime implements Arguments<String, ValueArgument<Object>> {
+public class Mime implements Arguments<String, ValuedArgument<Object>> {
 
-    private static final ValueArgument<Charset> CHARSET_ARGUMENT =
-            BaseValueArgument.newBuilder("charset")
+    private static final ValuedArgument<Charset> CHARSET_ARGUMENT =
+            BaseValuedArgument.newBuilder("charset")
                     .map(Mime::eraseQuotedString)
                     .map(Charset::forName)
                     .collect()
@@ -61,7 +61,7 @@ public class Mime implements Arguments<String, ValueArgument<Object>> {
         this(string, Collections.emptyList());
     }
 
-    Mime(String string, List<? extends ValueArgument<?>> arguments) {
+    Mime(String string, List<? extends ValuedArgument<?>> arguments) {
         string = Strings.emptyIfNull(string).trim();
         int slashIdx = string.indexOf('/');
         if (slashIdx < 0) {
@@ -118,12 +118,12 @@ public class Mime implements Arguments<String, ValueArgument<Object>> {
     }
 
     @Override
-    public ValueArgument<Object> getByKey(String s) {
+    public ValuedArgument<Object> getByKey(String s) {
         return arguments.getByKey(s);
     }
 
     @Override
-    public ValueArgument<Object> getByName(String name) {
+    public ValuedArgument<Object> getByName(String name) {
         return arguments.getByName(name);
     }
 }

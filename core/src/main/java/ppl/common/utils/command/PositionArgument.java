@@ -1,7 +1,7 @@
 package ppl.common.utils.command;
 
-import ppl.common.utils.argument.argument.value.ValueArgument;
-import ppl.common.utils.argument.argument.value.ValueArgumentBuilder;
+import ppl.common.utils.argument.argument.value.ValuedArgument;
+import ppl.common.utils.argument.argument.value.ValuedArgumentBuilder;
 import ppl.common.utils.string.Strings;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-public class PositionArgument<V> extends ValueArgument<V> {
+public class PositionArgument<V> extends ValuedArgument<V> {
 
     public static Builder<String> newBuilder(String name) {
         return new Builder<>(name);
@@ -52,13 +52,13 @@ public class PositionArgument<V> extends ValueArgument<V> {
                 getPosition(), name());
     }
 
-    public static class Builder<V> extends ValueArgumentBuilder<V> {
+    public static class Builder<V> extends ValuedArgumentBuilder<V> {
         private Builder(String name) {
             super(name);
         }
 
         @Override
-        protected <A extends ValueArgument<V>> A create(
+        protected <A extends ValuedArgument<V>> A create(
                 String name,
                 Function<String, Stream<String>> splitter,
                 List<?> mappers,

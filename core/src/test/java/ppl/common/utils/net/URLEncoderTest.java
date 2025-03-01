@@ -11,7 +11,7 @@ class URLEncoderTest {
     void parse() {
         URLEncoder encoder = URLEncoder.builder()
                 .setPercentEncodingReserved(true)
-                .or(c -> c == '%')
+                .orDontNeedToEncode(c -> c == '%')
                 .build();
         Assertions.assertEquals("a-%E4%B8%AD%20%%2A", encoder.parse("a-中%20%*", StandardCharsets.UTF_8));
     }

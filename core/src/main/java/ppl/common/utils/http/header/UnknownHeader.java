@@ -9,7 +9,7 @@ public final class UnknownHeader implements Header<HeaderValue> {
         this.value = value;
     }
 
-    public static HeaderCreator getFactory(HeaderName name) {
+    public static HeaderCreator getCreator(HeaderName name) {
         return (value, context) -> new UnknownHeader(name, new UnknownHeaderValue(value));
     }
 

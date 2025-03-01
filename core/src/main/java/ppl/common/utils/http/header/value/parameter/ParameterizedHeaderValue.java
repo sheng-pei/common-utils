@@ -4,7 +4,7 @@ import ppl.common.utils.argument.analyzer.Analyzer;
 import ppl.common.utils.argument.argument.Argument;
 import ppl.common.utils.argument.argument.Arguments;
 import ppl.common.utils.argument.argument.value.ArgumentValue;
-import ppl.common.utils.argument.argument.value.ValueArgument;
+import ppl.common.utils.argument.argument.value.ValuedArgument;
 import ppl.common.utils.http.header.Context;
 import ppl.common.utils.http.header.SingleLineHeaderValue;
 import ppl.common.utils.http.symbol.HttpCharGroup;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public abstract class ParameterizedHeaderValue<
-        AS extends Arguments<String, ValueArgument<Object>>,
+        AS extends Arguments<String, ValuedArgument<Object>>,
         PHV extends ParameterizedHeaderValue<AS, PHV>> extends SingleLineHeaderValue {
 
     static final char DELIMITER = ';';
@@ -45,9 +45,9 @@ public abstract class ParameterizedHeaderValue<
                 @SuppressWarnings("unchecked")
                 ArgumentValue<Object> av = (ArgumentValue<Object>) o;
                 ps.put(av.getArgument(), av);
-            } else if (o instanceof ValueArgument) {
+            } else if (o instanceof ValuedArgument) {
                 @SuppressWarnings("unchecked")
-                ValueArgument<Object> a = (ValueArgument<Object>) o;
+                ValuedArgument<Object> a = (ValuedArgument<Object>) o;
                 ps.put(a, ArgumentValue.create(a, null));
             } else {
                 ups.append(o).append(DELIMITER).append(" ");
@@ -66,7 +66,7 @@ public abstract class ParameterizedHeaderValue<
         return arguments;
     }
 
-    private static <T extends Arguments<String, ValueArgument<Object>>>
+    private static <T extends Arguments<String, ValuedArgument<Object>>>
     T createArguments(String target, Function<String, T> targetCreator) {
         required(target);
         return targetCreator.apply(target);
@@ -143,7 +143,7 @@ public abstract class ParameterizedHeaderValue<
 
     public final PHV setParameter(String name, Object value) {
         ensureKnown(name);
-        ValueArgument<Object> a = arguments.getByKey(name);
+        ValuedArgument<Object> a = arguments.getByKey(name);
         ArgumentValue<Object> av = ArgumentValue.create(a, value);
         parameters.remove(a);
         return appendLexicalParameter(name, av.toString());
@@ -190,7 +190,7 @@ public abstract class ParameterizedHeaderValue<
 
     private void appendParameters(
             Collection<? extends ArgumentValue<?>> parameters,
-            StringBuilder builder) {//TODO, av 规范化输出
+            StringBuilder builder) {
         parameters.forEach(av -> {
             String k = av.keyString();
             String v = av.valueString();

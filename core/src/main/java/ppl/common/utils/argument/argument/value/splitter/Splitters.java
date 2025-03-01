@@ -10,12 +10,12 @@ public class Splitters {
         return DEFAULT_DELIMITER_SPLITTER;
     }
 
-    public static Function<String, Stream<String>> delimiter(String delim) {
-        delim = delim == null ? "" : delim;
-        if (delim.isEmpty()) {
+    public static Function<String, Stream<String>> delimiter(String delimiter) {
+        delimiter = delimiter == null ? "" : delimiter;
+        if (delimiter.isEmpty()) {
             return DEFAULT_DELIMITER_SPLITTER;
         }
-        return new DelimiterSplitter(delim);
+        return new DelimiterSplitter(delimiter);
     }
 
 }

@@ -6,7 +6,7 @@ import ppl.common.utils.argument.argument.Arguments;
 import ppl.common.utils.argument.argument.value.ArgumentValue;
 import ppl.common.utils.argument.parser.Fragment;
 import ppl.common.utils.argument.argument.value.FeedingStream;
-import ppl.common.utils.argument.argument.value.ValueArgument;
+import ppl.common.utils.argument.argument.value.ValuedArgument;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,11 +34,11 @@ public class Analyzer<S> {
             Argument argument = arguments.getByKey(f.getKey());
             if (argument == null) {
                 res.add(f);
-            } else if (argument instanceof ValueArgument) {
+            } else if (argument instanceof ValuedArgument) {
                 @SuppressWarnings("unchecked")
-                ValueArgument<Object> valueArgument = (ValueArgument<Object>) argument;
+                ValuedArgument<Object> valuedArgument = (ValuedArgument<Object>) argument;
                 feedingStreams
-                        .computeIfAbsent(argument.name(), k -> valueArgument.stream())
+                        .computeIfAbsent(argument.name(), k -> valuedArgument.stream())
                         .feed(f.getValue());
             } else {//argument instanceof Argument
                 if (f.getValue() != null) {

@@ -82,7 +82,7 @@ public class URLEncoder {
             return this;
         }
 
-        public Builder or(Predicate<Character> dontNeedToEncode) {
+        public Builder orDontNeedToEncode(Predicate<Character> dontNeedToEncode) {
             this.dontNeedToEncode = this.dontNeedToEncode.or(dontNeedToEncode);
             return this;
         }

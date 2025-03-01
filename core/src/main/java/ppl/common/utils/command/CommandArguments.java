@@ -15,7 +15,7 @@ public class CommandArguments implements Arguments<Object, Argument> {
     static {
         Set<Class<? extends Argument>> supported = new HashSet<>();
         supported.add(PositionArgument.class);
-        supported.add(ValueOptionArgument.class);
+        supported.add(ValuedOptionArgument.class);
         supported.add(ToggleOptionArgument.class);
         SUPPORTED_ARGUMENT_TYPE = Collections.unmodifiableSet(supported);
     }
@@ -109,10 +109,10 @@ public class CommandArguments implements Arguments<Object, Argument> {
             Map<String, Argument> allArguments = (Map) this.allArguments;
             allArguments = allArguments == null ? Collections.emptyMap() : Collections.unmodifiableMap(allArguments);
             @SuppressWarnings({"rawtypes", "unchecked"})
-            Map<String, ValueOptionArgument<Object>> longOptions = (Map) this.longOptions;
+            Map<String, ValuedOptionArgument<Object>> longOptions = (Map) this.longOptions;
             longOptions = longOptions == null ? Collections.emptyMap() : Collections.unmodifiableMap(longOptions);
             @SuppressWarnings({"rawtypes", "unchecked"})
-            Map<String, ValueOptionArgument<Object>> shortOptions = (Map) this.shortOptions;
+            Map<String, ValuedOptionArgument<Object>> shortOptions = (Map) this.shortOptions;
             shortOptions = shortOptions == null ? Collections.emptyMap() : Collections.unmodifiableMap(shortOptions);
             @SuppressWarnings({"rawtypes", "unchecked"})
             List<PositionArgument<Object>> positions = (List) this.positions;
@@ -136,7 +136,7 @@ public class CommandArguments implements Arguments<Object, Argument> {
             return this;
         }
 
-        public Builder addOptionArgument(ValueOptionArgument<?> argument) {
+        public Builder addOptionArgument(ValuedOptionArgument<?> argument) {
             checkArgument(argument);
             addAllArgument(argument);
             _addValueOptionArgument(argument);
@@ -163,8 +163,8 @@ public class CommandArguments implements Arguments<Object, Argument> {
         }
 
         private void _addArgument(Argument argument) {
-            if (argument instanceof ValueOptionArgument) {
-                _addValueOptionArgument((ValueOptionArgument<?>) argument);
+            if (argument instanceof ValuedOptionArgument) {
+                _addValueOptionArgument((ValuedOptionArgument<?>) argument);
             } else if (argument instanceof ToggleOptionArgument) {
                 _addToggleOptionArgument((ToggleOptionArgument) argument);
             } else if (argument instanceof PositionArgument) {
@@ -185,7 +185,7 @@ public class CommandArguments implements Arguments<Object, Argument> {
             addShortOption(argument);
         }
 
-        public void _addValueOptionArgument(ValueOptionArgument<?> argument) {
+        public void _addValueOptionArgument(ValuedOptionArgument<?> argument) {
             addLongOption(argument);
             addShortOption(argument);
         }
@@ -194,7 +194,7 @@ public class CommandArguments implements Arguments<Object, Argument> {
             addShortOption(argument, argument);
         }
 
-        private void addShortOption(ValueOptionArgument<?> argument) {
+        private void addShortOption(ValuedOptionArgument<?> argument) {
             addShortOption(argument, argument);
         }
 
@@ -208,7 +208,7 @@ public class CommandArguments implements Arguments<Object, Argument> {
             addLongOption(argument, argument);
         }
 
-        private void addLongOption(ValueOptionArgument<?> argument) {
+        private void addLongOption(ValuedOptionArgument<?> argument) {
             addLongOption(argument, argument);
         }
 

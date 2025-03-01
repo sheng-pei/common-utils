@@ -1,7 +1,7 @@
 package ppl.common.utils.http.header.value.transfercoding;
 
 import ppl.common.utils.argument.argument.Arguments;
-import ppl.common.utils.argument.argument.value.ValueArgument;
+import ppl.common.utils.argument.argument.value.ValuedArgument;
 import ppl.common.utils.http.header.BaseArguments;
 import ppl.common.utils.http.header.value.UnknownParameterTargetException;
 
@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public enum CodingKind implements Arguments<String, ValueArgument<Object>> {
+public enum CodingKind implements Arguments<String, ValuedArgument<Object>> {
     CHUNKED("chunked"),
     COMPRESS("compress"),
     DEFLATE("deflate"),
@@ -22,7 +22,7 @@ public enum CodingKind implements Arguments<String, ValueArgument<Object>> {
         this(name, Collections.emptyList());
     }
 
-    CodingKind(String name, List<ValueArgument<?>> arguments) {
+    CodingKind(String name, List<ValuedArgument<?>> arguments) {
         this.name = name;
         this.arguments = arguments.isEmpty() ? BaseArguments.EMPTY : new BaseArguments(arguments);
     }
@@ -50,12 +50,12 @@ public enum CodingKind implements Arguments<String, ValueArgument<Object>> {
     }
 
     @Override
-    public ValueArgument<Object> getByKey(String s) {
+    public ValuedArgument<Object> getByKey(String s) {
         return arguments.getByKey(s);
     }
 
     @Override
-    public ValueArgument<Object> getByName(String name) {
+    public ValuedArgument<Object> getByName(String name) {
         return arguments.getByName(name);
     }
 }

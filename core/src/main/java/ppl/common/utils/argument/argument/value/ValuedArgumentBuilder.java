@@ -12,7 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-public abstract class ValueArgumentBuilder<V> extends ArgumentBuilder {
+public abstract class ValuedArgumentBuilder<V> extends ArgumentBuilder {
 
     protected Function<String, Stream<String>> splitter;
     @SuppressWarnings("rawtypes")
@@ -20,17 +20,17 @@ public abstract class ValueArgumentBuilder<V> extends ArgumentBuilder {
     @SuppressWarnings("rawtypes")
     protected Collector collector;
 
-    public ValueArgumentBuilder(String name) {
+    public ValuedArgumentBuilder(String name) {
         super(name);
     }
 
-    public ValueArgumentBuilder<V> split(Function<String, Stream<String>> splitter) {
+    public ValuedArgumentBuilder<V> split(Function<String, Stream<String>> splitter) {
         Objects.requireNonNull(splitter);
         this.splitter = splitter;
         return self();
     }
 
-    public <R> ValueArgumentBuilder<R> map(Function<V, R> mapper) {
+    public <R> ValuedArgumentBuilder<R> map(Function<V, R> mapper) {
         Objects.requireNonNull(mapper);
         if (collector != null) {
             throw new IllegalStateException("Setting mapper after collector is not allowed.");
@@ -46,12 +46,12 @@ public abstract class ValueArgumentBuilder<V> extends ArgumentBuilder {
         return self();
     }
 
-    public ValueArgumentBuilder<V> collect() {
+    public ValuedArgumentBuilder<V> collect() {
         this.collector = ExCollectors.one();
         return self();
     }
 
-    public <R> ValueArgumentBuilder<R> collect(Collector<V, ?, R> collector) {
+    public <R> ValuedArgumentBuilder<R> collect(Collector<V, ?, R> collector) {
         Objects.requireNonNull(collector);
         this.collector = collector;
         return self();
@@ -63,7 +63,7 @@ public abstract class ValueArgumentBuilder<V> extends ArgumentBuilder {
         return self;
     }
 
-    public final <A extends ValueArgument<V>> A build(Function<V, String> normalizer) {
+    public final <A extends ValuedArgument<V>> A build(Function<V, String> normalizer) {
         List<?> mappers = this.mappers;
         Collector<?, ?, ?> collector = this.collector;
         return create(name, splitter,
@@ -78,7 +78,7 @@ public abstract class ValueArgumentBuilder<V> extends ArgumentBuilder {
         return ret;
     }
 
-    protected abstract <A extends ValueArgument<V>> A create(
+    protected abstract <A extends ValuedArgument<V>> A create(
             String name,
             Function<String, Stream<String>> splitter,
             List<?> mappers,

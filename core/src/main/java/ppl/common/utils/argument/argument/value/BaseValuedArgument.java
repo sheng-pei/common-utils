@@ -5,13 +5,13 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-public class BaseValueArgument<V> extends ValueArgument<V> {
+public class BaseValuedArgument<V> extends ValuedArgument<V> {
 
-    protected BaseValueArgument(String name,
-                                Function<String, Stream<String>> splitter,
-                                @SuppressWarnings("rawtypes") List mappers,
-                                @SuppressWarnings("rawtypes") Collector collector,
-                                Function<V, String> valueNormalizer) {
+    protected BaseValuedArgument(String name,
+                                 Function<String, Stream<String>> splitter,
+                                 @SuppressWarnings("rawtypes") List mappers,
+                                 @SuppressWarnings("rawtypes") Collector collector,
+                                 Function<V, String> valueNormalizer) {
         super(name, splitter, mappers, collector, valueNormalizer);
     }
 
@@ -20,25 +20,25 @@ public class BaseValueArgument<V> extends ValueArgument<V> {
         return name();
     }
 
-    public static ValueArgumentBuilder<String> newBuilder(String name) {
+    public static ValuedArgumentBuilder<String> newBuilder(String name) {
         return new Builder<>(name);
     }
 
-    public static class Builder<V> extends ValueArgumentBuilder<V> {
+    public static class Builder<V> extends ValuedArgumentBuilder<V> {
 
         private Builder(String name) {
             super(name);
         }
 
         @Override
-        protected <A extends ValueArgument<V>> A create(
+        protected <A extends ValuedArgument<V>> A create(
                 String name,
                 Function<String, Stream<String>> splitter,
                 List<?> mappers,
                 Collector<?, ?, ?> collector,
                 Function<V, String> valueNormalizer) {
             @SuppressWarnings("unchecked")
-            A ret = (A) new BaseValueArgument<>(name, splitter, mappers, collector, valueNormalizer);
+            A ret = (A) new BaseValuedArgument<>(name, splitter, mappers, collector, valueNormalizer);
             return ret;
         }
 

@@ -20,7 +20,7 @@ public interface Headers {
         return getHeaders(HeaderName.create(name));
     }
 
-    default  <T extends Header<? extends HeaderValue>> List<T> getHeaders(Class<T> clazz) {
+    default  <V extends HeaderValue, T extends Header<V>> List<T> getHeaders(Class<T> clazz) {
         if (clazz == null) {
             return Collections.emptyList();
         }
@@ -44,7 +44,7 @@ public interface Headers {
         return getHeader(HeaderName.create(name));
     }
 
-    default  <T extends Header<? extends HeaderValue>> T getHeader(Class<T> clazz) {
+    default  <V extends HeaderValue, T extends Header<V>> T getHeader(Class<T> clazz) {
         if (clazz == null) {
             return null;
         }
@@ -73,7 +73,7 @@ public interface Headers {
                 .anyMatch(h -> h.isHeader(name));
     }
 
-    default <T extends Header<? extends HeaderValue>> boolean containsHeader(Class<T> clazz) {
+    default <V extends HeaderValue, T extends Header<V>> boolean containsHeader(Class<T> clazz) {
         if (clazz == null) {
             return false;
         }

@@ -66,7 +66,7 @@ public class Properties {
             if (value != null) {
                 @SuppressWarnings("unchecked")
                 Map<Object, Object> p = (Map<Object, Object>) this.properties;
-                p.put(name.trim(), Elements.elements().create(name, value));
+                p.put(name.trim(), ElementFactory.def().create(name, value));
             }
             return this;
         }

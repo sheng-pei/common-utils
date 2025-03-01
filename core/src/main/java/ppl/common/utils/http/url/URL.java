@@ -4,7 +4,6 @@ import ppl.common.utils.Bytes;
 import ppl.common.utils.character.ascii.AsciiGroup;
 import ppl.common.utils.character.ascii.Mask;
 import ppl.common.utils.net.URICharGroup;
-import ppl.common.utils.net.URLDecoder;
 import ppl.common.utils.net.URLEncoder;
 import ppl.common.utils.pair.Pair;
 import ppl.common.utils.string.Strings;
@@ -32,7 +31,7 @@ public class URL {
     private static final String DEFAULT_PROTOCOL = HTTP;
     private static final Pattern PORT_PATTERN = Pattern.compile("[0-9]+");
     private static final Pattern REGNAME_PATTERN = Pattern.compile(
-            "(?:[a-zA-Z0-9_.~!$&'()*+,;=-]|%[0-9a-fA-F]{2})*|[^\00-\0177]");
+            "(?:[a-zA-Z0-9_.~!$&'()*+,;=-]|%[0-9a-fA-F]{2}|[^\00-\0177])*");
     private static final Pattern IPV4ADDRESS_PATTERN = Pattern.compile(
             "(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}" +
                     "(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])");
@@ -49,7 +48,28 @@ public class URL {
                     "(?:(?:[0-9a-fA-F]{1,4}:){0,5}[0-9a-fA-F]{1,4})?::[0-9a-fA-F]{1,4}|" +
                     "(?:(?:[0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4})?::");
     private static final Pattern PATH_PATTERN = Pattern.compile("(?:/(?:[a-zA-Z0-9_.~!$&'()\\[\\]*+,;=:@-]|[^\\00-\\0177]|%[0-9a-fA-F]{2})*)*");
-    public static final Pattern QUERY_AND_FRAGMENT_PATTERN = Pattern.compile("(?:[a-zA-Z0-9_.~!$&'()*+,;=:@/?-]|[^\\00-\\0177]|%[0-9a-fA-F]{2})*");
+    private static final Pattern QUERY_AND_FRAGMENT_PATTERN = Pattern.compile("(?:[a-zA-Z0-9_.~!$&'()*+,;=:@/?-]|[^\\00-\\0177]|%[0-9a-fA-F]{2})*");
+
+    private static final URLEncoder PATH_ENCODER = URLEncoder.builder()
+            .setPercentEncodingReserved(true)
+            .orDontNeedToEncode((
+                    Mask.asciiMask("[]\"<>^`{}|")
+                            .bitOr(Mask.asciiMask('\0', '\040'))
+                            .bitOr(Mask.asciiMask("\177"))
+            ).bitNot().predicate())
+            .build();
+
+    private static final String QUERY_DELIMITER = "&";
+    private static final String NV_SEPARATOR = "=";
+    private static final URLEncoder QUERY_NAME_ENCODER = URLEncoder.builder()
+            .setPercentEncodingReserved(true)
+            .orDontNeedToEncode(Mask.asciiMask("!$'()*+,;").predicate())
+            .build();
+    private static final URLEncoder QUERY_VALUE_ENCODER = URLEncoder.builder()
+            .setPercentEncodingReserved(true)
+            .orDontNeedToEncode(Mask.asciiMask("!$'()*+,;=").predicate())
+            .orDontNeedToEncode(Mask.asciiMask(NV_SEPARATOR).predicate())
+            .build();
 
     private final String scheme;
     private final String host;
@@ -59,7 +79,14 @@ public class URL {
     private final String fragment;
     private final List<Query> queries;
 
-    private URL(String scheme, String host, Integer port, String path, String query, String fragment, List<Query> queries) {
+    private final Charset pathCharset;
+    private final Charset queryCharset;
+
+    private URL(
+            String scheme, String host, Integer port,
+            String path, String query, String fragment,
+            List<Query> queries,
+            Charset pathCharset, Charset queryCharset) {
         this.scheme = scheme;
         this.host = host;
         this.port = port;
@@ -67,6 +94,9 @@ public class URL {
         this.query = query;
         this.fragment = fragment;
         this.queries = queries;
+
+        this.pathCharset = pathCharset;
+        this.queryCharset = queryCharset;
     }
 
     private static Pair<String, Integer> scheme(char[] chars, int start, boolean strict) {
@@ -109,21 +139,22 @@ public class URL {
                 a.getSecond());
     }
 
-    private static Pair<String, Integer> path(char[] chars, int start, boolean strict) {
+    private static Pair<String, Integer> path(char[] chars, int start, boolean strict, Charset charset) {
         Pair<String, Integer> p = next(chars, start, "?#");
         if (strict && !PATH_PATTERN.matcher(p.getFirst()).matches()) {
             throw new IllegalArgumentException("Invalid path.");
         }
+        p = Pair.create(PATH_ENCODER.parse(p.getFirst(), charset), p.getSecond());
         return p;
     }
 
-    private static Pair<String, Integer> query(char[] chars, int start, boolean strict) {
+    private static Pair<String, Integer> query(char[] chars, int start, boolean strict, Charset charset) {
         Pair<String, Integer> q = next(chars, start, "#");
         if (strict && q.getFirst() != null && !QUERY_AND_FRAGMENT_PATTERN.matcher(q.getFirst()).matches()) {
             throw new IllegalArgumentException("Invalid query.");
         }
         return Pair.create(
-                q.getFirst().isEmpty() ? null : q.getFirst().substring(1),
+                q.getFirst().isEmpty() ? null : Query.encodeQuery(q.getFirst().substring(1), charset),
                 q.getSecond());
     }
 
@@ -217,6 +248,12 @@ public class URL {
     }
 
     public static URL create(String url, boolean strict) {
+        return create(url, strict, DEFAULT_CHARSET, DEFAULT_CHARSET);
+    }
+
+    public static URL create(
+            String url, boolean strict,
+            Charset pathCharset, Charset queryCharset) {
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("Url is required.");
         }
@@ -243,9 +280,9 @@ public class URL {
         char[] authChars = authority.getFirst().toCharArray();
         Pair<String, Integer> host = host(authChars, 0);
         Pair<Integer, Integer> port = port(authChars, host.getSecond());
-        Pair<String, Integer> path = path(chars, authority.getSecond(), strict);
+        Pair<String, Integer> path = path(chars, authority.getSecond(), strict, pathCharset);
         Pair<String, Integer> query = (chars.length == path.getSecond() || chars[path.getSecond()] == '#') ? null :
-                query(chars, path.getSecond(), strict);
+                query(chars, path.getSecond(), strict, queryCharset);
         Pair<String, Integer> fragment = fragment(chars, query == null ? path.getSecond() : query.getSecond(), strict);
         return new URL(
                 scheme.getFirst(),
@@ -254,7 +291,9 @@ public class URL {
                 path.getFirst(),
                 query == null ? null : query.getFirst(),
                 fragment.getFirst(),
-                Collections.emptyList());
+                Collections.emptyList(),
+                pathCharset == null ? DEFAULT_CHARSET : pathCharset,
+                queryCharset == null ? DEFAULT_CHARSET : queryCharset);
     }
 
     public HttpURLConnection open() throws IOException {
@@ -290,19 +329,33 @@ public class URL {
     }
 
     public URL raw() {
-        return new URL(scheme, host, port, path, query, fragment, Collections.emptyList());
+        return new URL(scheme, host, port, path, query,
+                fragment, Collections.emptyList(),
+                pathCharset, queryCharset);
     }
 
     public URL base() {
-        return new URL(scheme, host, port, "", null, null, Collections.emptyList());
+        return new URL(scheme, host, port, "", null,
+                null, Collections.emptyList(),
+                pathCharset, queryCharset);
     }
 
     public URL truncateToPath() {
-        return new URL(scheme, host, port, path, null, null, Collections.emptyList());
+        return new URL(scheme, host, port, path, null,
+                null, Collections.emptyList(),
+                pathCharset, queryCharset);
     }
 
-    public URL noQuery() {
-        return new URL(scheme, host, port, path, null, fragment, Collections.emptyList());
+    public URL truncateToQuery() {
+        return new URL(scheme, host, port, path, query,
+                null, this.queries,
+                pathCharset, queryCharset);
+    }
+
+    public URL truncateToFragment() {
+        return new URL(scheme, host, port, path, query,
+                null, this.queries,
+                pathCharset, queryCharset);
     }
 
     public URL dynamic() {
@@ -310,8 +363,11 @@ public class URL {
             return this;
         }
 
-        List<Query> queries = Queries.unsafeParseQueries(query);
-        return new URL(scheme, host, port, path, null, fragment, Collections.unmodifiableList(queries));
+        List<Query> queries = Query.parseQueries(query, queryCharset);
+        queries.addAll(this.queries);
+        return new URL(scheme, host, port, path, null,
+                fragment, Collections.unmodifiableList(queries),
+                pathCharset, queryCharset);
     }
 
     public URL appendDynamicQuery(String name, Object value) {
@@ -319,33 +375,41 @@ public class URL {
             throw new IllegalArgumentException("Name is required.");
         }
 
-        String v = Optional.ofNullable(value)
-                .map(Object::toString)
-                .map(s -> DYNAMIC_QUERY_VALUE_ENCODER.parse(s, DEFAULT_CHARSET))
-                .orElse(null);
-        Query q = Query.create(DYNAMIC_QUERY_NAME_ENCODER.parse(name, DEFAULT_CHARSET), v);
         List<Query> queries = new ArrayList<>(this.queries);
-        queries.add(q);
-        return new URL(scheme, host, port, path, this.query, fragment, Collections.unmodifiableList(queries));
+        queries.add(Query.create(name, Optional.ofNullable(value)
+                .map(Object::toString)
+                .orElse(null), queryCharset));
+        return new URL(scheme, host, port, path, this.query,
+                fragment, Collections.unmodifiableList(queries),
+                pathCharset, queryCharset);
     }
 
     public URL appendDynamicQuery(Query query) {
         Objects.requireNonNull(query, "Query is required.");
+        if (!Objects.equals(query.getCharset(), queryCharset)) {
+            String name = query.name();
+            String value = query.value();
+            query = Query.create(name, value, queryCharset);
+        }
         List<Query> queries = new ArrayList<>(this.queries);
         queries.add(query);
-        return new URL(scheme, host, port, path, this.query, fragment, Collections.unmodifiableList(queries));
+        return new URL(scheme, host, port, path, this.query,
+                fragment, Collections.unmodifiableList(queries),
+                pathCharset, queryCharset);
     }
 
     public URL removeDynamicQuery(String name) {
         List<Query> queries = this.queries.stream()
-                .filter(q -> !(q.name(DEFAULT_CHARSET).equals(URLDecoder.decode(name, DEFAULT_CHARSET))))
+                .filter(q -> !q.nameEquals(name))
                 .collect(Collectors.toList());
-        return new URL(scheme, host, port, path, this.query, fragment, Collections.unmodifiableList(queries));
+        return new URL(scheme, host, port, path, this.query,
+                fragment, Collections.unmodifiableList(queries),
+                pathCharset, queryCharset);
     }
 
-    public List<Query> getDynamicQuery(String name) {
+    public List<Query> getDynamicQueries(String name) {
         return this.queries.stream()
-                .filter(q -> q.name(DEFAULT_CHARSET).equals(URLDecoder.decode(name, DEFAULT_CHARSET)))
+                .filter(q -> q.nameEquals(name))
                 .collect(Collectors.toList());
     }
 
@@ -356,6 +420,10 @@ public class URL {
         return queries.get(i);
     }
 
+    public List<Query> getDynamicQueries() {
+        return new ArrayList<>(this.queries);
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(scheme).append(":")
@@ -364,10 +432,10 @@ public class URL {
             builder.append(path);
         }
 
-        String[] dynamicQueries = dynamicQueries();
-        if (this.query != null || dynamicQueries.length != 0) {
+        String joinedQuery = joinQuery();
+        if (!joinedQuery.isEmpty()) {
             builder.append('?')
-                    .append(concatQuery(this.query, dynamicQueries));
+                    .append(joinedQuery);
         }
 
         if (fragment != null) {
@@ -387,10 +455,10 @@ public class URL {
         builder.append(generatePort(normalizePort()));
         builder.append(normalizePath());
 
-        String[] dynamicQueries = dynamicQueries();
-        if (this.query != null || dynamicQueries.length != 0) {
+        String joinedQuery = joinQuery();
+        if (!joinedQuery.isEmpty()) {
             builder.append('?')
-                    .append(normalize(concatQuery(this.query, dynamicQueries)));
+                    .append(normalize(joinedQuery));
         }
 
         if (fragment != null) {
@@ -398,6 +466,18 @@ public class URL {
                     .append(normalize(fragment));
         }
         return builder.toString();
+    }
+
+    private String joinQuery() {
+        String query = this.query;
+        String dynamicQuery = Query.queryString(this.queries);
+        String joinedQuery = query;
+        if (Strings.isEmpty(query)) {
+            joinedQuery = dynamicQuery;
+        } else if (!dynamicQuery.isEmpty()) {
+            joinedQuery = Query.joinQuery(joinedQuery, dynamicQuery);
+        }
+        return joinedQuery;
     }
 
     private String normalizeHost() {
@@ -412,7 +492,7 @@ public class URL {
                     builder.append(chars[i]);
                 }
             } else {
-                char c = (char) Bytes.oneFromHex(chars[i+1], chars[i+2]);
+                char c = (char) Bytes.oneFromHex(chars[i + 1], chars[i + 2]);
                 if (URICharGroup.UNRESERVED.test(c)) {
                     if (AsciiGroup.UP_ALPHA.test(c)) {
                         builder.append((char) (c - 'A' + 'a'));
@@ -421,8 +501,8 @@ public class URL {
                     }
                 } else {
                     builder.append(chars[i]);
-                    builder.append(Character.toUpperCase(chars[i+1]));
-                    builder.append(Character.toUpperCase(chars[i+2]));
+                    builder.append(Character.toUpperCase(chars[i + 1]));
+                    builder.append(Character.toUpperCase(chars[i + 2]));
                 }
                 i += 2;
             }
@@ -458,27 +538,8 @@ public class URL {
     private String normalize(String string) {
         char[] chars = string.toCharArray();
         StringBuilder builder = new StringBuilder(chars.length);
-        Predicate<Character> pct = Mask.NON_ASCII.bitOr(Mask.asciiMask("[]")).predicate();
         for (int i = 0; i < chars.length; i++) {
-            if (chars[i] != '%') {
-                if (pct.test(chars[i])) {
-                    int j = i;
-                    i++;
-                    for (; i < chars.length; i++) {
-                        if (!pct.test(chars[i])) {
-                            break;
-                        }
-                    }
-                    String temp = new String(chars, j, i - j);
-                    byte[] bytes = temp.getBytes(DEFAULT_CHARSET);
-                    for (byte b : bytes) {
-                        builder.append('%').append(Bytes.hex(b));
-                    }
-                    i--;
-                } else {
-                    builder.append(chars[i]);
-                }
-            } else {
+            if (chars[i] == '%') {
                 char c = (char) Bytes.oneFromHex(chars[i + 1], chars[i + 2]);
                 if (URICharGroup.UNRESERVED.test(c)) {
                     builder.append(c);
@@ -517,44 +578,6 @@ public class URL {
     private String generateAuthority() {
         return generateHost(this.host) +
                 generatePort(this.port);
-    }
-
-    public static final String QUERY_DELIMITER = "&";
-    public static final String NV_SEPARATOR = "=";
-    private static final URLEncoder DYNAMIC_QUERY_NAME_ENCODER = URLEncoder.builder()
-            .setPercentEncodingReserved(true)
-            .or(Mask.asciiMask("!$'()*+,;").predicate())
-            .build();
-    private static final URLEncoder DYNAMIC_QUERY_VALUE_ENCODER = URLEncoder.builder()
-            .setPercentEncodingReserved(true)
-            .or(Mask.asciiMask("!$'()*+,;=").predicate())
-            .build();
-
-    private String[] dynamicQueries() {
-        List<Query> queries = this.queries;
-        List<String> ret = new ArrayList<>();
-        if (queries != null && !queries.isEmpty()) {
-            for (Query q : queries) {
-                ret.add(q.getName() +
-                        NV_SEPARATOR +
-                        q.getValue());
-            }
-        }
-        return ret.toArray(new String[0]);
-    }
-
-    private String concatQuery(String query, String[] dynamicQueries) {
-        String ret = "";
-        if (query != null && !query.isEmpty()) {
-            ret += query;
-        }
-        if (dynamicQueries.length != 0) {
-            if (!ret.isEmpty()) {
-                ret = ret + QUERY_DELIMITER;
-            }
-            ret = ret + String.join(QUERY_DELIMITER, dynamicQueries);
-        }
-        return ret;
     }
 
 }

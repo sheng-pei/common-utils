@@ -78,17 +78,17 @@ public final class HeaderFactory {
     }
 
     private HeaderFactory() {
-        this.headers = new HashMap<>();
-        this.classToFactory = new HashMap<>();
+        this.creators = new HashMap<>();
+        this.classToCreator = new HashMap<>();
     }
 
-    private final Map<HeaderName, HeaderCreator> headers;
-    private final Map<Class<? extends Header<? extends HeaderValue>>, HeaderCreator> classToFactory;
+    private final Map<HeaderName, HeaderCreator> creators;
+    private final Map<Class<? extends Header<? extends HeaderValue>>, HeaderCreator> classToCreator;
 
     private void registerKnownHeader(Class<? extends Header<? extends HeaderValue>> clazz) {
         HeaderName name = getName(clazz);
         Constructor<Header<HeaderValue>> constructor = getConstructor(clazz);
-        HeaderCreator factory = (s, context) -> {
+        HeaderCreator creator = (s, context) -> {
             try {
                 if (constructor.getParameterCount() == 2) {
                     return constructor.newInstance(s, context);
@@ -105,16 +105,16 @@ public final class HeaderFactory {
                 throw new RuntimeException("Unknown exception.", e);
             }
         };
-        this.headers.put(name, factory);
-        this.classToFactory.put(clazz, factory);
+        this.creators.put(name, creator);
+        this.classToCreator.put(clazz, creator);
     }
 
-    public HeaderCreator getFactory(Class<? extends Header<? extends HeaderValue>> clazz) {
-        HeaderCreator factory = classToFactory.get(clazz);
-        if (factory == null) {
-            factory = UnknownHeader.getFactory(getName(clazz));
+    public HeaderCreator getCreator(Class<? extends Header<? extends HeaderValue>> clazz) {
+        HeaderCreator creator = classToCreator.get(clazz);
+        if (creator == null) {
+            creator = UnknownHeader.getCreator(getName(clazz));
         }
-        return factory;
+        return creator;
     }
 
     public Header<HeaderValue> create(String header) {
@@ -159,14 +159,14 @@ public final class HeaderFactory {
     }
 
     private Header<HeaderValue> create(HeaderName name, String value, Context context) {
-        HeaderCreator factory;
-        if (headers.containsKey(name)) {
-            factory = headers.get(name);
+        HeaderCreator creator;
+        if (creators.containsKey(name)) {
+            creator = creators.get(name);
             value = Strings.trim(value, HttpCharGroup.WS);
         } else {
-            factory = UnknownHeader.getFactory(name);
+            creator = UnknownHeader.getCreator(name);
         }
-        return factory.create(value, context);
+        return creator.create(value, context);
     }
 
     public static HeaderFactory def() {

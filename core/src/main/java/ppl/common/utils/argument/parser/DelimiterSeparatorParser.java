@@ -25,7 +25,7 @@ public class DelimiterSeparatorParser implements StringParser<String, String> {
 
     private static final char DEFAULT_DELIMITER = ';';
     private static final char DEFAULT_SEPARATOR = '=';
-    private static final Function<String, String> TRIM = String::trim;
+    private static final Function<String, String> TRIM = Strings::trim;
     private static final Function<String, String> IDENTITY = Function.identity();
 
     private final char delimiter;
