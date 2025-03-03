@@ -10,7 +10,6 @@ import ppl.common.utils.http.header.UnknownHeaderValue;
 import ppl.common.utils.http.header.internal.NoRedirect;
 import ppl.common.utils.http.header.known.ContentLength;
 import ppl.common.utils.http.header.known.TransferEncoding;
-import ppl.common.utils.http.header.value.LongValue;
 import ppl.common.utils.http.header.value.transfercoding.Coding;
 import ppl.common.utils.http.header.value.transfercoding.CodingKind;
 import ppl.common.utils.http.property.Properties;
@@ -150,7 +149,7 @@ public class BaseClient extends AbstractClient {
 
     private void processContentLength(HttpURLConnection conn, ContentLength length) {
         if (length != null) {
-            conn.setFixedLengthStreamingMode(((LongValue) length.value()).getValue());
+            conn.setFixedLengthStreamingMode(length.value().getValue());
         }
     }
 
