@@ -1,9 +1,11 @@
 package ppl.common.utils.http.url;
 
 import ppl.common.utils.Bytes;
+import ppl.common.utils.asserts.IPs;
 import ppl.common.utils.character.ascii.AsciiGroup;
 import ppl.common.utils.character.ascii.Mask;
 import ppl.common.utils.net.URICharGroup;
+import ppl.common.utils.net.URLDecoder;
 import ppl.common.utils.net.URLEncoder;
 import ppl.common.utils.pair.Pair;
 import ppl.common.utils.string.Strings;
@@ -17,7 +19,6 @@ import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -26,49 +27,27 @@ import java.util.stream.Collectors;
  */
 public class URL {
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
-    private static final String DEFAULT_PROTOCOL = HTTP;
-    private static final Pattern PORT_PATTERN = Pattern.compile("[0-9]+");
-    private static final Pattern REGNAME_PATTERN = Pattern.compile(
-            "(?:[a-zA-Z0-9_.~!$&'()*+,;=-]|%[0-9a-fA-F]{2}|[^\00-\0177])*");
-    private static final Pattern IPV4ADDRESS_PATTERN = Pattern.compile(
-            "(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}" +
-                    "(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])");
-    private static final Pattern IPV6ADDRESS_PATTERN = Pattern.compile(
-            "(?:(?:[0-9a-fA-F]{1,4}:){6}|" +
-                    "::(?:[0-9a-fA-F]{1,4}:){5}|" +
-                    "(?:[0-9a-fA-F]{1,4})?::(?:[0-9a-fA-F]{1,4}:){4}|" +
-                    "(?:(?:[0-9a-fA-F]{1,4}:)?[0-9a-fA-F]{1,4})?::(?:[0-9a-fA-F]{1,4}:){3}|" +
-                    "(?:(?:[0-9a-fA-F]{1,4}:){0,2}[0-9a-fA-F]{1,4})?::(?:[0-9a-fA-F]{1,4}:){2}|" +
-                    "(?:(?:[0-9a-fA-F]{1,4}:){0,3}[0-9a-fA-F]{1,4})?::[0-9a-fA-F]{1,4}:|" +
-                    "(?:(?:[0-9a-fA-F]{1,4}:){0,4}[0-9a-fA-F]{1,4})?::)" +
-                    "(?:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}|" +
-                    "(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))|" +
-                    "(?:(?:[0-9a-fA-F]{1,4}:){0,5}[0-9a-fA-F]{1,4})?::[0-9a-fA-F]{1,4}|" +
-                    "(?:(?:[0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4})?::");
-    private static final Pattern PATH_PATTERN = Pattern.compile("(?:/(?:[a-zA-Z0-9_.~!$&'()\\[\\]*+,;=:@-]|[^\\00-\\0177]|%[0-9a-fA-F]{2})*)*");
+    public static final String DEFAULT_SCHEME = HTTP;
+
+    private static final Pattern COMPATIBLE_HOST_PATTERN = Pattern.compile("(?:[a-zA-Z0-9-]+\\.)*[a-zA-Z0-9-]+");
+    private static final Pattern PATH_PATTERN = Pattern.compile("(?:/(?:[a-zA-Z0-9_.~!$&'()*+,;=:@-]|[^\\00-\\0177]|%[0-9a-fA-F]{2})*)*");
     private static final Pattern QUERY_AND_FRAGMENT_PATTERN = Pattern.compile("(?:[a-zA-Z0-9_.~!$&'()*+,;=:@/?-]|[^\\00-\\0177]|%[0-9a-fA-F]{2})*");
 
-    private static final URLEncoder PATH_ENCODER = URLEncoder.builder()
+    private static final URLEncoder COMPATIBLE_CHARACTER_ENCODER = URLEncoder.builder()
             .setPercentEncodingReserved(true)
             .orDontNeedToEncode((
                     Mask.asciiMask("[]\"<>^`{}|")
-                            .bitOr(Mask.asciiMask('\0', '\040'))
+                            .bitOr(Mask.asciiMask('\1', '\040'))
                             .bitOr(Mask.asciiMask("\177"))
             ).bitNot().predicate())
             .build();
 
-    private static final String QUERY_DELIMITER = "&";
-    private static final String NV_SEPARATOR = "=";
-    private static final URLEncoder QUERY_NAME_ENCODER = URLEncoder.builder()
+    private static final URLEncoder NON_ASCII_ENCODER = URLEncoder.builder()
             .setPercentEncodingReserved(true)
-            .orDontNeedToEncode(Mask.asciiMask("!$'()*+,;").predicate())
-            .build();
-    private static final URLEncoder QUERY_VALUE_ENCODER = URLEncoder.builder()
-            .setPercentEncodingReserved(true)
-            .orDontNeedToEncode(Mask.asciiMask("!$'()*+,;=").predicate())
-            .orDontNeedToEncode(Mask.asciiMask(NV_SEPARATOR).predicate())
+            .orDontNeedToEncode(AsciiGroup.ALL)
             .build();
 
     private final String scheme;
@@ -79,14 +58,13 @@ public class URL {
     private final String fragment;
     private final List<Query> queries;
 
-    private final Charset pathCharset;
-    private final Charset queryCharset;
+    private final Charset charset;
 
     private URL(
             String scheme, String host, Integer port,
             String path, String query, String fragment,
             List<Query> queries,
-            Charset pathCharset, Charset queryCharset) {
+            Charset charset) {
         this.scheme = scheme;
         this.host = host;
         this.port = port;
@@ -95,37 +73,30 @@ public class URL {
         this.fragment = fragment;
         this.queries = queries;
 
-        this.pathCharset = pathCharset;
-        this.queryCharset = queryCharset;
+        this.charset = charset;
     }
 
-    private static Pair<String, Integer> scheme(char[] chars, int start, boolean strict) {
-        String scheme = DEFAULT_PROTOCOL;
-        int skip;
+    private static Pair<String, Integer> scheme(char[] chars, int start) {
+        String scheme = DEFAULT_SCHEME;
+        int next;
         if (chars[start] == '/') {//Starts with '//' i.e. authority. Use default scheme: http.
-            skip = start + 2;
+            next = start + 2;
         } else if (chars[start] == '[') {//Maybe starts with ip-literal, compatible url.
-            if (strict) {
-                throw new IllegalArgumentException("No scheme and not starts with '//'");
-            }
-            skip = start;
+            next = start;
         } else {
             SubstringFinder finder = new SundaySubstringFinder("://");
             Substring substring = finder.find(chars, start);
             if (substring != null) {
-                skip = substring.start() + 3;
+                next = substring.start() + 3;
                 scheme = new String(chars, start, substring.start());
             } else {
-                if (strict) {
-                    throw new IllegalArgumentException("No scheme and not starts with '//'");
-                }
-                skip = start;//It does not start with scheme and '//'. Maybe compatible url.
+                next = start;//It does not start with scheme and '//'. Maybe compatible url.
             }
         }
-        return Pair.create(scheme, skip);
+        return Pair.create(scheme, next);
     }
 
-    private static boolean isHttp(String scheme) {
+    public static boolean isSupportedScheme(String scheme) {
         return HTTP.equalsIgnoreCase(scheme) || HTTPS.equalsIgnoreCase(scheme);
     }
 
@@ -134,42 +105,11 @@ public class URL {
         if (a.getFirst().isEmpty()) {
             throw new IllegalArgumentException("No authority.");
         }
-        return Pair.create(
-                a.getFirst().isEmpty() ? null : a.getFirst(),
-                a.getSecond());
-    }
-
-    private static Pair<String, Integer> path(char[] chars, int start, boolean strict, Charset charset) {
-        Pair<String, Integer> p = next(chars, start, "?#");
-        if (strict && !PATH_PATTERN.matcher(p.getFirst()).matches()) {
-            throw new IllegalArgumentException("Invalid path.");
-        }
-        p = Pair.create(PATH_ENCODER.parse(p.getFirst(), charset), p.getSecond());
-        return p;
-    }
-
-    private static Pair<String, Integer> query(char[] chars, int start, boolean strict, Charset charset) {
-        Pair<String, Integer> q = next(chars, start, "#");
-        if (strict && q.getFirst() != null && !QUERY_AND_FRAGMENT_PATTERN.matcher(q.getFirst()).matches()) {
-            throw new IllegalArgumentException("Invalid query.");
-        }
-        return Pair.create(
-                q.getFirst().isEmpty() ? null : Query.encodeQuery(q.getFirst().substring(1), charset),
-                q.getSecond());
-    }
-
-    private static Pair<String, Integer> fragment(char[] chars, int start, boolean strict) {
-        Pair<String, Integer> f = next(chars, start, "");
-        if (strict && f.getFirst() != null && !QUERY_AND_FRAGMENT_PATTERN.matcher(f.getFirst()).matches()) {
-            throw new IllegalArgumentException("Invalid fragment.");
-        }
-        return Pair.create(
-                f.getFirst().isEmpty() ? null : f.getFirst().substring(1),
-                f.getSecond());
+        return a;
     }
 
     private static Pair<String, Integer> host(char[] chars, int start) {
-        invalidUserInfo(chars, start);
+        assertNoUserInfo(chars, start);
         if (chars[start] == '[') {
             return ipv6(chars, start);
         } else {
@@ -177,7 +117,7 @@ public class URL {
         }
     }
 
-    private static void invalidUserInfo(char[] chars, int start) {
+    private static void assertNoUserInfo(char[] chars, int start) {
         int atIdx = Strings.indexOf('@', chars, start, chars.length);
         if (atIdx >= 0) {
             throw new IllegalArgumentException("Invalid authority, userinfo is not allowed for http(s).");
@@ -187,27 +127,29 @@ public class URL {
     private static Pair<String, Integer> ipv6(char[] chars, int start) {
         int e = Strings.indexOf(']', chars, start, chars.length);
         if (e < 0) {
-            throw new IllegalArgumentException("Invalid authority, invalid ip literal, no matching ].");
+            throw new IllegalArgumentException("Invalid authority, no matching ']', maybe ipv6 or future ip literal.");
         }
         if (chars.length == e + 1 || Mask.asciiMask(":/?#").predicate().test(chars[e + 1])) {
             String ipv6 = new String(chars, start + 1, e - start - 1);
-            if (IPV6ADDRESS_PATTERN.matcher(ipv6).matches()) {
+            if (IPs.isIpv6(ipv6)) {
                 return Pair.create(ipv6, e + 1);
             } else {
-                throw new IllegalArgumentException("Maybe future ip.");
+                throw new IllegalArgumentException("Maybe future ip literal.");
             }
         } else {
-            throw new IllegalArgumentException("Invalid authority, maybe ip literal.");
+            throw new IllegalArgumentException("Invalid authority, too many characters, maybe ipv6 literal.");
         }
     }
 
     private static Pair<String, Integer> classicHost(char[] chars, int start) {
         Pair<String, Integer> host = next(chars, start, ":");
 
-        if (host.getFirst().isEmpty()) {
+        String h = URLDecoder.decode(host.getFirst());
+        if (h.isEmpty()) {
             throw new IllegalArgumentException("No host.");
         }
-        if (!REGNAME_PATTERN.matcher(host.getFirst()).matches()) {
+
+        if (!COMPATIBLE_HOST_PATTERN.matcher(h).matches()) {
             throw new IllegalArgumentException("Invalid classic host.");
         }
 
@@ -216,23 +158,64 @@ public class URL {
 
     private static Pair<Integer, Integer> port(char[] chars, int start) {
         if (start == chars.length) {
-            return null;
+            return Pair.create(null, start);
         }
 
         int port = -1;
-        start++;
+        start++; //skip colon
         if (start != chars.length) {
             String p = new String(chars, start, chars.length - start);
-            if (!PORT_PATTERN.matcher(p).matches()) {
-                throw new IllegalArgumentException("Invalid authority, port is invalid number.");
+            try {
+                port = Integer.parseInt(p);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid authority, port is not number.");
             }
-
-            port = Integer.parseInt(p);
             if (0 > port || port >= 65536) {
-                throw new IllegalArgumentException("Invalid authority, port out of range 0~65535");
+                throw new IllegalArgumentException("Invalid authority, port out of range 0~65535.");
             }
         }
         return Pair.create(port, chars.length);
+    }
+
+    private static Pair<String, Integer> path(char[] chars, int start, Charset charset) {
+        Pair<String, Integer> p = next(chars, start, "?#");
+        p = Pair.create(COMPATIBLE_CHARACTER_ENCODER.parse(p.getFirst(), charset), p.getSecond());
+        if (!PATH_PATTERN.matcher(p.getFirst()).matches()) {
+            throw new IllegalArgumentException("Invalid path.");
+        }
+        String s = URLDecoder.decode(p.getFirst(), charset);
+        if (s.contains("\0")) {
+            throw new IllegalArgumentException("Nul character is not allowed in path.");
+        }
+        return p;
+    }
+
+    private static Pair<String, Integer> query(char[] chars, int start, Charset charset) {
+        Pair<String, Integer> q = next(chars, start, "#");
+        if (q.getFirst().isEmpty()) {
+            return Pair.create(null, q.getSecond());
+        }
+
+        String tmp = q.getFirst().substring(1);
+        tmp = COMPATIBLE_CHARACTER_ENCODER.parse(tmp, charset);
+        if (!QUERY_AND_FRAGMENT_PATTERN.matcher(tmp).matches()) {
+            throw new IllegalArgumentException("Invalid query.");
+        }
+        return Pair.create(tmp, q.getSecond());
+    }
+
+    private static Pair<String, Integer> fragment(char[] chars, int start) {
+        Pair<String, Integer> f = next(chars, start, "");
+        if (f.getFirst().isEmpty()) {
+            return Pair.create(null, f.getSecond());
+        }
+
+        String tmp = f.getFirst().substring(1);
+        if (!QUERY_AND_FRAGMENT_PATTERN.matcher(tmp).matches()) {
+            throw new IllegalArgumentException("Invalid fragment.");
+        }
+
+        return Pair.create(tmp, f.getSecond());
     }
 
     private static Pair<String, Integer> next(char[] chars, int start, String s) {
@@ -244,16 +227,10 @@ public class URL {
     }
 
     public static URL create(String url) {
-        return create(url, false);
+        return create(url, DEFAULT_CHARSET);
     }
 
-    public static URL create(String url, boolean strict) {
-        return create(url, strict, DEFAULT_CHARSET, DEFAULT_CHARSET);
-    }
-
-    public static URL create(
-            String url, boolean strict,
-            Charset pathCharset, Charset queryCharset) {
+    public static URL create(String url, Charset charset) {
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("Url is required.");
         }
@@ -271,37 +248,39 @@ public class URL {
             throw new IllegalArgumentException("Incomplete http url which starts with path.");
         }
 
-        Pair<String, Integer> scheme = scheme(chars, 0, strict);
-        if (!isHttp(scheme.getFirst())) {
+        charset = charset == null ? DEFAULT_CHARSET : charset;
+
+        Pair<String, Integer> scheme = scheme(chars, 0);
+        if (!isSupportedScheme(scheme.getFirst())) {
             throw new IllegalArgumentException("Scheme is not http(s).");
         }
 
         Pair<String, Integer> authority = authority(chars, scheme.getSecond());
+
         char[] authChars = authority.getFirst().toCharArray();
         Pair<String, Integer> host = host(authChars, 0);
         Pair<Integer, Integer> port = port(authChars, host.getSecond());
-        Pair<String, Integer> path = path(chars, authority.getSecond(), strict, pathCharset);
-        Pair<String, Integer> query = (chars.length == path.getSecond() || chars[path.getSecond()] == '#') ? null :
-                query(chars, path.getSecond(), strict, queryCharset);
-        Pair<String, Integer> fragment = fragment(chars, query == null ? path.getSecond() : query.getSecond(), strict);
+
+        Pair<String, Integer> path = path(chars, authority.getSecond(), charset);
+        Pair<String, Integer> query = query(chars, path.getSecond(), charset);
+        Pair<String, Integer> fragment = fragment(chars, query.getSecond());
         return new URL(
                 scheme.getFirst(),
                 host.getFirst(),
-                port == null ? null : port.getFirst(),
+                port.getFirst(),
                 path.getFirst(),
-                query == null ? null : query.getFirst(),
+                query.getFirst(),
                 fragment.getFirst(),
                 Collections.emptyList(),
-                pathCharset == null ? DEFAULT_CHARSET : pathCharset,
-                queryCharset == null ? DEFAULT_CHARSET : queryCharset);
+                charset);
     }
 
     public HttpURLConnection open() throws IOException {
-        return (HttpURLConnection) new java.net.URL(toString()).openConnection();
+        return (HttpURLConnection) new java.net.URL(NON_ASCII_ENCODER.parse(toString())).openConnection();
     }
 
     public HttpURLConnection open(Proxy proxy) throws IOException {
-        return (HttpURLConnection) new java.net.URL(toString()).openConnection(proxy);
+        return (HttpURLConnection) new java.net.URL(NON_ASCII_ENCODER.parse(toString())).openConnection(proxy);
     }
 
     public String scheme() {
@@ -331,31 +310,31 @@ public class URL {
     public URL raw() {
         return new URL(scheme, host, port, path, query,
                 fragment, Collections.emptyList(),
-                pathCharset, queryCharset);
+                charset);
     }
 
     public URL base() {
         return new URL(scheme, host, port, "", null,
                 null, Collections.emptyList(),
-                pathCharset, queryCharset);
+                charset);
     }
 
     public URL truncateToPath() {
         return new URL(scheme, host, port, path, null,
                 null, Collections.emptyList(),
-                pathCharset, queryCharset);
+                charset);
     }
 
     public URL truncateToQuery() {
         return new URL(scheme, host, port, path, query,
                 null, this.queries,
-                pathCharset, queryCharset);
+                charset);
     }
 
     public URL truncateToFragment() {
         return new URL(scheme, host, port, path, query,
                 null, this.queries,
-                pathCharset, queryCharset);
+                charset);
     }
 
     public URL dynamic() {
@@ -363,11 +342,11 @@ public class URL {
             return this;
         }
 
-        List<Query> queries = Query.parseQueries(query, queryCharset);
+        List<Query> queries = Query.parseQueries(query, charset);
         queries.addAll(this.queries);
         return new URL(scheme, host, port, path, null,
                 fragment, Collections.unmodifiableList(queries),
-                pathCharset, queryCharset);
+                charset);
     }
 
     public URL appendDynamicQuery(String name, Object value) {
@@ -375,27 +354,36 @@ public class URL {
             throw new IllegalArgumentException("Name is required.");
         }
 
-        List<Query> queries = new ArrayList<>(this.queries);
-        queries.add(Query.create(name, Optional.ofNullable(value)
+        Query q = Query.create(name, Optional.ofNullable(value)
                 .map(Object::toString)
-                .orElse(null), queryCharset));
-        return new URL(scheme, host, port, path, this.query,
-                fragment, Collections.unmodifiableList(queries),
-                pathCharset, queryCharset);
+                .orElse(null), charset);
+        return _appendDynamicQuery(q);
     }
 
     public URL appendDynamicQuery(Query query) {
         Objects.requireNonNull(query, "Query is required.");
-        if (!Objects.equals(query.getCharset(), queryCharset)) {
+        if (!Objects.equals(query.getCharset(), charset)) {
             String name = query.name();
-            String value = query.value();
-            query = Query.create(name, value, queryCharset);
+            String value = query.getValue();
+            query = Query.create(name, value, charset);
         }
-        List<Query> queries = new ArrayList<>(this.queries);
-        queries.add(query);
-        return new URL(scheme, host, port, path, this.query,
-                fragment, Collections.unmodifiableList(queries),
-                pathCharset, queryCharset);
+
+        return _appendDynamicQuery(query);
+    }
+
+    private URL _appendDynamicQuery(Query query) {
+        String n = COMPATIBLE_CHARACTER_ENCODER.parse(query.getName());
+        String v = query.getValue() == null ? null : COMPATIBLE_CHARACTER_ENCODER.parse(query.getValue());
+        if (QUERY_AND_FRAGMENT_PATTERN.matcher(n).matches()) {
+            if (v == null || !QUERY_AND_FRAGMENT_PATTERN.matcher(v).matches()) {
+                List<Query> queries = new ArrayList<>(this.queries);
+                queries.add(Query.create(n, v, charset));
+                return new URL(scheme, host, port, path, this.query,
+                        fragment, Collections.unmodifiableList(queries),
+                        charset);
+            }
+        }
+        throw new IllegalArgumentException("Invalid query.");
     }
 
     public URL removeDynamicQuery(String name) {
@@ -404,7 +392,7 @@ public class URL {
                 .collect(Collectors.toList());
         return new URL(scheme, host, port, path, this.query,
                 fragment, Collections.unmodifiableList(queries),
-                pathCharset, queryCharset);
+                charset);
     }
 
     public List<Query> getDynamicQueries(String name) {
@@ -426,113 +414,142 @@ public class URL {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(scheme).append(":")
-                .append("//").append(generateAuthority());
-        if (path != null) {
-            builder.append(path);
-        }
-
-        String joinedQuery = joinQuery();
-        if (!joinedQuery.isEmpty()) {
-            builder.append('?')
-                    .append(joinedQuery);
-        }
-
-        if (fragment != null) {
-            builder.append('#')
-                    .append(fragment);
-        }
-        return builder.toString();
+        return scheme +
+                "://" +
+                generateHost(_host(false)) +
+                generatePort(_port(false)) +
+                generatePath(_path(false)) +
+                generateQuery(joinQuery(false)) +
+                generateFragment(fragment);
     }
 
     /**
      * Security case: change character to pct-encoded with utf-8.
      */
     public String normalizeString() {
-        StringBuilder builder = new StringBuilder(scheme.toLowerCase()).append(":")
-                .append("//");
-        builder.append(generateHost(normalizeHost()));
-        builder.append(generatePort(normalizePort()));
-        builder.append(normalizePath());
+        return scheme.toLowerCase() + ":" +
+                "//" +
+                generateHost(_host(true)) +
+                generatePort(_port(true)) +
+                generatePath(_path(true)) +
+                generateQuery(joinQuery(true));
+    }
 
-        String joinedQuery = joinQuery();
-        if (!joinedQuery.isEmpty()) {
-            builder.append('?')
-                    .append(normalize(joinedQuery));
-        }
-
-        if (fragment != null) {
-            builder.append('#')
-                    .append(normalize(fragment));
+    private String generateHost(String host) {
+        StringBuilder builder = new StringBuilder();
+        if (host.contains(":")) {
+            builder.append('[').append(host).append(']');
+        } else {
+            builder.append(host);
         }
         return builder.toString();
     }
 
-    private String joinQuery() {
-        String query = this.query;
-        String dynamicQuery = Query.queryString(this.queries);
-        String joinedQuery = query;
-        if (Strings.isEmpty(query)) {
-            joinedQuery = dynamicQuery;
-        } else if (!dynamicQuery.isEmpty()) {
-            joinedQuery = Query.joinQuery(joinedQuery, dynamicQuery);
+    private String generatePort(Integer port) {
+        if (port == null) {
+            return "";
         }
-        return joinedQuery;
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(':');
+        if (port >= 0) {
+            builder.append(port);
+        }
+        return builder.toString();
     }
 
-    private String normalizeHost() {
-        StringBuilder builder = new StringBuilder();
+    private String generatePath(String path) {
+        return path;
+    }
+
+    private String generateQuery(String query) {
+        if (query == null) {
+            return "";
+        }
+
+        return "?" + query;
+    }
+
+    private String joinQuery(boolean normalize) {
+        String query = this.query;
+        List<Query> queries = this.queries;
+        if (query == null && queries.isEmpty()) {
+            return normalize ? "" : null;
+        }
+
+        String joinedQuery = Query.joinQuery(query, queries);
+        return normalize ? normalize(joinedQuery) : joinedQuery;
+    }
+
+    private String generateFragment(String fragment) {
+        if (fragment == null) {
+            return "";
+        }
+
+        return "#" + fragment;
+    }
+
+    private String _host(boolean normalize) {
         String host = this.host;
-        char[] chars = host.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            if (chars[i] != '%') {
-                if (AsciiGroup.UP_ALPHA.test(chars[i])) {
-                    builder.append((char) (chars[i] - 'A' + 'a'));
-                } else {
-                    builder.append(chars[i]);
-                }
-            } else {
-                char c = (char) Bytes.oneFromHex(chars[i + 1], chars[i + 2]);
-                if (URICharGroup.UNRESERVED.test(c)) {
-                    if (AsciiGroup.UP_ALPHA.test(c)) {
-                        builder.append((char) (c - 'A' + 'a'));
+        if (normalize) {
+            StringBuilder builder = new StringBuilder();
+            char[] chars = host.toCharArray();
+            for (int i = 0; i < chars.length; i++) {
+                if (chars[i] != '%') {
+                    if (AsciiGroup.UP_ALPHA.test(chars[i])) {
+                        builder.append((char) (chars[i] - 'A' + 'a'));
                     } else {
-                        builder.append(c);
+                        builder.append(chars[i]);
                     }
                 } else {
-                    builder.append(chars[i]);
-                    builder.append(Character.toUpperCase(chars[i + 1]));
-                    builder.append(Character.toUpperCase(chars[i + 2]));
+                    char c = (char) Bytes.oneFromHex(chars[i + 1], chars[i + 2]);
+                    if (URICharGroup.UNRESERVED.test(c)) {
+                        if (AsciiGroup.UP_ALPHA.test(c)) {
+                            builder.append((char) (c - 'A' + 'a'));
+                        } else {
+                            builder.append(c);
+                        }
+                    } else {
+                        builder.append(chars[i]);
+                        builder.append(Character.toUpperCase(chars[i + 1]));
+                        builder.append(Character.toUpperCase(chars[i + 2]));
+                    }
+                    i += 2;
                 }
-                i += 2;
             }
+            host = builder.toString();
         }
-        return builder.toString();
+        return host;
     }
 
-    private Integer normalizePort() {
+    private Integer _port(boolean normalize) {
         Integer port = this.port;
-        if (port != null && port.equals(-1)) {
-            port = null;
-        }
+        if (normalize) {
+            if (port != null && port.equals(-1)) {
+                port = null;
+            }
 
-        if (port != null) {
-            if (scheme.equals(HTTP) && port.equals(80)) {
-                port = null;
-            } else if (scheme.equals(HTTPS) && port.equals(443)) {
-                port = null;
+            if (port != null) {
+                if (scheme.equals(HTTP) && port.equals(80)) {
+                    port = null;
+                } else if (scheme.equals(HTTPS) && port.equals(443)) {
+                    port = null;
+                }
             }
         }
         return port;
     }
 
-    private String normalizePath() {
+    private String _path(boolean normalize) {
         String path = this.path;
-        if (Strings.isEmpty(path)) {
-            return "/";
-        } else {
-            return normalize(path);
+        if (normalize) {
+            if (Strings.isEmpty(path)) {
+                path = "/";
+            } else {
+                path = normalize(path);
+            }
         }
+        return path;
     }
 
     private String normalize(String string) {
@@ -549,35 +566,11 @@ public class URL {
                     builder.append(Character.toUpperCase(chars[i + 2]));
                 }
                 i += 2;
+            } else {
+                builder.append(chars[i]);
             }
         }
         return builder.toString();
-    }
-
-    private String generateHost(String host) {
-        StringBuilder builder = new StringBuilder();
-        if (host.contains(":")) {
-            builder.append('[').append(host).append(']');
-        } else {
-            builder.append(host);
-        }
-        return builder.toString();
-    }
-
-    private String generatePort(Integer port) {
-        StringBuilder builder = new StringBuilder();
-        if (port != null) {
-            builder.append(':');
-            if (port >= 0) {
-                builder.append(port);
-            }
-        }
-        return builder.toString();
-    }
-
-    private String generateAuthority() {
-        return generateHost(this.host) +
-                generatePort(this.port);
     }
 
 }

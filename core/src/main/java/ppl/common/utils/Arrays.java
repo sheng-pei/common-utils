@@ -10,6 +10,7 @@ import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.*;
 
 public final class Arrays {
     private Arrays() {}
@@ -114,5 +115,110 @@ public final class Arrays {
 
     public static double[] zeroDouble() {
         return ZERO_DOUBLE_ARRAY;
+    }
+
+    public static void fill(long[] a, long val) {
+        java.util.Arrays.fill(a, val);
+    }
+
+    public static void fill(long[] a, int fromIndex, int toIndex, long val) {
+        java.util.Arrays.fill(a, fromIndex, toIndex, val);
+    }
+
+    public static void fill(int[] a, int val) {
+        java.util.Arrays.fill(a, val);
+    }
+
+    public static void fill(int[] a, int fromIndex, int toIndex, int val) {
+        java.util.Arrays.fill(a, fromIndex, toIndex, val);
+    }
+
+    public static void fill(short[] a, short val) {
+        java.util.Arrays.fill(a, val);
+    }
+
+    public static void fill(short[] a, int fromIndex, int toIndex, short val) {
+        java.util.Arrays.fill(a, fromIndex, toIndex, val);
+    }
+
+    public static void fill(char[] a, char val) {
+        java.util.Arrays.fill(a, val);
+    }
+
+    public static void fill(char[] a, int fromIndex, int toIndex, char val) {
+        java.util.Arrays.fill(a, fromIndex, toIndex, val);
+    }
+
+    public static void fill(byte[] a, byte val) {
+        java.util.Arrays.fill(a, val);
+    }
+
+    public static void fill(byte[] a, int fromIndex, int toIndex, byte val) {
+        java.util.Arrays.fill(a, fromIndex, toIndex, val);
+    }
+
+    public static void fill(boolean[] a, boolean val) {
+        java.util.Arrays.fill(a, val);
+    }
+
+    public static void fill(boolean[] a, int fromIndex, int toIndex,
+                            boolean val) {
+        java.util.Arrays.fill(a, fromIndex, toIndex, val);
+    }
+
+    public static void fill(double[] a, double val) {
+        java.util.Arrays.fill(a, val);
+    }
+
+    public static void fill(double[] a, int fromIndex, int toIndex,double val){
+        java.util.Arrays.fill(a, fromIndex, toIndex, val);
+    }
+
+    public static void fill(float[] a, float val) {
+        java.util.Arrays.fill(a, val);
+    }
+
+    public static void fill(float[] a, int fromIndex, int toIndex, float val) {
+        java.util.Arrays.fill(a, fromIndex, toIndex, val);
+    }
+
+    public static void fill(Object[] a, Object val) {
+        java.util.Arrays.fill(a, val);
+    }
+
+    public static void fill(Object[] a, int fromIndex, int toIndex, Object val) {
+        java.util.Arrays.fill(a, fromIndex, toIndex, val);
+    }
+
+    public static <T> Stream<T> stream(T[] array) {
+        return java.util.Arrays.stream(array);
+    }
+
+    public static <T> Stream<T> stream(T[] array, int startInclusive, int endExclusive) {
+        return java.util.Arrays.stream(array, startInclusive, endExclusive);
+    }
+
+    public static IntStream stream(int[] array) {
+        return java.util.Arrays.stream(array);
+    }
+
+    public static IntStream stream(int[] array, int startInclusive, int endExclusive) {
+        return java.util.Arrays.stream(array, startInclusive, endExclusive);
+    }
+
+    public static LongStream stream(long[] array) {
+        return java.util.Arrays.stream(array);
+    }
+
+    public static LongStream stream(long[] array, int startInclusive, int endExclusive) {
+        return java.util.Arrays.stream(array, startInclusive, endExclusive);
+    }
+
+    public static DoubleStream stream(double[] array) {
+        return java.util.Arrays.stream(array);
+    }
+
+    public static DoubleStream stream(double[] array, int startInclusive, int endExclusive) {
+        return java.util.Arrays.stream(array, startInclusive, endExclusive);
     }
 }

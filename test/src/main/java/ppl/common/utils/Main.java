@@ -1,34 +1,41 @@
 package ppl.common.utils;
 
-import org.apache.commons.compress.utils.IOUtils;
-import ppl.common.utils.character.ascii.Mask;
-import ppl.common.utils.ext.Exts;
+import ppl.common.utils.http.Clients;
+import ppl.common.utils.http.Connection;
+import ppl.common.utils.http.header.known.ContentType;
+import ppl.common.utils.http.header.value.mediatype.MediaType;
+import ppl.common.utils.http.request.Method;
+import ppl.common.utils.http.request.Request;
+import ppl.common.utils.http.response.Response;
 import ppl.common.utils.http.url.Query;
 import ppl.common.utils.http.url.URL;
-import ppl.common.utils.json.jackson.JsonUtils;
-import ppl.common.utils.string.trie.Trie;
-import ppl.common.utils.string.variable.VariableParser;
-import ppl.common.utils.string.variable.replacer.StringReplacer;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.util.Optional;
+
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        URL url = URL.create("http://localhost:18080/myapp/forward/request-session/obj[?a==");
-        url = url.appendDynamicQuery("b", "好的");
-        System.out.println(url.toString());
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        InputStream is = url.open().getInputStream();
-        IOUtils.copy(is, os);
-        System.out.println(os.toString());
+    public static void main(String[] args) throws Exception {
+        URL url = URL.create("localhost:18080/myapp/forward/request-parameter/json?key=你好");
+        Request req = Request.builder(Method.POST, url)
+                .appendHeader(new ContentType(MediaType.ensureKnown("application/json")))
+                .build();
+        Connection conn = Clients.create().connect(req);
+        OutputStream os = conn.openOutputStream();
+        String json = "{\"id\":111}";
+        os.write(json.getBytes());
+        os.flush();
+        os.close();
+        Response res = conn.getResponse();
+        InputStream is = res.openInputStream();
+        ByteArrayOutputStream os1 = new ByteArrayOutputStream();
+        IOs.copy(is, os1);
+        System.out.println(os1.toString());
+
 //        StringReplacer replacer = VariableParser.parse("\\${\\}\\}}\\l");
 //        String random = "LT-wZ1dnMhT2DPCmkqtVCI+";
 //        ECPublicKey publicKey = BCECUtils.publicKey("04bd2df35b56122e520452083a9c8e21861a9325ebe32851be97317e6bbe15e88005c3bc077d07a90107150b66a250b697dfbbe2600026eb2abc5d10b24357b108");

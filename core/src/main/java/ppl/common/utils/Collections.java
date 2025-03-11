@@ -117,6 +117,10 @@ public final class Collections {
         return c == null || c.isEmpty();
     }
 
+    public static boolean isNotEmpty(Collection<?> c) {
+        return !isEmpty(c);
+    }
+
     public static <E> Stack<E> emptyStack() {
         @SuppressWarnings("unchecked")
         Stack<E> ret = (Stack<E>) EMPTY_STACK;

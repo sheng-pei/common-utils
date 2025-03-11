@@ -38,11 +38,11 @@
     <distributionManagement>
         <repository>
             <id>maven-releases</id>
-            <url>http://localhost:8082/artifactory/maven-releases/</url>
+            <url>http://123.123.208.27:18082/artifactory/maven-releases/</url>
         </repository>
         <snapshotRepository>
             <id>maven-snapshots</id>
-            <url>http://localhost:8082/artifactory/maven-snapshots/</url>
+            <url>http://123.123.208.27:18082/artifactory/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
