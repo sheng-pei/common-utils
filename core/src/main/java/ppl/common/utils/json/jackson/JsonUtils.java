@@ -23,6 +23,10 @@ public class JsonUtils {
         OBJECT_MAPPER = mapper;
     }
 
+    public static ObjectMapper defaultObjectMapper() {
+        return OBJECT_MAPPER;
+    }
+
     public static String pretty(String json) {
         try {
             return writePretty(OBJECT_MAPPER.readTree(json));

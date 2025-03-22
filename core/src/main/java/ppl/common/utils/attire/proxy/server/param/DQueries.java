@@ -1,4 +1,4 @@
-package ppl.common.utils.attire;
+package ppl.common.utils.attire.proxy.server.param;
 
 import ppl.common.utils.http.url.Query;
 
@@ -11,6 +11,10 @@ public class DQueries {
 
     private DQueries(Builder builder) {
         this.queries = Collections.unmodifiableList(builder.queries);
+    }
+
+    public List<Query> getQueries() {
+        return queries;
     }
 
     public static final class Builder {

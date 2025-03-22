@@ -221,4 +221,125 @@ public final class Arrays {
     public static DoubleStream stream(double[] array, int startInclusive, int endExclusive) {
         return java.util.Arrays.stream(array, startInclusive, endExclusive);
     }
+
+    @SafeVarargs
+    public static <T> List<T> asList(T... ts) {
+        return java.util.Arrays.asList(ts);
+    }
+
+    public static String toString(long[] a) {
+        return java.util.Arrays.toString(a);
+    }
+
+    public static String toString(int[] a) {
+        return java.util.Arrays.toString(a);
+    }
+
+    public static String toString(short[] a) {
+        return java.util.Arrays.toString(a);
+    }
+
+    public static String toString(char[] a) {
+        return java.util.Arrays.toString(a);
+    }
+
+    public static String toString(byte[] a) {
+        return java.util.Arrays.toString(a);
+    }
+
+    public static String toString(boolean[] a) {
+        return java.util.Arrays.toString(a);
+    }
+
+    public static String toString(float[] a) {
+        return java.util.Arrays.toString(a);
+    }
+
+    public static String toString(double[] a) {
+        return java.util.Arrays.toString(a);
+    }
+
+    public static String toString(Object[] a) {
+        return java.util.Arrays.toString(a);
+    }
+
+    public static <T> T[] copyOf(T[] original, int newLength) {
+        return java.util.Arrays.copyOf(original, newLength);
+    }
+
+    public static <T,U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
+        return java.util.Arrays.copyOf(original, newLength, newType);
+    }
+
+    public static byte[] copyOf(byte[] original, int newLength) {
+        return java.util.Arrays.copyOf(original, newLength);
+    }
+
+    public static short[] copyOf(short[] original, int newLength) {
+        return java.util.Arrays.copyOf(original, newLength);
+    }
+
+    public static int[] copyOf(int[] original, int newLength) {
+        return java.util.Arrays.copyOf(original, newLength);
+    }
+
+    public static long[] copyOf(long[] original, int newLength) {
+        return java.util.Arrays.copyOf(original, newLength);
+    }
+
+    public static char[] copyOf(char[] original, int newLength) {
+        return java.util.Arrays.copyOf(original, newLength);
+    }
+
+    public static float[] copyOf(float[] original, int newLength) {
+        return java.util.Arrays.copyOf(original, newLength);
+    }
+
+    public static double[] copyOf(double[] original, int newLength) {
+        return java.util.Arrays.copyOf(original, newLength);
+    }
+
+    public static boolean[] copyOf(boolean[] original, int newLength) {
+        return java.util.Arrays.copyOf(original, newLength);
+    }
+
+    public static <T> T[] copyOfRange(T[] original, int from, int to) {
+        return java.util.Arrays.copyOfRange(original, from, to);
+    }
+
+    public static <T,U> T[] copyOfRange(U[] original, int from, int to, Class<? extends T[]> newType) {
+        return java.util.Arrays.copyOfRange(original, from, to, newType);
+    }
+
+    public static byte[] copyOfRange(byte[] original, int from, int to) {
+        return java.util.Arrays.copyOfRange(original, from, to);
+    }
+
+    public static short[] copyOfRange(short[] original, int from, int to) {
+        return java.util.Arrays.copyOfRange(original, from, to);
+    }
+
+    public static int[] copyOfRange(int[] original, int from, int to) {
+        return java.util.Arrays.copyOfRange(original, from, to);
+    }
+
+    public static long[] copyOfRange(long[] original, int from, int to) {
+        return java.util.Arrays.copyOfRange(original, from, to);
+    }
+
+    public static char[] copyOfRange(char[] original, int from, int to) {
+        return java.util.Arrays.copyOfRange(original, from, to);
+    }
+
+    public static float[] copyOfRange(float[] original, int from, int to) {
+        return java.util.Arrays.copyOfRange(original, from, to);
+    }
+
+    public static double[] copyOfRange(double[] original, int from, int to) {
+        return java.util.Arrays.copyOfRange(original, from, to);
+    }
+
+    public static boolean[] copyOfRange(boolean[] original, int from, int to) {
+        return java.util.Arrays.copyOfRange(original, from, to);
+    }
 }

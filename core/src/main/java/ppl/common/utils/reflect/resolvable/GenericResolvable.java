@@ -29,8 +29,6 @@ public abstract class GenericResolvable implements Resolvable {
                 clazz.getGenericInterfaces().length);
     }
 
-    public abstract Class<?> getType();
-
     public Resolvable getParent() {
         Resolvable parent = this.parent;
         if (parent == null) {

@@ -1,5 +1,6 @@
 package ppl.common.utils.reflect.resolvable.variableresolver;
 
+import ppl.common.utils.reflect.resolvable.ArrayTypeResolvable;
 import ppl.common.utils.reflect.resolvable.GenericResolvable;
 import ppl.common.utils.reflect.resolvable.Resolvable;
 import ppl.common.utils.reflect.resolvable.TypeVariableResolvable;
@@ -32,6 +33,9 @@ public final class DefaultVariableResolver implements VariableResolver {
             }
         } else if (resolvable instanceof GenericResolvable) {
             GenericResolvable r = (GenericResolvable) resolvable;
+            ret = r.resolve(this);
+        } else if (resolvable instanceof ArrayTypeResolvable) {
+            ArrayTypeResolvable r = (ArrayTypeResolvable) resolvable;
             ret = r.resolve(this);
         }
         return ret;

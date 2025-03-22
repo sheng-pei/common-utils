@@ -93,7 +93,7 @@ public class URL {
                 next = start;//It does not start with scheme and '//'. Maybe compatible url.
             }
         }
-        return Pair.create(scheme, next);
+        return Pair.create(scheme.toLowerCase(), next);
     }
 
     public static boolean isSupportedScheme(String scheme) {
@@ -423,12 +423,9 @@ public class URL {
                 generateFragment(fragment);
     }
 
-    /**
-     * Security case: change character to pct-encoded with utf-8.
-     */
     public String normalizeString() {
-        return scheme.toLowerCase() + ":" +
-                "//" +
+        return scheme +
+                "://" +
                 generateHost(_host(true)) +
                 generatePort(_port(true)) +
                 generatePath(_path(true)) +
@@ -497,7 +494,7 @@ public class URL {
             for (int i = 0; i < chars.length; i++) {
                 if (chars[i] != '%') {
                     if (AsciiGroup.UP_ALPHA.test(chars[i])) {
-                        builder.append((char) (chars[i] - 'A' + 'a'));
+                        builder.append(Character.toLowerCase(chars[i]));
                     } else {
                         builder.append(chars[i]);
                     }
@@ -505,7 +502,7 @@ public class URL {
                     char c = (char) Bytes.oneFromHex(chars[i + 1], chars[i + 2]);
                     if (URICharGroup.UNRESERVED.test(c)) {
                         if (AsciiGroup.UP_ALPHA.test(c)) {
-                            builder.append((char) (c - 'A' + 'a'));
+                            builder.append(Character.toLowerCase(c));
                         } else {
                             builder.append(c);
                         }

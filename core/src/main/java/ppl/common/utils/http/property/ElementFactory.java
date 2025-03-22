@@ -5,6 +5,7 @@ import ppl.common.utils.reflect.PackageLoader;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public class ElementFactory {
 
     static {
         String basePackage = Properties.class.getPackage().getName() + "." + PACKAGE_OF_ELEMENTS;
-        PackageLoader loader = new PackageLoader(basePackage, Properties.class.getClassLoader());
+        PackageLoader loader = new PackageLoader(Collections.singletonList(basePackage), Properties.class.getClassLoader());
         @SuppressWarnings({"rawtypes", "unchecked"})
         Class<Element<?>> eClass = (Class) Element.class;
         loader.load(eClass, true)

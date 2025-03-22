@@ -12,15 +12,15 @@ public class VariableString implements StringReplacer {
     }
 
     @Override
-    public String replace(Map<String, Object> env) {
+    public String replace(Map<String, ?> env) {
         return replace(env, true);
     }
 
     @Override
-    public String replace(Map<String, Object> env, boolean reserveNullVariable) {
+    public String replace(Map<String, ?> env, boolean reserveNullVariable) {
         Objects.requireNonNull(env, "Env couldn't be null");
         Object tmp = env.get(this.name);
-        return tmp == null ? (reserveNullVariable ? "${" + this.name + "}" : "") : tmp.toString();
+        return tmp == null ? (reserveNullVariable ? toString() : "") : tmp.toString();
     }
 
     @Override
@@ -36,4 +36,8 @@ public class VariableString implements StringReplacer {
         return Objects.hash(name);
     }
 
+    @Override
+    public String toString() {
+        return "${" + name + "}";
+    }
 }

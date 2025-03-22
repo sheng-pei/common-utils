@@ -81,7 +81,7 @@ class PathImpl implements Path {
         if (beginIndex < 0 || endIndex < 0) {
             throw new IllegalArgumentException("Begin and end index must not be negative.");
         }
-        if (beginIndex >= endIndex) {
+        if (beginIndex > endIndex) {
             throw new IllegalArgumentException("Begin index is greater than or equal to end index.");
         }
         initNames();

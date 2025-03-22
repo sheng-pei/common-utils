@@ -3,6 +3,7 @@ package ppl.common.utils.string.variable.replacer;
 import ppl.common.utils.string.variable.VariablePatternException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DynamicString implements StringReplacer {
 
@@ -121,12 +122,12 @@ public class DynamicString implements StringReplacer {
     }
 
     @Override
-    public String replace(Map<String, Object> env) {
+    public String replace(Map<String, ?> env) {
         return replace(env, true);
     }
 
     @Override
-    public String replace(Map<String, Object> env, boolean reserveNullVariable) {
+    public String replace(Map<String, ?> env, boolean reserveNullVariable) {
         Objects.requireNonNull(env, "Env couldn't be null");
         StringBuilder builder = new StringBuilder();
         this.parts.forEach(p -> builder.append(p.replace(env, reserveNullVariable)));
@@ -144,5 +145,10 @@ public class DynamicString implements StringReplacer {
     @Override
     public int hashCode() {
         return Objects.hash(parts);
+    }
+
+    @Override
+    public String toString() {
+        return parts.stream().map(StringReplacer::toString).collect(Collectors.joining());
     }
 }

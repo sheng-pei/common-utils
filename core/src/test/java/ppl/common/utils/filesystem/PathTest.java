@@ -140,8 +140,7 @@ class PathTest {
         return Stream.of(
                 Arguments.of(Paths.get("a/../b"), -1, 1),
                 Arguments.of(Paths.get("a/../b"), 0, -1),
-                Arguments.of(Paths.get("a/../b"), 2, 1),
-                Arguments.of(Paths.get("a/../b"), 2, 2)
+                Arguments.of(Paths.get("a/../b"), 2, 1)
         );
     }
 

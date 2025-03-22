@@ -8,7 +8,13 @@ public class Proxies {
         return create(Proxies.class.getClassLoader(), interfaces, handler);
     }
 
-    public static Object create(ClassLoader cl, Class<?>[] interfaces, InvocationHandler handler) {
+    public static Object create(
+            ClassLoader cl,
+            Class<?>[] interfaces, InvocationHandler handler) {
+        if (handler instanceof PrerequisiteInvocationHandler) {
+            PrerequisiteInvocationHandler pInvocationHandler = (PrerequisiteInvocationHandler) handler;
+            pInvocationHandler.assertInterfaces(interfaces);
+        }
         return Proxy.newProxyInstance(cl, interfaces, handler);
     }
 }

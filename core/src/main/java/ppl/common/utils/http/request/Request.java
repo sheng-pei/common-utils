@@ -8,6 +8,7 @@ import ppl.common.utils.http.header.known.ContentLength;
 import ppl.common.utils.http.header.known.TransferEncoding;
 import ppl.common.utils.http.header.value.transfercoding.Coding;
 import ppl.common.utils.http.header.value.transfercoding.CodingKind;
+import ppl.common.utils.http.url.Query;
 import ppl.common.utils.http.url.URL;
 import ppl.common.utils.string.Strings;
 
@@ -159,6 +160,12 @@ public class Request implements Headers {
         public Builder appendQuery(String name, Object value) {
             URL url = this.url;
             this.url = url.appendDynamicQuery(name, value);
+            return this;
+        }
+
+        public Builder appendQuery(Query query) {
+            URL url = this.url;
+            this.url = url.appendDynamicQuery(query);
             return this;
         }
 

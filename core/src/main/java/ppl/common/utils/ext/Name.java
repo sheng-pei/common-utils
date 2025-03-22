@@ -1,7 +1,11 @@
 package ppl.common.utils.ext;
 
 import ppl.common.utils.Arrays;
+import ppl.common.utils.pair.Pair;
 import ppl.common.utils.string.Strings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Name {
 
@@ -25,6 +29,22 @@ public class Name {
 
     public String getBase() {
         return parts[baseIndex];
+    }
+
+    public Pair<List<String>, Integer> baseReplaced(List<String> baseParts) {
+        List<String> ret = new ArrayList<>();
+        for (int i = 0; i < parts.length; i++) {
+            if (i != baseIndex) {
+                ret.add(parts[i]);
+            } else {
+                ret.addAll(baseParts);
+            }
+        }
+        return Pair.create(ret, baseIndex);
+    }
+
+    public Pair<List<String>, Integer> baseReplaced(String[] baseParts) {
+        return baseReplaced(Arrays.asList(baseParts));
     }
 
     @Override

@@ -8,6 +8,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
+import ppl.common.utils.Arrays;
+
+import java.util.function.Predicate;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -17,41 +20,26 @@ import java.util.zip.ZipEntry;
 public class PackageLoader {
 
     private final ClassLoader classLoader;
-    private final String basePackage;
+    private final Collection<String> basePackages;
 
-    public PackageLoader(String basePackage) {
-        this(basePackage, null);
+    public PackageLoader(String... basePackages) {
+        this(Arrays.asList(basePackages), null);
     }
 
-    public PackageLoader(String basePackage, ClassLoader classLoader) {
-        if (basePackage == null) {
-            throw new IllegalArgumentException("Base package is required.");
+    public PackageLoader(Collection<String> basePackages) {
+        this(basePackages, null);
+    }
+
+    public PackageLoader(Collection<String> basePackages, ClassLoader classLoader) {
+        if (basePackages.isEmpty()) {
+            throw new IllegalArgumentException("Base packages is required.");
         }
-        this.basePackage = basePackage;
+        this.basePackages = new HashSet<>(basePackages);
         this.classLoader = classLoader == null ? PackageLoader.class.getClassLoader() : classLoader;
     }
 
-    public Stream<Class<?>> load() {
-        String resourceName = resourceName();
-
-        Enumeration<URL> urls;
-        try {
-            urls = classLoader.getResources(resourceName); //exclude package(or directory) loaded by extension or bootstrap classloader.
-        } catch (IOException e) {
-            throw new RuntimeException("Error occurs when finding resource: '" + resourceName + "'.", e);
-        }
-
-        List<Class<?>> allClasses = new ArrayList<>();
-        while (urls.hasMoreElements()) {
-            allClasses.addAll(loadUserOuterClass(urls.nextElement(), resourceName));
-        }
-
-        return allClasses.stream();
-    }
-
     public Stream<Class<?>> load(boolean concreteOnly) {
-        return load()
-                .filter(c -> !concreteOnly || (c.getModifiers() & Modifier.ABSTRACT) == 0);
+        return load(c -> !concreteOnly || (c.getModifiers() & Modifier.ABSTRACT) == 0);
     }
 
     public <T> Stream<Class<? extends T>> load(Class<T> clazz) {
@@ -60,9 +48,8 @@ public class PackageLoader {
 
     public <T> Stream<Class<? extends T>> load(Class<T> clazz, boolean concreteOnly) {
         Objects.requireNonNull(clazz, "Target class is required.");
-        return load()
-                .filter(clazz::isAssignableFrom)
-                .filter(c -> !concreteOnly || (c.getModifiers() & Modifier.ABSTRACT) == 0)
+        return load(clazz::isAssignableFrom,
+                c -> (!concreteOnly || (c.getModifiers() & Modifier.ABSTRACT) == 0))
                 .map(c -> {
                     @SuppressWarnings("unchecked")
                     Class<? extends T> res = (Class<? extends T>) c;
@@ -70,8 +57,48 @@ public class PackageLoader {
                 });
     }
 
-    private String resourceName() {
-        return this.basePackage.replaceAll("\\.", "/");
+    @SafeVarargs
+    public final Stream<Class<?>> load(Predicate<Class<?>>... predicates) {
+        Predicate<Class<?>>[] temp = predicates;
+        if (predicates == null) {
+            @SuppressWarnings("unchecked")
+            Predicate<Class<?>>[] ps = (Predicate<Class<?>>[]) Arrays.zero(Predicate.class);
+            temp = ps;
+        }
+
+        Set<String> resourceNames = resourceNames();
+        Map<String, Enumeration<URL>> urls = new HashMap<>(resourceNames.size());
+
+        for (String resourceName : resourceNames) {
+            try {
+                urls.put(resourceName, classLoader.getResources(resourceName)); //exclude package(or directory) loaded by extension or bootstrap classloader.
+            } catch (IOException e) {
+                throw new RuntimeException("Error occurs when finding resource: '" + resourceName + "'.", e);
+            }
+        }
+
+        Stream<Class<?>> stream = Stream.of(urls.entrySet().toArray(Arrays.zero(Map.Entry.class)))
+                .flatMap(e -> {
+                    String resourceName = (String) e.getKey();
+                    @SuppressWarnings("unchecked")
+                    Enumeration<URL> us = (Enumeration<URL>) e.getValue();
+                    List<Class<?>> allClasses = new ArrayList<>();
+                    while (us.hasMoreElements()) {
+                        allClasses.addAll(loadUserOuterClass(us.nextElement(), resourceName));
+                    }
+                    return allClasses.stream();
+                });
+
+        for (Predicate<Class<?>> predicate : temp) {
+            stream = stream.filter(predicate);
+        }
+        return stream;
+    }
+
+    private Set<String> resourceNames() {
+        return this.basePackages.stream()
+                .map(s -> s.replaceAll("\\.", "/"))
+                .collect(Collectors.toSet());
     }
 
     private List<Class<?>> loadUserOuterClass(URL resource, String resourceName) {
@@ -148,6 +175,7 @@ public class PackageLoader {
     }
 
     private static final Pattern USER_OUTER_CLASSNAME_PATTERN = Pattern.compile("[a-zA-Z][a-zA-Z0-9_]*");
+
     private Boolean isUserOuterClassName(String string) {
         String name = string;
         int idx = name.lastIndexOf('.');

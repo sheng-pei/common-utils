@@ -12,12 +12,12 @@ public class RawString implements StringReplacer {
     }
 
     @Override
-    public String replace(Map<String, Object> env) {
+    public String replace(Map<String, ?> env) {
         return replace(env, true);
     }
 
     @Override
-    public String replace(Map<String, Object> env, boolean reserveNullVariable) {
+    public String replace(Map<String, ?> env, boolean reserveNullVariable) {
         Objects.requireNonNull(env, "Env couldn't be null");
         return this.str;
     }
@@ -33,5 +33,10 @@ public class RawString implements StringReplacer {
     @Override
     public int hashCode() {
         return Objects.hash(str);
+    }
+
+    @Override
+    public String toString() {
+        return str;
     }
 }

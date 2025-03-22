@@ -23,6 +23,10 @@ public class ConcurrentReferenceValueCache<K, V> implements Cache<K, V> {
     private final ReferenceQueue<Object> queue = new ReferenceQueue<>();
     private final Map<K, IdentityValue> cache = new ConcurrentHashMap<>();
 
+    public ConcurrentReferenceValueCache() {
+        this.type = ReferenceType.WEAK;
+    }
+
     public ConcurrentReferenceValueCache(ReferenceType type) {
         this.type = type;
     }
@@ -35,6 +39,12 @@ public class ConcurrentReferenceValueCache<K, V> implements Cache<K, V> {
         } catch (InternalLoaderException e) {
             throw new ExecutionException(e);
         }
+    }
+
+    @Override
+    public V get(K key, Function<K, ? extends V> mapperFunction) throws ExecutionException {
+        Objects.requireNonNull(mapperFunction, "MapperFunction is required.");
+        return get(key, () -> mapperFunction.apply(key));
     }
 
     @Override

@@ -146,7 +146,7 @@ public abstract class ParameterizedHeaderValue<
         ValuedArgument<Object> a = arguments.getByKey(name);
         ArgumentValue<Object> av = ArgumentValue.create(a, value);
         parameters.remove(a);
-        return appendLexicalParameter(name, av.toString());
+        return appendLexicalParameter(name, av.valueString());
     }
 
     public final Object getParameter(String name) {

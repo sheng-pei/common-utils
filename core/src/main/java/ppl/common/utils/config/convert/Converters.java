@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 
 public class Converters {
 
@@ -421,6 +422,11 @@ public class Converters {
         @Override
         public Converter<?> get(Class<?> key, Callable<? extends Converter<?>> loader) throws ExecutionException {
             return cache.get(key, loader);
+        }
+
+        @Override
+        public Converter<?> get(Class<?> key, Function<Class<?>, ? extends Converter<?>> mapperFunction) throws ExecutionException {
+            return cache.get(key, mapperFunction);
         }
 
         @Override

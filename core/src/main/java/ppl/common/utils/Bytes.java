@@ -118,7 +118,7 @@ public final class Bytes {
             return null;
         }
         return new String(Base64.getEncoder().encode(bytes),
-                StandardCharsets.ISO_8859_1);
+                StandardCharsets.US_ASCII);
     }
 
     public static byte[] fromBase64(String base64) {

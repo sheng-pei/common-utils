@@ -1,4 +1,4 @@
-package ppl.common.utils.attire;
+package ppl.common.utils.attire.proxy.server.param;
 
 import ppl.common.utils.http.header.Header;
 import ppl.common.utils.http.header.HeaderFactory;
@@ -13,6 +13,10 @@ public class DHeaders {
 
     public DHeaders(Builder builder) {
         this.headers = Collections.unmodifiableList(new ArrayList<>(builder.headers));
+    }
+
+    public List<Header<HeaderValue>> getHeaders() {
+        return this.headers;
     }
 
     public static final class Builder {

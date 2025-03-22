@@ -1,10 +1,13 @@
 package ppl.common.utils.http.clients.base;
 
+import ppl.common.utils.IOs;
 import ppl.common.utils.http.Connection;
+import ppl.common.utils.http.Entity;
 import ppl.common.utils.http.NetworkException;
 import ppl.common.utils.http.header.Header;
 import ppl.common.utils.http.header.HeaderFactory;
 import ppl.common.utils.http.header.HeaderValue;
+import ppl.common.utils.http.header.known.ContentType;
 import ppl.common.utils.http.request.Method;
 import ppl.common.utils.http.response.Response;
 import ppl.common.utils.http.response.ResponseCode;
@@ -15,6 +18,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class BaseConnection implements Connection {
@@ -28,6 +32,20 @@ public class BaseConnection implements Connection {
     @Override
     public void disconnect() {
         this.connection.disconnect();
+    }
+
+    @Override
+    public void write(Entity entity) {
+        ContentType contentType = entity.contentType();
+        Objects.requireNonNull(contentType);
+        this.connection.addRequestProperty(
+                contentType.name().toString(),
+                contentType.value().toCanonicalString());
+        try (OutputStream os = openOutputStream()) {
+            entity.write(os);
+        } catch (Exception e) {
+            throw new NetworkException("Couldn't transfer data.", e);
+        }
     }
 
     @Override

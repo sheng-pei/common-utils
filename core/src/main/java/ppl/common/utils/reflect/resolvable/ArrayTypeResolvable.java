@@ -3,10 +3,7 @@ package ppl.common.utils.reflect.resolvable;
 import ppl.common.utils.exception.UnreachableCodeException;
 import ppl.common.utils.reflect.resolvable.variableresolver.VariableResolver;
 
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 import java.util.Objects;
 
 public class ArrayTypeResolvable implements Resolvable {
@@ -50,6 +47,12 @@ public class ArrayTypeResolvable implements Resolvable {
             throw new UnreachableCodeException("Unsupported component type of generic array type. " +
                     "Please check java reflect library.");
         }
+    }
+
+    @Override
+    public Class<?> getType() {
+        Object temp = Array.newInstance(component.getType(), 0);
+        return temp.getClass();
     }
 
     @SuppressWarnings("unused")

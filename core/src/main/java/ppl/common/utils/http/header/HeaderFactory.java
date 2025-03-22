@@ -7,10 +7,7 @@ import ppl.common.utils.pair.Pair;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public final class HeaderFactory {
 
@@ -28,7 +25,7 @@ public final class HeaderFactory {
     private static void load(String name, HeaderFactory headers) {
         String knownHeaderPackage = HeaderFactory.class.getPackage().getName() +
                 "." + name;
-        PackageLoader loader = new PackageLoader(knownHeaderPackage,
+        PackageLoader loader = new PackageLoader(Collections.singletonList(knownHeaderPackage),
                 HeaderFactory.class.getClassLoader());
         loader.load(Header.class, true)
                 .map(h -> {

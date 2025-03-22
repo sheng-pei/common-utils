@@ -139,4 +139,36 @@ public final class Collections {
         return java.util.Collections.newSetFromMap(map);
     }
 
+    public static <E> Collection<E> unmodifiableCollection(Collection<? extends E> c) {
+        return java.util.Collections.unmodifiableCollection(c);
+    }
+
+    public static <E> Set<E> unmodifiableSet(Set<? extends E> s) {
+        return java.util.Collections.unmodifiableSet(s);
+    }
+
+    public static <E> SortedSet<E> unmodifiableSortedSet(SortedSet<E> s) {
+        return java.util.Collections.unmodifiableSortedSet(s);
+    }
+
+    public static <T> NavigableSet<T> unmodifiableNavigableSet(NavigableSet<T> s) {
+        return java.util.Collections.unmodifiableNavigableSet(s);
+    }
+
+    public static <E> List<E> unmodifiableList(List<? extends E> list) {
+        return java.util.Collections.unmodifiableList(list);
+    }
+
+    public static <K,V> Map<K,V> unmodifiableMap(Map<? extends K, ? extends V> m) {
+        return java.util.Collections.unmodifiableMap(m);
+    }
+
+    public static <K,V> SortedMap<K,V> unmodifiableSortedMap(SortedMap<K, ? extends V> m) {
+        return java.util.Collections.unmodifiableSortedMap(m);
+    }
+
+    public static <K,V> NavigableMap<K,V> unmodifiableNavigableMap(NavigableMap<K, ? extends V> m) {
+        return java.util.Collections.unmodifiableNavigableMap(m);
+    }
+
 }

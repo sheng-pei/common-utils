@@ -22,27 +22,41 @@ public class Mime implements Arguments<String, ValuedArgument<Object>> {
                     .collect()
                     .build(v -> Lexer.quoteString(v.name().toLowerCase()));
 
+    private static final ValuedArgument<String> BOUNDARY_ARGUMENT =
+            BaseValuedArgument.newBuilder("boundary")
+                    .map(Mime::eraseQuotedString)
+                    .collect()
+                    .build(Lexer::quoteString);
+
     private static final Map<CaseIgnoreString, Mime> MIMES;
     public static final Mime JSON;
     public static final Mime PLAIN;
     public static final Mime HTML;
     public static final Mime OCTET;
+    public static final Mime X_WWW_FORM_URLENCODED;
+    public static final Mime MULTIPART_FORM_DATA;
 
     static {
         Mime json = new Mime("application/json", Collections.singletonList(CHARSET_ARGUMENT));
         Mime plain = new Mime("text/plain", Collections.singletonList(CHARSET_ARGUMENT));
         Mime html = new Mime("text/html", Collections.singletonList(CHARSET_ARGUMENT));
         Mime octet = new Mime("application/octet-stream");
+        Mime wwwForm = new Mime("application/x-www-form-urlencoded");
+        Mime multipartForm = new Mime("multipart/form-data", Collections.singletonList(BOUNDARY_ARGUMENT));
         Map<CaseIgnoreString, Mime> mimes = new HashMap<>();
         mimes.put(json.mime, json);
         mimes.put(plain.mime, plain);
         mimes.put(html.mime, html);
         mimes.put(octet.mime, octet);
+        mimes.put(wwwForm.mime, wwwForm);
+        mimes.put(multipartForm.mime, multipartForm);
         MIMES = Collections.unmodifiableMap(mimes);
         JSON = json;
         PLAIN = plain;
         HTML = html;
         OCTET = octet;
+        X_WWW_FORM_URLENCODED = wwwForm;
+        MULTIPART_FORM_DATA = multipartForm;
     }
 
     private static String eraseQuotedString(String string) {

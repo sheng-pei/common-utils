@@ -41,6 +41,11 @@ public abstract class BoundResolvable implements Resolvable {
         return ret;
     }
 
+    @Override
+    public Class<?> getType() {
+        return getBound(0).getType();
+    }
+
     protected abstract Type[] bounds();
 
     @Override

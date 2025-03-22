@@ -9,6 +9,7 @@ import java.io.OutputStream;
  */
 public interface Connection {
     void disconnect();
+    void write(Entity entity);
     OutputStream openOutputStream();
     Response getResponse();
 }
