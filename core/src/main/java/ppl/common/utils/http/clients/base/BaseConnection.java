@@ -1,6 +1,5 @@
 package ppl.common.utils.http.clients.base;
 
-import ppl.common.utils.IOs;
 import ppl.common.utils.http.Connection;
 import ppl.common.utils.http.Entity;
 import ppl.common.utils.http.NetworkException;

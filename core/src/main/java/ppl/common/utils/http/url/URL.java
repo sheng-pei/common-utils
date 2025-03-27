@@ -375,7 +375,7 @@ public class URL {
         String n = COMPATIBLE_CHARACTER_ENCODER.parse(query.getName());
         String v = query.getValue() == null ? null : COMPATIBLE_CHARACTER_ENCODER.parse(query.getValue());
         if (QUERY_AND_FRAGMENT_PATTERN.matcher(n).matches()) {
-            if (v == null || !QUERY_AND_FRAGMENT_PATTERN.matcher(v).matches()) {
+            if (v == null || QUERY_AND_FRAGMENT_PATTERN.matcher(v).matches()) {
                 List<Query> queries = new ArrayList<>(this.queries);
                 queries.add(Query.create(n, v, charset));
                 return new URL(scheme, host, port, path, this.query,

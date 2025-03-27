@@ -44,17 +44,18 @@ public class ServerWwwFormBodyParameterInterceptor extends AbstractStatefulParam
         if (WWW_FORM_UNSUPPORTED != object) {
             WwwFormEntity entity = null;
             ParamPojo[] pojo = (ParamPojo[]) object;
+            Object[] unwrapped = unwrap(parameters);
             for (int i = 0; i < pojo.length; i++) {
                 if (pojo[i] != null) {
                     if (entity == null) {
                         entity = new WwwFormEntity();
                     }
 
-                    if (parameters[i] != null) {
-                        if (Types.isWrapper(parameters[i].getClass())) {
-                            entity.addField(pojo[i].name(), Objects.toString(parameters[i]));
-                        } else if (Types.isString(parameters[i])) {
-                            entity.addField(pojo[i].name(), (String) parameters[i]);
+                    if (unwrapped[i] != null) {
+                        if (Types.isWrapper(unwrapped[i].getClass())) {
+                            entity.addField(pojo[i].name(), Objects.toString(unwrapped[i]));
+                        } else if (Types.isString(unwrapped[i])) {
+                            entity.addField(pojo[i].name(), (String) unwrapped[i]);
                         } else {
                             throw new IllegalArgumentException(Strings.format(
                                     "Non base type is not supported by '{}'", Mime.X_WWW_FORM_URLENCODED));
@@ -65,8 +66,8 @@ public class ServerWwwFormBodyParameterInterceptor extends AbstractStatefulParam
 
             if (entity != null) {
                 collector.write(entity);
-                return collector;
             }
+            return collector;
         }
         return null;
     }

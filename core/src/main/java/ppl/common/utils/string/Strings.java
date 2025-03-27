@@ -6,6 +6,9 @@ import ppl.common.utils.string.substring.Substring;
 import ppl.common.utils.string.substring.impl.SundaySubstringFinder;
 import ppl.common.utils.string.substring.impl.ToStringArguments;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -586,6 +589,23 @@ public final class Strings {
 			codes[i] = tmp;
 		}
 		return new String(codes, 0, codes.length);
+	}
+
+	public static String truncate(Reader reader, int max) {
+		try {
+			char[] chars = new char[max];
+			int offset = 0;
+			while (offset < chars.length) {
+				int l = reader.read(chars, offset, Math.min(chars.length - offset, 8024));
+				if (l < 0) {
+					break;
+				}
+				offset += l;
+			}
+			return new String(chars, 0, offset) + "......";
+		} catch (IOException e) {
+			throw new UncheckedIOException("Read error.", e);
+		}
 	}
 
 }

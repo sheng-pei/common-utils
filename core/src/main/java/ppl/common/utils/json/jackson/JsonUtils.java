@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ppl.common.utils.IOs;
 import ppl.common.utils.json.JsonException;
 
@@ -13,12 +15,17 @@ import java.io.InputStream;
 import java.util.List;
 
 public class JsonUtils {
+    private static final Logger log = LoggerFactory.getLogger(JsonUtils.class);
     private static final ObjectMapper OBJECT_MAPPER;
 
     static {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new CommonModule());
-        mapper.registerModule(new JavaTimeModule());
+        try {
+            mapper.registerModule(new JavaTimeModule());
+        } catch (NoClassDefFoundError e) {
+            log.info("Ignore ZonedDateTime and LocalDateTime serializer.", e);
+        }
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         OBJECT_MAPPER = mapper;
     }

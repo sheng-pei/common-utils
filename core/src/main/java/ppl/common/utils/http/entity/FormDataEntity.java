@@ -68,7 +68,7 @@ public class FormDataEntity implements Entity {
                 String stringContentType = contentType.toCanonicalString();
                 if (!stringContentType.equals(Mime.PLAIN.toString())) {
                     os.write(stringContentType.getBytes(StandardCharsets.ISO_8859_1));
-                    os.write("\r\n".getBytes());
+                    os.write("\r\n\r\n".getBytes());
                 }
                 entity.write(os);
             }

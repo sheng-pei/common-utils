@@ -167,7 +167,7 @@ public class ServerCallInitializer implements CallInitializer<Request.Builder> {
 
         private MethodAnnotations(Method method) {
             Objects.requireNonNull(method);
-            if (method.isAnnotationPresent(RequestLine.class)) {
+            if (!method.isAnnotationPresent(RequestLine.class)) {
                 throw new IllegalArgumentException("Not RequestLine method.");
             }
 

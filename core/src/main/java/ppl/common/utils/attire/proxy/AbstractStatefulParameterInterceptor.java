@@ -7,6 +7,14 @@ import java.util.function.Consumer;
 
 public abstract class AbstractStatefulParameterInterceptor<T> implements ParameterInterceptor<T> {
 
+    public static Object unwrap(Object object) {
+        if (object instanceof StatefulParameter) {
+            return ((StatefulParameter) object).object;
+        } else {
+            return object;
+        }
+    }
+
     public static Object[] unwrap(Object[] objects) {
         Object[] ret = new Object[objects.length];
         for (int i = 0; i < objects.length; i++) {
@@ -46,12 +54,12 @@ public abstract class AbstractStatefulParameterInterceptor<T> implements Paramet
         statefulParameter.useExclusive(consumer);
     }
 
-    protected final boolean isUsed(Object parameter) {
+    public static boolean isUsed(Object parameter) {
         StatefulParameter statefulParameter = (StatefulParameter) parameter;
         return statefulParameter.useType != null;
     }
 
-    protected final int[] remainParameters(Object[] parameters) {
+    public static int[] remainParameters(Object[] parameters) {
         int[] ret = new int[parameters.length];
         Arrays.fill(ret, -1);
         for (int i = 0; i < parameters.length; i++) {

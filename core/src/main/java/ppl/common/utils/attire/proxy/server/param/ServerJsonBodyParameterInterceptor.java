@@ -50,10 +50,11 @@ public class ServerJsonBodyParameterInterceptor extends AbstractStatefulParamete
             JsonPojo[] pojo = (JsonPojo[]) object;
             for (int i = 0; i < pojo.length; i++) {
                 if (pojo[i] != null) {
-                    collector.write(new JsonEntity(pojo[i].getCharset(), parameters[i]));
+                    collector.write(new JsonEntity(pojo[i].getCharset(), unwrap(parameters[i])));
                     return collector;
                 }
             }
+            return collector;
         }
         return null;
     }

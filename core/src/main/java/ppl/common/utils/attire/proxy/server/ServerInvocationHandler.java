@@ -6,8 +6,7 @@ import ppl.common.utils.Arrays;
 import ppl.common.utils.attire.proxy.*;
 import ppl.common.utils.attire.proxy.exceptions.*;
 import ppl.common.utils.attire.proxy.server.initializer.ServerCallInitializer;
-import ppl.common.utils.attire.proxy.server.param.BodyParameterInterceptor;
-import ppl.common.utils.attire.proxy.server.param.RequestParameterInterceptor;
+import ppl.common.utils.attire.proxy.server.param.*;
 import ppl.common.utils.cache.Cache;
 import ppl.common.utils.cache.ConcurrentReferenceValueCache;
 import ppl.common.utils.http.Connection;
@@ -22,6 +21,7 @@ import ppl.common.utils.string.Strings;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,6 +35,8 @@ public class ServerInvocationHandler implements PrerequisiteInvocationHandler {
 
     private final ServerCallInitializer callInitializer;
     private final List<RequestParameterInterceptor> requestParameterInterceptors;
+    private final RequestParameterInterceptor defaultQueryRequestParameterInterceptor =
+            new ServerDefaultQueryForGetMethodStatefulParameterInterceptor();
     private final List<BodyParameterInterceptor> bodyParameterInterceptors;
     private final List<ReturnInterceptor<Response>> returnInterceptors;
 
@@ -47,7 +49,7 @@ public class ServerInvocationHandler implements PrerequisiteInvocationHandler {
 
         this.defaultConnector = new AtomicReference<>(builder.defaultConnector);
         this.connectors = new ConcurrentHashMap<>(builder.connectors);
-        this.callInitializer = new ServerCallInitializer();
+        this.callInitializer = builder.callInitializer;
         this.requestParameterInterceptors = Collections.unmodifiableList(new ArrayList<>(
                 builder.parameterInterceptors));
         this.bodyParameterInterceptors = Collections.unmodifiableList(new ArrayList<>(
@@ -102,18 +104,17 @@ public class ServerInvocationHandler implements PrerequisiteInvocationHandler {
         }
 
         if (name.equals("hashCode") && parameterTypes.length == 0) {
-            InvocationHandlerUtils.hashCode(proxy, p -> serverPojo.hashCode());
+            return InvocationHandlerUtils.hashCode(proxy, p -> serverPojo.hashCode());
         }
 
         if (name.equals("toString") && parameterTypes.length == 0) {
-            InvocationHandlerUtils.toString(proxy, p -> serverPojo.toString());
+            return InvocationHandlerUtils.toString(proxy, p -> serverPojo.toString());
         }
 
         assert assertMethodIsNotMemberOfPrimaryProxiedInterface(proxy.getClass().getInterfaces()[0], method) :
                 "Method {} is not member of primary proxied interface";
 
         boolean methodAccepted = callInitializer.accept(method);
-        //TODO,     default方法，没有RequestLine注解，直接调用
         if (method.isDefault() && !methodAccepted) {
             MethodHandle handle = defaultMethodCache.get(method, () -> {
                 Class<?> interface1 = proxy.getClass().getInterfaces()[0];
@@ -156,24 +157,34 @@ public class ServerInvocationHandler implements PrerequisiteInvocationHandler {
                 throw new IllegalStateException(Strings.format("No connector found for '{}'", serverPojo));
             }
 
+            Connection conn;
             try {
-                Connection conn = connector.connect(req.build());
-
-                //TODO, body
-                try {
-                    for (ParameterInterceptor<Connection> interceptor : bodyParameterInterceptors) {
-                        if (interceptor.handle(method, statefulParameters, conn) != null) {
-                            break;
+                if (requestLinePojo.method() == ppl.common.utils.http.request.Method.GET) {
+                    req = ParameterInterceptorApplier.handle(defaultQueryRequestParameterInterceptor, method, statefulParameters, req);
+                    conn = connector.connect(req.build());
+                } else {
+                    conn = connector.connect(req.build());
+                    try {
+                        for (ParameterInterceptor<Connection> interceptor : bodyParameterInterceptors) {
+                            if (ParameterInterceptorApplier.handle(interceptor, method, statefulParameters, conn) != null) {
+                                break;
+                            }
                         }
+                    } catch (NetworkException e) {
+                        throw e;
+                    } catch (RuntimeException e) {
+                        throw new RequestBodyException(Strings.format(
+                                "Invalid request body of api '{}' of server '{}'.",
+                                requestLinePojo, serverPojo), e);
                     }
-                } catch (NetworkException e) {
-                    throw e;
-                } catch (RuntimeException e) {
-                    throw new RequestBodyException(Strings.format(
-                            "Invalid request body of api '{}' of server '{}'.",
-                            requestLinePojo, serverPojo), e);
                 }
+            } catch (NetworkException e) {
+                throw new CommunicationException(Strings.format(
+                        "Communication error when call api '{}' of server '{}'.",
+                        requestLinePojo, serverPojo), e);
+            }
 
+            try {
                 Response response = conn.getResponse();
 
                 //TODO, 响应数据处理异常处理
@@ -241,6 +252,7 @@ public class ServerInvocationHandler implements PrerequisiteInvocationHandler {
         private String defaultConnector;
         private final Map<String, Connector> connectors = new HashMap<>();
 
+        private ServerCallInitializer callInitializer;
         private final List<RequestParameterInterceptor> parameterInterceptors = new ArrayList<>();
         private final List<BodyParameterInterceptor> requestBodyInterceptors = new ArrayList<>();
         private final List<ReturnInterceptor<Response>> returnInterceptors = new ArrayList<>();
@@ -253,6 +265,11 @@ public class ServerInvocationHandler implements PrerequisiteInvocationHandler {
 
             name = name.trim();
             this.connectors.put(name, connector);
+            return this;
+        }
+
+        public Builder setCallInitializer(ServerCallInitializer callInitializer) {
+            this.callInitializer = callInitializer;
             return this;
         }
 
@@ -280,13 +297,48 @@ public class ServerInvocationHandler implements PrerequisiteInvocationHandler {
             return this;
         }
 
-        public Builder addResponseInterceptor(ReturnInterceptor<Response> returnInterceptor) {
+        public Builder addResponseReturnInterceptor(ReturnInterceptor<Response> returnInterceptor) {
             this.returnInterceptors.add(returnInterceptor);
             return this;
         }
 
         public ServerInvocationHandler build() {
             return new ServerInvocationHandler(this);
+        }
+    }
+
+    private static class ServerDefaultQueryForGetMethodStatefulParameterInterceptor extends AbstractStatefulParameterInterceptor<Request.Builder> implements RequestParameterInterceptor {
+        private transient final Cache<Method, String[]> methodCache = new ConcurrentReferenceValueCache<>();
+
+        @Override
+        protected Request.Builder handleImpl(Method method, Object[] parameters, Request.Builder collector) {
+            Parameter[] ps = method.getParameters();
+            String[] names = methodCache.getIfPresent(method);
+            if (names == null) {
+                names = new String[parameters.length];
+                int[] remainParameters = remainParameters(parameters);
+                for (int i : remainParameters) {
+                    if (i >= 0) {
+                        if (!ps[i].isNamePresent()) {
+                            throw new IllegalArgumentException(Strings.format(
+                                    "Name for default query argument of position [{}] not specified, " +
+                                            "and parameter name information not available via reflection. " +
+                                            "Ensure that the compiler uses the '-parameters' flag.", i));
+                        }
+                        names[i] = ps[i].getName();
+                    }
+                }
+                methodCache.putIfAbsent(method, names);
+            }
+
+            for (int i = 0; i < names.length; i++) {
+                Object[] unwrapped = unwrap(parameters);
+                String n = names[i];
+                if (n != null) {
+                    collector.appendQuery(n, unwrapped[i]);
+                }
+            }
+            return collector;
         }
     }
 

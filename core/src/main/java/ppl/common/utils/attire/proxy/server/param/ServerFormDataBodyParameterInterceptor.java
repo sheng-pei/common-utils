@@ -50,6 +50,7 @@ public class ServerFormDataBodyParameterInterceptor extends AbstractStatefulPara
 
         if (FORM_DATA_UNSUPPORTED != object) {
             FormDataEntity entity = null;
+            Object[] unwrapped = unwrap(parameters);
             @SuppressWarnings("unchecked")
             Pair<FormDataPojo, ParamPojo[]> pair = (Pair<FormDataPojo, ParamPojo[]>) object;
             for (int i = 0; i < pair.getSecond().length; i++) {
@@ -61,13 +62,13 @@ public class ServerFormDataBodyParameterInterceptor extends AbstractStatefulPara
                                 pair.getFirst().charset().toString()));
                     }
 
-                    if (parameters[i] instanceof File) {
-                        addFile(entity, (File) parameters[i], pair.getSecond()[i]);
-                    } else if (parameters[i] instanceof Entity) {
-                        addEntity(entity, (Entity) parameters[i], pair.getSecond()[i]);
-                    } else if (parameters[i] instanceof List) {
+                    if (unwrapped[i] instanceof File) {
+                        addFile(entity, (File) unwrapped[i], pair.getSecond()[i]);
+                    } else if (unwrapped[i] instanceof Entity) {
+                        addEntity(entity, (Entity) unwrapped[i], pair.getSecond()[i]);
+                    } else if (unwrapped[i] instanceof List) {
                         @SuppressWarnings("unchecked")
-                        List<Object> list = (List<Object>) parameters[i];
+                        List<Object> list = (List<Object>) unwrapped[i];
                         long fileCount = list.stream().filter(o -> o instanceof File).count();
                         if (fileCount > 0 && fileCount < list.size()) {
                             throw new IllegalArgumentException("Not file list.");
@@ -79,16 +80,16 @@ public class ServerFormDataBodyParameterInterceptor extends AbstractStatefulPara
                         } else {
                             addScalar(entity, list, pair.getSecond()[i], pair.getFirst().charset());
                         }
-                    } else if (parameters[i] != null) {
-                        addScalar(entity, parameters[i], pair.getSecond()[i], pair.getFirst().charset());
+                    } else if (unwrapped[i] != null) {
+                        addScalar(entity, unwrapped[i], pair.getSecond()[i], pair.getFirst().charset());
                     }
                 }
             }
 
             if (entity != null) {
                 collector.write(entity);
-                return collector;
             }
+            return collector;
         }
         return null;
     }
