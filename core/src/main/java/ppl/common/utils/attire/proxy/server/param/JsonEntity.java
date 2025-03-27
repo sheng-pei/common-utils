@@ -1,4 +1,4 @@
-package ppl.common.utils.http.entity;
+package ppl.common.utils.attire.proxy.server.param;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -20,7 +20,7 @@ import java.util.Objects;
 
 public class JsonEntity implements Entity {
 
-    private static final ContentType DEFAULT_CONTENT_TYPE = new ContentType("application/json; charset=utf-8");
+    private static final ContentType DEFAULT_CONTENT_TYPE = new ContentType("application/json");
     private static final Map<Charset, JsonEncoding> JSON_ENCODINGS;
 
     static {
@@ -43,7 +43,7 @@ public class JsonEntity implements Entity {
     }
 
     public JsonEntity(Charset charset, Object content) {
-        if (charset == null || charset.equals(StandardCharsets.UTF_8)) {
+        if (charset == null) {
             this.contentType = DEFAULT_CONTENT_TYPE;
         } else {
             MediaType mediaType = DEFAULT_CONTENT_TYPE.knownValue();
@@ -54,11 +54,11 @@ public class JsonEntity implements Entity {
         this.mapper = JsonUtils.defaultObjectMapper();
     }
 
-    public JsonEntity(Object content, Charset charset, ObjectMapper mapper) {
+    public JsonEntity(Charset charset, Object content, ObjectMapper mapper) {
         Objects.requireNonNull(mapper);
         this.content = content;
         this.mapper = mapper;
-        if (charset == null || charset.equals(StandardCharsets.UTF_8)) {
+        if (charset == null) {
             this.contentType = DEFAULT_CONTENT_TYPE;
         } else {
             MediaType mediaType = DEFAULT_CONTENT_TYPE.knownValue();

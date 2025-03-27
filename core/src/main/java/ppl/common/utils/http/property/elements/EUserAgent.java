@@ -11,7 +11,7 @@ import ppl.common.utils.http.request.RequestInitializer;
 public class EUserAgent implements Element<String>, RequestInitializer {
     private final String userAgent;
 
-    private EUserAgent(Object userAgent) {
+    public EUserAgent(Object userAgent) {
         this.userAgent = toString(userAgent);
     }
 
@@ -24,7 +24,7 @@ public class EUserAgent implements Element<String>, RequestInitializer {
                     "Unsupported value type: '%s' for '%s'.",
                     value.getClass(), EUserAgent.class.getCanonicalName()));
         }
-        return userAgent;
+        return userAgent.trim();
     }
 
     @Override

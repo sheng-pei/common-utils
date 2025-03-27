@@ -18,19 +18,35 @@ public class Software extends SingleLineHeaderValue {
 
     private Software(String value) {
         super(value);
-        int i = 0;
+        int e = Strings.lastIndexOf(HttpCharGroup.WHITESPACE.negate(), value);
+        int i = Strings.indexOf(HttpCharGroup.WHITESPACE.negate(), value);
+        boolean start = true;
         while (i >= 0 && i < value.length()) {
+            if (!start) {
+                String whitespace = Lexer.extractRequiredWhitespace(value, i);
+                if (null == whitespace) {
+                    throw new IllegalArgumentException("Whitespace is required.");
+                }
+                i += whitespace.length();
+            }
+
             String segment = Lexer.extractProduct(value, i);
-            if (!segment.isEmpty()) {
+            if (segment != null) {
                 components.add(segment);
+                i += segment.length();
+                start = false;
+                continue;
             }
-            i += segment.length();
+
             segment = Lexer.extractComment(value, i);
-            if (!segment.isEmpty()) {
+            if (segment != null) {
                 components.add(segment);
+                i += segment.length();
+                start = false;
+                continue;
             }
-            i += segment.length();
-            i = Strings.indexOf(HttpCharGroup.WS.negate(), value, i, value.length());
+
+            throw new IllegalArgumentException("Invalid software component.");
         }
     }
 

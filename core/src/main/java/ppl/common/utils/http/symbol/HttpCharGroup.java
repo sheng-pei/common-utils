@@ -6,10 +6,16 @@ import ppl.common.utils.character.ascii.MaskCharPredicate;
 
 public enum HttpCharGroup implements MaskCharPredicate {
 
+    NON_OCTET(Mask.NON_OCTET.predicate()),
     OCTET(Mask.OCTET.predicate()),
     CHAR(AsciiGroup.ALL),
-    VCHAR(AsciiGroup.VCHAR),
+    //RFC 7230
     OBS_TEXT(OCTET.mask().bitAnd(CHAR.mask().bitNot()).predicate()),
+    CONTROL(Mask.asciiMask('\000', '\037').predicate(),
+            Mask.asciiMask("\177").predicate()),
+    VCHAR(AsciiGroup.VCHAR),
+    //RFC 7230
+    FIELD_VCHAR(AsciiGroup.VCHAR, OBS_TEXT),
     UPALPHA(AsciiGroup.UP_ALPHA),
     LOALPHA(AsciiGroup.LOW_ALPHA),
     ALPHA(AsciiGroup.ALPHA),
@@ -20,23 +26,25 @@ public enum HttpCharGroup implements MaskCharPredicate {
     SP(" "),
     HT("\t"),
     BS("\\"),
-    WS(SP, HT),
-    CTL(Mask.asciiMask('\000', '\037').predicate(),
-            Mask.asciiMask("\177").predicate()),
-    NON_CTL_OCTET(OCTET.mask().bitAnd(CTL.mask().bitNot()).predicate()),
-    TOKEN(AsciiGroup.ALPHA_NUM,
+    //RFC 7230
+    WHITESPACE(SP, HT),
+    //RFC 7230
+    TCHAR(AsciiGroup.ALPHA_NUM,
             Mask.asciiMask("!#$%&'*+-.^_`|~").predicate()),
-    SEPARATORS(SP, HT, Mask.asciiMask("()<>@,;:\\\"/[]?={}").predicate()),
     L_COMMENT("("),
     R_COMMENT(")"),
-    CTEXT(SP, HT, OBS_TEXT,
-            VCHAR.mask.bitAnd(Mask.asciiMask("()\\").bitNot()).predicate()),
-    QM("\""),
-    QDTEXT(SP, HT, OBS_TEXT,
-            VCHAR.mask.bitAnd(Mask.asciiMask("\\\"").bitNot()).predicate()),
-    QUOTED_TEXT(SP, HT, VCHAR, OBS_TEXT),
-    CL_TOKEN(AsciiGroup.ALPHA_NUM,
-             Mask.asciiMask("-").predicate());
+    DQUOTE("\""),
+    //RFC 7230
+    QDPTEXT(SP, HT, VCHAR, OBS_TEXT),
+    //RFC 7230
+    CTEXT(QDPTEXT.mask.bitAnd(Mask.asciiMask("()\\").bitNot()).predicate()),
+    //RFC 7230
+    QDTEXT(QDPTEXT.mask.bitAnd(Mask.asciiMask("\\\"").bitNot()).predicate()),
+    //RFC 2046
+    BCHARS_NO_SPACE(DIGIT, ALPHA, Mask.asciiMask("'()+_,-./:=?").predicate()),
+    //RFC 2046
+    BCHARS(BCHARS_NO_SPACE, SP),
+    SEPARATORS(WHITESPACE, DQUOTE, Mask.asciiMask("(),/:;<=>?@[\\]{}").predicate());
 
     private final Mask mask;
 

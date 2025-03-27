@@ -1,6 +1,6 @@
 package ppl.common.utils.argument.argument.value.collector;
 
-class One<T> {
+public class One<T> {
 
     private final Type type;
     private final boolean required;

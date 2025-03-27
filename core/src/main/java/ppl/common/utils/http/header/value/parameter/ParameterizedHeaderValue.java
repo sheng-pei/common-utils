@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+// token : OWS token ( OWS ; OWS token ( BWS = ( BWS ( token | quoted-string ) )? )? )* OWS
 public abstract class ParameterizedHeaderValue<
         AS extends Arguments<String, ValuedArgument<Object>>,
         PHV extends ParameterizedHeaderValue<AS, PHV>> extends SingleLineHeaderValue {
@@ -97,7 +98,7 @@ public abstract class ParameterizedHeaderValue<
 
     private static String first(char[] chars, int start, int end) {
         String first = new String(chars, start, end - start);
-        return Strings.trim(first, HttpCharGroup.WS);
+        return Strings.trim(first, HttpCharGroup.WHITESPACE);
     }
 
     private static int next(int end, int length) {
@@ -124,8 +125,8 @@ public abstract class ParameterizedHeaderValue<
                 .analyse(parser.parse(name, value));
         @SuppressWarnings("unchecked")
         ArgumentValue<Object> av = (ArgumentValue<Object>) res.get(0);
-        ArgumentValue<Object> exist = parameters.get(av.getArgument());
-        parameters.put(av.getArgument(), exist == null ? av : exist.merge(av));
+        parameters.compute(av.getArgument(), (a, v) ->
+                v == null ? av : v.merge(av));
         return self();
     }
 

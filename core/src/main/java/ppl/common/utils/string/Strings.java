@@ -558,12 +558,15 @@ public final class Strings {
 		if (pos == TrimPosition.ALL || pos == TrimPosition.AFTER) {
 			int l = unsafeLastIndexOf(predicate.negate(), chars, start, end);
 			if (l < 0) {
-				return new Substring(chars, chars.length, chars.length);
+				return new Substring(chars, 0, 0);
 			}
 			end = l + 1;
 		}
 		if (pos == TrimPosition.ALL || pos == TrimPosition.BEFORE) {
 			start = unsafeIndexOf(predicate.negate(), chars, start, end);
+			if (start < 0) {
+				return new Substring(chars, chars.length, chars.length);
+			}
 		}
 		return new Substring(chars, start, end);
 	}

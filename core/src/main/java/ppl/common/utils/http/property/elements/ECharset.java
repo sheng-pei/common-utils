@@ -14,9 +14,10 @@ import java.nio.charset.Charset;
 
 @Name(Client.CHARSET)
 public class ECharset implements Element<Charset>, RequestInitializer {
+
     private final Charset charset;
 
-    private ECharset(Object charset) {
+    public ECharset(Object charset) {
         this.charset = toCharset(charset);
     }
 

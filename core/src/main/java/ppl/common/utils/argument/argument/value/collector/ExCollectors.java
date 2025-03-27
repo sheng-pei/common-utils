@@ -9,27 +9,27 @@ import java.util.stream.Collectors;
 
 public class ExCollectors {
     public static <V> Collector<V, ?, Optional<V>> optionalLast() {
-        return new OptionalCollector<>(Type.LAST_SEEN, false);
+        return new OptionalCollector<>(Type.LAST_SEEN);
     }
     public static <V> Collector<V, ?, Optional<V>> optionalFirst() {
-        return new OptionalCollector<>(Type.FIRST_SEEN, false);
+        return new OptionalCollector<>(Type.FIRST_SEEN);
     }
     public static <V> Collector<V, ?, Optional<V>> optional() {
-        return new OptionalCollector<>(Type.ONLY_ONE, false);
+        return new OptionalCollector<>(Type.ONLY_ONE);
     }
     public static <V> Collector<V, ?, V> required() {
-        return new OneCollector<>(Type.ONLY_ONE, true);
+        return new IdentityCollector<>(Type.ONLY_ONE, true);
     }
     public static <V> Collector<V, ?, V> one() {
-        return new OneCollector<>();
+        return new IdentityCollector<>();
     }
 
     public static <V> Collector<V, ?, V> first() {
-        return new OneCollector<>(Type.FIRST_SEEN);
+        return new IdentityCollector<>(Type.FIRST_SEEN);
     }
 
     public static <V> Collector<V, ?, V> last() {
-        return new OneCollector<>(Type.LAST_SEEN);
+        return new IdentityCollector<>(Type.LAST_SEEN);
     }
 
     public static <V> Collector<V, ?, List<V>> list() {

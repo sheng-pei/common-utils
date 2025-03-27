@@ -22,7 +22,7 @@ public class ListValue<T extends HeaderValue> extends SingleLineHeaderValue {
         Objects.requireNonNull(value, "Splitter is required.");
         Objects.requireNonNull(value, "Value creator is required.");
         List<HeaderValue> values = splitter.apply(value, DELIMITER).stream()
-                .map(s -> Strings.trim(s, HttpCharGroup.WS))
+                .map(s -> Strings.trim(s, HttpCharGroup.WHITESPACE))
                 .filter(s -> !s.isEmpty())
                 .map(s -> valueCreator.apply(s, context))
                 .collect(Collectors.toList());

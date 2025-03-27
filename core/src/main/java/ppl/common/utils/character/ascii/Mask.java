@@ -3,6 +3,24 @@ package ppl.common.utils.character.ascii;
 import java.util.Objects;
 
 public final class Mask {
+    private static final String[] NORMAL_REPRESENTATION = {
+            "\\00",   "\\01",  "\\02",  "\\03",  "\\04",  "\\05",  "\\06",  "\\07",
+            "\\010",  "\\t",   "\\n",   "\\013", "\\014", "\\r",   "\\016", "\\017",
+            "\\020",  "\\021", "\\022", "\\023", "\\024", "\\025", "\\026", "\\027",
+            "\\030",  "\\031", "\\032", "\\033", "\\034", "\\035", "\\036", "\\037",
+            " ",      "!",     "\"",    "#",     "$",     "%",     "&",     "'",
+            "(",      ")",     "*",     "+",     ",",     "\\-",   ".",     "/",
+            "0",      "1",     "2",     "3",     "4",     "5",     "6",     "7",
+            "8",      "9",     ":",     ";",     "<",     "=",     ">",     "?",
+            "@",      "A",     "B",     "C",     "D",     "E",     "F",     "G",
+            "H",      "I",     "J",     "K",     "L",     "M",     "N",     "O",
+            "P",      "Q",     "R",     "S",     "T",     "U",     "V",     "W",
+            "X",      "Y",     "Z",     "\\[",   "\\\\",  "\\]",   "^",     "_",
+            "`",      "a",     "b",     "c",     "d",     "e",     "f",     "g",
+            "h",      "i",     "j",     "k",     "l",     "m",     "n",     "o",
+            "p",      "q",     "r",     "s",     "t",     "u",     "v",     "w",
+            "x",      "y",     "z",     "{",     "|",     "}",     "~",     "\\0177",
+    };
     private static final int NON_ASCII_MASK = 3;
     public static final Mask NON_ASCII = new Mask(0L, 0L, (byte) 3);
     public static final Mask NON_OCTET = new Mask(0L, 0L, (byte) 2);
@@ -19,6 +37,58 @@ public final class Mask {
         this.low = low;
         this.high = high;
         this.nonAscii = nonAscii;
+    }
+
+    public String patternString() {
+        StringBuilder builder = new StringBuilder();
+        char start = '\0';
+        char next = start;
+        for (; next < '\100'; next ++) {
+            if ((low & (1L << next)) == 0) {
+                builder.append(patternOf(start, next));
+                start = (char) (next + 1);
+            }
+        }
+        for (; next < '\200'; next ++) {
+            if ((high & (1L << next)) == 0) {
+                builder.append(patternOf(start, next));
+                start = (char) (next + 1);
+            }
+        }
+        builder.append(patternOf(start, '\200'));
+        if ((nonAscii & 0x01) != 0) {
+            builder.append("\\0200-\\0377");
+        }
+        if ((nonAscii & 0x02) != 0) {
+            builder.append("\\u0100-\\uffff");
+        }
+        return builder.toString();
+    }
+
+    private static String patternOf(char begin, char end) {
+        if (begin + 1 == end) {
+            return NORMAL_REPRESENTATION[begin];
+        } else if (begin + 2 == end) {
+            return NORMAL_REPRESENTATION[begin] + NORMAL_REPRESENTATION[begin + 1];
+        } else if (begin < end) {
+            char last = (char) (end - 1);
+            if (begin >= 'A' && last <= 'Z') {
+                return begin + "-" + last;
+            }
+            if (begin >= 'a' && last <= 'z') {
+                return begin + "-" + last;
+            }
+            if (begin >= '0' && last <= '9') {
+                return begin + "-" + last;
+            }
+            return escape(begin) + "-" + escape(last);
+        }
+        return "";
+    }
+
+
+    private static String escape(char c) {
+        return "\\0" + Integer.toOctalString(c);
     }
 
     public Mask bitNot() {

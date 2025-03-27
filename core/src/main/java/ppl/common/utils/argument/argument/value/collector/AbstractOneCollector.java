@@ -13,18 +13,6 @@ public abstract class AbstractOneCollector<S, T> implements Collector<S, One<S>,
     private final boolean required;
     private final Function<S, T> finisher;
 
-//    OneCollector() {
-//        this(null, false);
-//    }
-//
-//    OneCollector(Type type) {
-//        this(type, false);
-//    }
-//
-//    OneCollector(Type type, boolean required) {
-//        this(type, required, Function.identity())
-//    }
-
     AbstractOneCollector(Type type, boolean required, Function<S, T> finisher) {
         if (type == null) {
             type = Type.ONLY_ONE;

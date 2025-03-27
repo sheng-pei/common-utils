@@ -1,5 +1,7 @@
 package ppl.common.utils.attire.proxy;
 
+import ppl.common.utils.Arrays;
+
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
@@ -47,6 +49,17 @@ public abstract class AbstractStatefulParameterInterceptor<T> implements Paramet
     protected final boolean isUsed(Object parameter) {
         StatefulParameter statefulParameter = (StatefulParameter) parameter;
         return statefulParameter.useType != null;
+    }
+
+    protected final int[] remainParameters(Object[] parameters) {
+        int[] ret = new int[parameters.length];
+        Arrays.fill(ret, -1);
+        for (int i = 0; i < parameters.length; i++) {
+            if (!isUsed(parameters[i])) {
+                ret[i] = i;
+            }
+        }
+        return ret;
     }
 
     protected static final class StatefulParameter {

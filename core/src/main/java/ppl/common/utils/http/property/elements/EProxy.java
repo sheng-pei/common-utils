@@ -13,7 +13,7 @@ public class EProxy implements Element<Proxy>, RequestInitializer {
 
     private final Proxy proxy;
 
-    private EProxy(Object proxy) {
+    public EProxy(Object proxy) {
         if (!(proxy instanceof Proxy)) {
             throw new IllegalArgumentException(String.format(
                     "Unsupported value type: '%s' for '%s'.",

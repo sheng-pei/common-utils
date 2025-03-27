@@ -59,7 +59,7 @@ public class URLEncoder {
                         stream.write(chars[i + 1]);
                         stream.write(chars[i + 2]);
                         i += 2;
-                        beginToEscape = i + 3;
+                        beginToEscape = i + 1;
                         continue;
                     }
                 }

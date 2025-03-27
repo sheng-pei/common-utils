@@ -36,7 +36,7 @@ public abstract class ValuedArgument<V> extends Argument {
 
             @Override
             public void feed(String string) {
-                Stream<?> stream = string == null ? Stream.empty() : Stream.of(string);
+                Stream<?> stream = Stream.of(string);
                 if (string != null && splitter != null) {
                     stream = splitter.apply(string);
                 }

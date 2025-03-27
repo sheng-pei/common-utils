@@ -39,13 +39,13 @@ public class TransferEncoding implements Header<ListValue<Coding>> {
                 if (delimiter == c) {
                     res.add(new String(chars, start, i - 1));
                     start = i;
-                } else if (HttpCharGroup.QM.test(c)) {
+                } else if (HttpCharGroup.DQUOTE.test(c)) {
                     doubleQuoted = true;
                 }
             } else {
                 if (quoted) {
                     quoted = false;
-                } else if (HttpCharGroup.QM.test(c)) {
+                } else if (HttpCharGroup.DQUOTE.test(c)) {
                     doubleQuoted = false;
                 } else if (HttpCharGroup.BS.test(c)) {
                     quoted = true;

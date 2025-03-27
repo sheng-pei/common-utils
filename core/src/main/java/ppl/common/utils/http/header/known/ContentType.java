@@ -36,4 +36,5 @@ public class ContentType implements Header<MediaType> {
         }
         return (MediaType) value;
     }
+
 }

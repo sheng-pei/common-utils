@@ -7,13 +7,23 @@ import ppl.common.utils.argument.argument.value.map.comparable.MinOnComparator;
 import ppl.common.utils.argument.argument.value.map.len.Length;
 import ppl.common.utils.argument.argument.value.map.len.MaxLength;
 import ppl.common.utils.argument.argument.value.map.len.MinLength;
+import ppl.common.utils.string.Strings;
 
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Mappers {
     @SuppressWarnings("rawtypes")
-    private static final Function EMPTY = v -> {throw new MapperException("No value is required.");};
+    private static final Function EMPTY = v -> {throw new MapperException("No value is needed.");};
+    @SuppressWarnings("rawtypes")
+    private static final Function REQUIRED = v -> {
+        if (v == null) {
+            throw new MapperException("The value is required.");
+        }
+        return v;
+    };
 
     public static <V extends Comparable<V>> Function<V, V> max(V max) {
         return new Max<>(max);
@@ -43,5 +53,39 @@ public class Mappers {
         @SuppressWarnings("unchecked")
         Function<V, V> res = (Function<V, V>) EMPTY;
         return res;
+    }
+
+    public static <V> Function<V, V> required() {
+        @SuppressWarnings("unchecked")
+        Function<V, V> res = (Function<V, V>) REQUIRED;
+        return res;
+    }
+
+    public static <V> Function<V, V> predicate(Predicate<V> predicate) {
+        Objects.requireNonNull(predicate);
+        return new NullPassedPredicateMapper<V>() {
+            @Override
+            public boolean test(V v) {
+                return predicate.test(v);
+            }
+        };
+    }
+
+    public static <V> Function<V, V> predicate(Predicate<V> predicate, String message) {
+        Objects.requireNonNull(predicate);
+        if (Strings.isEmpty(message)) {
+            throw new IllegalArgumentException("Message is required.");
+        }
+        return new NullPassedPredicateMapper<V>() {
+            @Override
+            public boolean test(V v) {
+                return predicate.test(v);
+            }
+
+            @Override
+            protected String message() {
+                return message;
+            }
+        };
     }
 }

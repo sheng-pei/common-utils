@@ -12,7 +12,7 @@ import javax.net.ssl.SSLContext;
 public class ESSLContext implements Element<SSLContext>, RequestInitializer {
     private final SSLContext sslContext;
 
-    private ESSLContext(Object sslContext) {
+    public ESSLContext(Object sslContext) {
         if (!(sslContext instanceof SSLContext)) {
             throw new IllegalArgumentException(String.format(
                     "Unsupported value type: '%s' for '%s'.",

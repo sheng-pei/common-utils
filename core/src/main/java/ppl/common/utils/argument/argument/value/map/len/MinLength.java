@@ -1,10 +1,8 @@
 package ppl.common.utils.argument.argument.value.map.len;
 
-import ppl.common.utils.argument.argument.value.map.MapperException;
+import ppl.common.utils.argument.argument.value.map.NullPassedPredicateMapper;
 
-import java.util.function.Function;
-
-public class MinLength<V> implements Function<V, V> {
+public class MinLength<V> extends NullPassedPredicateMapper<V> {
     private final Length<V> length;
     private final int min;
 
@@ -18,11 +16,12 @@ public class MinLength<V> implements Function<V, V> {
     }
 
     @Override
-    public V apply(V v) {
-        if (length.len(v) < min) {
-            throw new MapperException(String.format(
-                    "The length of the value is less than '%s'.", min));
-        }
-        return v;
+    protected String message() {
+        return String.format("The length of the value is less than '%s'.", min);
+    }
+
+    @Override
+    public boolean test(V v) {
+        return length.len(v) >= min;
     }
 }

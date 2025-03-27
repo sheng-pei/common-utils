@@ -4,14 +4,10 @@ import java.util.Optional;
 
 public class OptionalCollector<T> extends AbstractOneCollector<T, Optional<T>> {
     OptionalCollector() {
-        this(null, false);
+        this(Type.ONLY_ONE);
     }
 
     OptionalCollector(Type type) {
-        this(type, false);
-    }
-
-    OptionalCollector(Type type, boolean required) {
-        super(type, required, Optional::ofNullable);
+        super(type, false, Optional::ofNullable);
     }
 }

@@ -1,81 +1,126 @@
 package ppl.common.utils.http.header.value.mediatype;
 
 import ppl.common.utils.argument.argument.Arguments;
-import ppl.common.utils.argument.argument.value.BaseValuedArgument;
 import ppl.common.utils.argument.argument.value.ValuedArgument;
+import ppl.common.utils.argument.argument.value.map.Mappers;
 import ppl.common.utils.http.header.BaseArguments;
 import ppl.common.utils.http.header.value.UnknownParameterTargetException;
-import ppl.common.utils.http.symbol.HttpCharGroup;
+import ppl.common.utils.http.header.value.parameter.ParameterValuedArgument;
 import ppl.common.utils.http.symbol.Lexer;
 import ppl.common.utils.string.Strings;
 import ppl.common.utils.character.ascii.CaseIgnoreString;
 
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Mime implements Arguments<String, ValuedArgument<Object>> {
 
     private static final ValuedArgument<Charset> CHARSET_ARGUMENT =
-            BaseValuedArgument.newBuilder("charset")
-                    .map(Mime::eraseQuotedString)
+            ParameterValuedArgument.newBuilder("charset")
+                    .map(Mappers.required())
                     .map(Charset::forName)
                     .collect()
-                    .build(v -> Lexer.quoteString(v.name().toLowerCase()));
+                    .build(v -> v.name().toLowerCase());
 
     private static final ValuedArgument<String> BOUNDARY_ARGUMENT =
-            BaseValuedArgument.newBuilder("boundary")
-                    .map(Mime::eraseQuotedString)
+            ParameterValuedArgument.newBuilder("boundary")
+                    .map(Mappers.required())
+                    .map(Mappers.predicate(Lexer::isBoundary, "Invalid boundary."))
                     .collect()
-                    .build(Lexer::quoteString);
+                    .build();
 
+
+    private static final Map<String, Mime> PRIMARY_MAPPER = new HashMap<>();
     private static final Map<CaseIgnoreString, Mime> MIMES;
     public static final Mime JSON;
     public static final Mime PLAIN;
     public static final Mime HTML;
+    public static final Mime XHTML;
     public static final Mime OCTET;
+    public static final Mime XLS;
+    public static final Mime XLSX;
+    public static final Mime XML;
+    public static final Mime ZIP;
+    public static final Mime TAR;
+    public static final Mime RAR;
     public static final Mime X_WWW_FORM_URLENCODED;
     public static final Mime MULTIPART_FORM_DATA;
+    public static final Mime MULTIPART_MIXED;
 
     static {
-        Mime json = new Mime("application/json", Collections.singletonList(CHARSET_ARGUMENT));
-        Mime plain = new Mime("text/plain", Collections.singletonList(CHARSET_ARGUMENT));
-        Mime html = new Mime("text/html", Collections.singletonList(CHARSET_ARGUMENT));
-        Mime octet = new Mime("application/octet-stream");
-        Mime wwwForm = new Mime("application/x-www-form-urlencoded");
-        Mime multipartForm = new Mime("multipart/form-data", Collections.singletonList(BOUNDARY_ARGUMENT));
         Map<CaseIgnoreString, Mime> mimes = new HashMap<>();
-        mimes.put(json.mime, json);
-        mimes.put(plain.mime, plain);
-        mimes.put(html.mime, html);
-        mimes.put(octet.mime, octet);
-        mimes.put(wwwForm.mime, wwwForm);
-        mimes.put(multipartForm.mime, multipartForm);
+        JSON = register(mimes, "application/json", Collections.singletonList(CHARSET_ARGUMENT), "json");
+        PLAIN = register(mimes, "text/plain", Collections.singletonList(CHARSET_ARGUMENT), "txt");
+        HTML = register(mimes, "text/html", Collections.singletonList(CHARSET_ARGUMENT), "htm", "html");
+        XHTML = register(mimes, "application/xhtml+xml", Collections.singletonList(CHARSET_ARGUMENT), "xhtml");
+        OCTET = register(mimes, "application/octet-stream", "bin");
+        XLS = register(mimes, "application/vnd.ms-excel", "xls");
+        XLSX = register(mimes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx");
+        XML = register(mimes, "application/xml", "xml");
+        ZIP = register(mimes, "application/x-zip-compressed", "zip");
+        TAR = register(mimes, "application/x-tar", "tar");
+        RAR = register(mimes, "application/vnd.rar", "rar");
+        X_WWW_FORM_URLENCODED = register(mimes, "application/x-www-form-urlencoded");
+        MULTIPART_FORM_DATA = register(mimes, "multipart/form-data", Collections.singletonList(BOUNDARY_ARGUMENT));
+        MULTIPART_MIXED = register(mimes, "multipart/mixed", Collections.singletonList(BOUNDARY_ARGUMENT));
         MIMES = Collections.unmodifiableMap(mimes);
-        JSON = json;
-        PLAIN = plain;
-        HTML = html;
-        OCTET = octet;
-        X_WWW_FORM_URLENCODED = wwwForm;
-        MULTIPART_FORM_DATA = multipartForm;
     }
 
-    private static String eraseQuotedString(String string) {
-        if (string.length() >= 2 &&
-                HttpCharGroup.QM.test(string.charAt(0)) &&
-                HttpCharGroup.QM.test(string.charAt(string.length() - 1))) {
-            string = Lexer.eraseQuotedPair(string.substring(1, string.length() - 1));
+    private static Mime register(
+            Map<CaseIgnoreString, Mime> mimes,
+            String mime, String... extensions) {
+        return register(mimes, mime, Collections.emptyList(), extensions);
+    }
+
+    private static Mime register(
+            Map<CaseIgnoreString, Mime> mimes,
+            String mime,
+            List<? extends ValuedArgument<?>> arguments,
+            String... extensions) {
+        return register(mimes, mime, arguments, Arrays.asList(extensions), extensions);
+    }
+
+    private static Mime register(
+            Map<CaseIgnoreString, Mime> mimes,
+            String mime,
+            List<? extends ValuedArgument<?>> arguments,
+            List<String> primaryExtensions,
+            String... extensions) {
+        Set<String> p = new HashSet<>(primaryExtensions);
+        p.forEach(s -> {
+            if (PRIMARY_MAPPER.containsKey(s)) {
+                throw new IllegalArgumentException("More than one mime map to single primary extension.");
+            }
+        });
+
+        Set<String> g = Arrays.stream(extensions)
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
+        p.removeAll(g);
+        if (!p.isEmpty()) {
+            throw new IllegalArgumentException(Strings.format("Unknown primary extensions: '{}'", p));
         }
-        return string;
+
+        Mime ret = new Mime(mime, arguments, g);
+        mimes.put(ret.mime, ret);
+        primaryExtensions.forEach(s -> PRIMARY_MAPPER.put(s, ret));
+        return ret;
     }
 
     private final CaseIgnoreString mime;
     private final BaseArguments arguments;
+    private final Set<String> extensions;
 
-    Mime(String string) {
-        this(string, Collections.emptyList());
+    private Mime(String string) {
+        this(string, Collections.emptyList(), Collections.emptySet());
     }
 
-    Mime(String string, List<? extends ValuedArgument<?>> arguments) {
+    private Mime(String string, Set<String> extensions) {
+        this(string, Collections.emptyList(), extensions);
+    }
+
+    private Mime(String string, List<? extends ValuedArgument<?>> arguments, Set<String> extensions) {
         string = Strings.emptyIfNull(string).trim();
         int slashIdx = string.indexOf('/');
         if (slashIdx < 0) {
@@ -87,6 +132,7 @@ public class Mime implements Arguments<String, ValuedArgument<Object>> {
         }
         this.mime = CaseIgnoreString.create(string);
         this.arguments = arguments.isEmpty() ? BaseArguments.EMPTY : new BaseArguments(arguments);
+        this.extensions = extensions;
     }
 
     public String getType() {
@@ -99,6 +145,10 @@ public class Mime implements Arguments<String, ValuedArgument<Object>> {
         String string = mime.toString();
         int slashIdx = string.indexOf('/');
         return string.substring(slashIdx + 1);
+    }
+
+    public Set<String> getExtensions() {
+        return new HashSet<>(extensions);
     }
 
     @Override
@@ -129,6 +179,11 @@ public class Mime implements Arguments<String, ValuedArgument<Object>> {
             throw new UnknownParameterTargetException("Unknown mime: " + mime);
         }
         return m;
+    }
+
+    public static Mime primary(String extension) {
+        Objects.requireNonNull(extension);
+        return PRIMARY_MAPPER.get(extension);
     }
 
     @Override

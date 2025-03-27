@@ -1,12 +1,11 @@
 package ppl.common.utils.argument.argument.value.map.comparable;
 
-import ppl.common.utils.argument.argument.value.map.MapperException;
+import ppl.common.utils.argument.argument.value.map.NullPassedPredicateMapper;
 import ppl.common.utils.string.Strings;
 
 import java.util.Comparator;
-import java.util.function.Function;
 
-public class MaxOnComparator<V> implements Function<V, V> {
+public class MaxOnComparator<V> extends NullPassedPredicateMapper<V> {
 
     private final V max;
     private final Comparator<V> comparator;
@@ -17,10 +16,12 @@ public class MaxOnComparator<V> implements Function<V, V> {
     }
 
     @Override
-    public V apply(V v) {
-        if (comparator.compare(max, v) < 0) {
-            throw new MapperException(Strings.format("The value is more than '{}'.", max));
-        }
-        return v;
+    public boolean test(V v) {
+        return comparator.compare(max, v) >= 0;
+    }
+
+    @Override
+    protected String message() {
+        return Strings.format("The value is more than '{}'.", max);
     }
 }

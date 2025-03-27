@@ -46,7 +46,7 @@ public class KVCollector implements Collector<String, KVCollector.KVPairs, Map<S
         return EnumSet.of(Characteristics.CONCURRENT, Characteristics.UNORDERED);
     }
 
-    static class KVPairs {
+    public static class KVPairs {
         private final String separator;
         private final Map<String, String> kvPairs;
 

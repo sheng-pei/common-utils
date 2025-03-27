@@ -162,8 +162,7 @@ public class ServerInvocationHandler implements PrerequisiteInvocationHandler {
                 //TODO, body
                 try {
                     for (ParameterInterceptor<Connection> interceptor : bodyParameterInterceptors) {
-                        Connection connection = interceptor.handle(method, statefulParameters, conn);
-                        if (connection != null) {
+                        if (interceptor.handle(method, statefulParameters, conn) != null) {
                             break;
                         }
                     }

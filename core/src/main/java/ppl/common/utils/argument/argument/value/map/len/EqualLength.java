@@ -1,10 +1,8 @@
 package ppl.common.utils.argument.argument.value.map.len;
 
-import ppl.common.utils.argument.argument.value.map.MapperException;
+import ppl.common.utils.argument.argument.value.map.NullPassedPredicateMapper;
 
-import java.util.function.Function;
-
-public class EqualLength<V> implements Function<V, V> {
+public class EqualLength<V> extends NullPassedPredicateMapper<V> {
     private final Length<V> length;
     private final int tLength;
 
@@ -18,11 +16,12 @@ public class EqualLength<V> implements Function<V, V> {
     }
 
     @Override
-    public V apply(V v) {
-        if (length.len(v) != tLength) {
-            throw new MapperException(String.format(
-                    "The length of the value is not equal to '%s'.", tLength));
-        }
-        return v;
+    public boolean test(V v) {
+        return length.len(v) == tLength;
+    }
+
+    @Override
+    protected String message() {
+        return String.format("The length of the value is not equal to '%s'.", tLength);
     }
 }

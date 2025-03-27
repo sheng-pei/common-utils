@@ -4,7 +4,6 @@ import ppl.common.utils.attire.proxy.AbstractStatefulParameterInterceptor;
 import ppl.common.utils.cache.Cache;
 import ppl.common.utils.cache.ConcurrentReferenceValueCache;
 import ppl.common.utils.http.Connection;
-import ppl.common.utils.http.entity.JsonEntity;
 
 import java.lang.reflect.Method;
 
@@ -27,10 +26,10 @@ public class ServerJsonBodyParameterInterceptor extends AbstractStatefulParamete
             if (jsonAnnotation == null) {
                 object = JSON_UNSUPPORTED;
             } else {
-                Integer bodyIndex = null;
+                int bodyIndex = -1;
                 for (int i = 0; i < parameters.length; i++) {
                     if (!isUsed(parameters[i])) {
-                        if (bodyIndex == null) {
+                        if (bodyIndex < 0) {
                             bodyIndex = i;
                         } else {
                             throw new IllegalStateException("Too many json body.");
@@ -38,25 +37,21 @@ public class ServerJsonBodyParameterInterceptor extends AbstractStatefulParamete
                     }
                 }
 
-                if (bodyIndex == null) {
-                    object = new JsonPojo(jsonAnnotation);
-                } else {
-                    JsonPojo[] pojo = new JsonPojo[parameters.length];
+                JsonPojo[] pojo = new JsonPojo[parameters.length];
+                if (bodyIndex >= 0) {
                     pojo[bodyIndex] = new JsonPojo(jsonAnnotation);
-                    object = pojo;
                 }
+                object = pojo;
             }
             methodCache.putIfAbsent(method, object);
         }
 
         if (JSON_UNSUPPORTED != object) {
-            if (object instanceof JsonPojo[]) {
-                JsonPojo[] pojo = (JsonPojo[]) object;
-                for (int i = 0; i < pojo.length; i++) {
-                    if (pojo[i] != null) {
-                        collector.write(new JsonEntity(pojo[i].getCharset(), parameters[i]));
-                        break;
-                    }
+            JsonPojo[] pojo = (JsonPojo[]) object;
+            for (int i = 0; i < pojo.length; i++) {
+                if (pojo[i] != null) {
+                    collector.write(new JsonEntity(pojo[i].getCharset(), parameters[i]));
+                    return collector;
                 }
             }
         }

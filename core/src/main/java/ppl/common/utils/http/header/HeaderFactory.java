@@ -140,7 +140,7 @@ public final class HeaderFactory {
     }
 
     private void trailingWhitespaceNotAllowed(String name) {
-        if (HttpCharGroup.WS.test(name.charAt(name.length() - 1))) {
+        if (HttpCharGroup.WHITESPACE.test(name.charAt(name.length() - 1))) {
             throw new IllegalArgumentException(
                     "Invalid header name. Whitespace is not allowed between name and separator.");
         }
@@ -159,7 +159,7 @@ public final class HeaderFactory {
         HeaderCreator creator;
         if (creators.containsKey(name)) {
             creator = creators.get(name);
-            value = Strings.trim(value, HttpCharGroup.WS);
+            value = Strings.trim(value, HttpCharGroup.WHITESPACE);
         } else {
             creator = UnknownHeader.getCreator(name);
         }
