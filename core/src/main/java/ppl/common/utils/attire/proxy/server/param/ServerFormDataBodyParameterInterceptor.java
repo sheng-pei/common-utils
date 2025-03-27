@@ -1,6 +1,7 @@
 package ppl.common.utils.attire.proxy.server.param;
 
 import ppl.common.utils.attire.proxy.AbstractStatefulParameterInterceptor;
+import ppl.common.utils.attire.proxy.server.util.ParamUtils;
 import ppl.common.utils.cache.Cache;
 import ppl.common.utils.cache.ConcurrentReferenceValueCache;
 import ppl.common.utils.http.Connection;
@@ -9,7 +10,6 @@ import ppl.common.utils.http.entity.FormDataEntity;
 import ppl.common.utils.http.entity.PlainTextEntity;
 import ppl.common.utils.http.entity.SmartFileEntity;
 import ppl.common.utils.pair.Pair;
-import ppl.common.utils.string.Strings;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -39,34 +39,10 @@ public class ServerFormDataBodyParameterInterceptor extends AbstractStatefulPara
                 object = FORM_DATA_UNSUPPORTED;
             } else {
                 FormDataPojo formDataPojo = new FormDataPojo(formDataAnnotation);
-                ParamPojo[] pojo = new ParamPojo[parameters.length];
                 int[] remainParameters = remainParameters(parameters);
                 Parameter[] ps = method.getParameters();
-                for (int i = 0; i < remainParameters.length; i++) {
-                    if (remainParameters[i] < 0 && ps[i].isAnnotationPresent(Param.class)) {
-                        remainParameters[i] = i;
-                    }
-                }
-                for (int i : remainParameters) {
-                    if (i >= 0) {
-                        if (ps[i].isAnnotationPresent(Param.class)) {
-                            pojo[i] = new ParamPojo(ps[i].getAnnotation(Param.class));
-                        } else {
-                            pojo[i] = ParamPojo.DEFAULT_PARAM;
-                        }
-
-                        ParamPojo p = pojo[i].changeNameIfAbsent(ps[i].getName());
-                        if (p != null) {
-                            if (!ps[i].isNamePresent()) {
-                                throw new IllegalArgumentException(Strings.format(
-                                        "Name for param argument of position [{}] not specified, " +
-                                                "and parameter name information not available via reflection. " +
-                                                "Ensure that the compiler uses the '-parameters' flag.", i));
-                            }
-                            pojo[i] = p;
-                        }
-                    }
-                }
+                ParamUtils.completeBodyParam(ps, remainParameters);
+                ParamPojo[] pojo = ParamUtils.parseBodyParam(ps, remainParameters);
                 object = Pair.create(formDataPojo, pojo);
             }
             methodCache.putIfAbsent(method, object);
